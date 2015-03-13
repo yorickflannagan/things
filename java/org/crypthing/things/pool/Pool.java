@@ -54,6 +54,7 @@ public final class Pool<P> extends Overseer<Pool<P>, Pool<P>>
 	private long lifeTime;
 	private ScheduledExecutorService service;
 	private boolean interrupted = false;
+	private boolean interruptAsSoonPossible = false;
 
 
 	/**
@@ -121,12 +122,12 @@ public final class Pool<P> extends Overseer<Pool<P>, Pool<P>>
 		return waterLevel;
 	}
 	
-	void incrementWaterLevel()
+	synchronized void incrementWaterLevel()
 	{
 		waterLevel++;
 	}
 
-	void decrementWaterLevel()
+	synchronized void decrementWaterLevel()
 	{
 		waterLevel--;
 	}
@@ -250,7 +251,7 @@ public final class Pool<P> extends Overseer<Pool<P>, Pool<P>>
 	{
 		synchronized (this)
 		{
-			if (interrupted) throw new PoolOverflowException("Cannot borrow an interrupted pool");
+			if (interrupted || interruptAsSoonPossible) throw new PoolOverflowException("Cannot borrow an interrupted pool");
 		}
 		P ret = null;
 		if (stack.size() == 0)
@@ -291,26 +292,9 @@ public final class Pool<P> extends Overseer<Pool<P>, Pool<P>>
 		{
 			log.warning("Required to relase instance of " + p.getClass().getName());
 			factory.release(p);
-			waterLevel--;
+			decrementWaterLevel();
 		}
-	}
-
-	/**
-	 * Get the current amount of objects in pool.
-	 * @return the amount of objects remaining in pool.
-	 */
-	public int getAvailableObjects()
-	{
-		return stack.size();
-	}
-
-	/**
-	 * Get the current size of this pool. 
-	 * @return it.
-	 */
-	public int getSize()
-	{
-		return waterLevel;
+		if(interruptAsSoonPossible && waterLevel == stack.size()) interrupt();
 	}
 
 	@Override
@@ -319,14 +303,26 @@ public final class Pool<P> extends Overseer<Pool<P>, Pool<P>>
 		synchronized (this)
 		{
 			if (interrupted) return;
-			interrupted = true;
+			if (stack.size() == waterLevel)
+			{
+				service.shutdownNow();
+				super.interrupt();
+				final Iterator<PooledObject> it = stack.iterator();
+				while (it.hasNext()) factory.release(it.next().getObject());
+				interrupted = true;
+				interruptAsSoonPossible = false;
+			}
+			else interruptAsSoonPossible = true;
 		}
-		service.shutdownNow();
-		super.interrupt();
-		final Iterator<PooledObject> it = stack.iterator();
-		while (it.hasNext()) factory.release(it.next().getObject());
 	}
-
+	
+	public ExecutionState getStatus()
+	{
+		if (interrupted) return ExecutionState.Interrupted;
+		if (interruptAsSoonPossible) return ExecutionState.WillInterrupt;
+		return ExecutionState.Running;
+	}
+	
 	class PooledObject
 	{
 		private long lastReturned;

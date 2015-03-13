@@ -14,6 +14,7 @@ package org.crypthing.things.pool;
 
 
 import java.util.concurrent.LinkedBlockingDeque;
+import java.util.logging.Logger;
 
 import org.crypthing.things.asynthings.EventProcessor;
 import org.crypthing.things.asynthings.EventProcessorFactory;
@@ -21,6 +22,7 @@ import org.crypthing.things.asynthings.EventProcessorFactory;
 
 class ProcessorFactory<P> implements EventProcessorFactory<Pool<P>, Pool<P>>
 {
+	private static final Logger _workerLog = Logger.getLogger(ProcessorFactory.Worker.class.getName());
 	private Worker worker = new Worker();
 	private ObjectFactory<P> factory;
 
@@ -59,8 +61,17 @@ class ProcessorFactory<P> implements EventProcessorFactory<Pool<P>, Pool<P>>
 			}
 			for (int i = 0; i < newSize; i++)
 			{
-				stack.offerFirst(payload.new PooledObject(factory.createObject()));
-				payload.incrementWaterLevel();
+				P object = factory.createObject();
+				if (object != null)
+				{
+					stack.offerFirst(payload.new PooledObject(object));
+					payload.incrementWaterLevel();
+				}
+				else
+				{
+					_workerLog.severe("Cannot create pooled object");
+					break;
+				}
 			}
 			if (newSize == 0)
 			{
