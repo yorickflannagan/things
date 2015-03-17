@@ -18,7 +18,6 @@ import java.io.ObjectOutputStream;
 import java.io.ObjectStreamException;
 import java.util.Iterator;
 import java.util.concurrent.Executors;
-import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -50,7 +49,6 @@ public final class Pool<P> extends Overseer<Pool<P>, Pool<P>>
 	private int increment;
 	private long timeout;
 	private final ObjectFactory<P> factory;
-	private int waterLevel;
 	private long lifeTime;
 	private ScheduledExecutorService service;
 	private boolean interrupted = false;
@@ -105,7 +103,6 @@ public final class Pool<P> extends Overseer<Pool<P>, Pool<P>>
 		this.increment = increment;
 		this.timeout = timeout;
 		this.factory = factory;
-		this.waterLevel = 0;
 		this.lifeTime = lifeTime;
 		service = Executors.newSingleThreadScheduledExecutor(new DaemonThreadFactory());
 		service.scheduleWithFixedDelay(new DayGirl(this), delay, delay, TimeUnit.MILLISECONDS);
@@ -117,20 +114,6 @@ public final class Pool<P> extends Overseer<Pool<P>, Pool<P>>
 		return stack;
 	}
 
-	int getWaterLevel()
-	{
-		return waterLevel;
-	}
-	
-	synchronized void incrementWaterLevel()
-	{
-		waterLevel++;
-	}
-
-	synchronized void decrementWaterLevel()
-	{
-		waterLevel--;
-	}
 
 	/**
 	 * Get the maximum amount of objects instances in the pool
@@ -266,6 +249,7 @@ public final class Pool<P> extends Overseer<Pool<P>, Pool<P>>
 		}
 		try
 		{
+			
 			final PooledObject temp = stack.poll(timeout, TimeUnit.MILLISECONDS);
 			if (temp == null) throw new PoolOverflowException("Cannot supply more objects");
 			ret = temp.getObject();
@@ -282,19 +266,18 @@ public final class Pool<P> extends Overseer<Pool<P>, Pool<P>>
 	 */
 	public void giveBack(final P p)
 	{
-		if (stack.size() >= waterLevel) throw new IllegalArgumentException("Cannot give back more objects than borrowed");
 		try
 		{
 			factory.checkSanity(p);
-			stack.offerFirst(new PooledObject(p));
+			stack.giveBack(new PooledObject(p));
 		}
 		catch (final PoolException swallowed)
 		{
 			log.warning("Required to relase instance of " + p.getClass().getName());
 			factory.release(p);
-			decrementWaterLevel();
+			stack.decrementWaterLevel();
 		}
-		if(interruptAsSoonPossible && waterLevel == stack.size()) interrupt();
+		if (interruptAsSoonPossible && stack.isFull()) interrupt();
 	}
 
 	@Override
@@ -303,7 +286,7 @@ public final class Pool<P> extends Overseer<Pool<P>, Pool<P>>
 		synchronized (this)
 		{
 			if (interrupted) return;
-			if (stack.size() == waterLevel)
+			if (stack.isFull())
 			{
 				service.shutdownNow();
 				super.interrupt();
