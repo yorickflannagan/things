@@ -832,47 +832,6 @@ public class LinkedBlockingDeque<E>
         }
     }
 
-    /*
-     * TODO: Add support for more efficient bulk operations.
-     *
-     * We don't want to acquire the lock for every iteration, but we
-     * also want other threads a chance to interact with the
-     * collection, especially when count is close to capacity.
-     */
-
-//     /**
-//      * Adds all of the elements in the specified collection to this
-//      * queue.  Attempts to addAll of a queue to itself result in
-//      * {@code IllegalArgumentException}. Further, the behavior of
-//      * this operation is undefined if the specified collection is
-//      * modified while the operation is in progress.
-//      *
-//      * @param c collection containing elements to be added to this queue
-//      * @return {@code true} if this queue changed as a result of the call
-//      * @throws ClassCastException            {@inheritDoc}
-//      * @throws NullPointerException          {@inheritDoc}
-//      * @throws IllegalArgumentException      {@inheritDoc}
-//      * @throws IllegalStateException         {@inheritDoc}
-//      * @see #add(Object)
-//      */
-//     public boolean addAll(Collection<? extends E> c) {
-//         if (c == null)
-//             throw new NullPointerException();
-//         if (c == this)
-//             throw new IllegalArgumentException();
-//         final ReentrantLock lock = this.lock;
-//         lock.lock();
-//         try {
-//             boolean modified = false;
-//             for (E e : c)
-//                 if (linkLast(e))
-//                     modified = true;
-//             return modified;
-//         } finally {
-//             lock.unlock();
-//         }
-//     }
-
     /**
      * Returns an array containing all of the elements in this deque, in
      * proper sequence (from first to last element).

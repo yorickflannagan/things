@@ -70,7 +70,7 @@ class ProcessorFactory<P> implements EventProcessorFactory<Pool<P>, Pool<P>>
 			}
 			if (newSize == 0)
 			{
-				newSize = waterLevel - (minWaterLevel > 2 ? minWaterLevel : 2);
+				newSize = Math.min(waterLevel - minWaterLevel, stack.size() - 2);
 				for (int i = 0; i < newSize; i++)
 				{
 					final Pool<P>.PooledObject object = stack.pollLast();
@@ -82,7 +82,7 @@ class ProcessorFactory<P> implements EventProcessorFactory<Pool<P>, Pool<P>>
 						)	stack.decrementWaterLevel();
 						else	stack.offerFirst(object);
 					}
-					else break;
+					else break;	// Oops!
 				}
 			}
 		}
