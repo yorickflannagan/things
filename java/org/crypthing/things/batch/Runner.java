@@ -12,8 +12,9 @@ import java.util.concurrent.TimeUnit;
 import javax.management.ObjectName;
 
 import org.crypthing.things.SNMPTrap;
+import org.crypthing.things.appservice.SandboxMBean;
 
-public final class Runner implements RunnerMBean
+public final class Runner implements SandboxMBean
 {
 
 	private static ObjectName mbName = null;

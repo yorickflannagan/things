@@ -6,8 +6,9 @@ import java.util.Properties;
 import javax.management.ObjectName;
 
 import org.crypthing.things.SNMPTrap;
+import org.crypthing.things.appservice.SandboxMBean;
 
-public abstract class Worker extends Thread implements RunnerMBean
+public abstract class Worker extends Thread implements SandboxMBean
 
 {
 	private boolean isRunning = true;

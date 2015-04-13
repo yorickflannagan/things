@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+	<xs:element name="config">
+	<xs:complexType>
+	<xs:sequence>
+		<xs:element ref="jvm" minOccurs="0" />
+		<xs:element ref="jndi" />
+		<xs:element ref="worker" />
+		<xs:element ref="snmp" minOccurs="0" />
+		<xs:element ref="datasources" minOccurs="0" />
+		<xs:element ref="mqxconnectors" minOccurs="0" />
+	</xs:sequence>
+	</xs:complexType>
+	</xs:element>
+
+	<xs:element name="jvm">
+	<xs:complexType>
+	<xs:sequence>
+		<xs:element name="minMemory" type="positive" minOccurs="0" />
+		<xs:element name="maxMemory" type="positive" minOccurs="0" />
+		<xs:element name="vmflags" type="nonempty" minOccurs="0" />
+		<xs:element name="classpath" minOccurs="0">
+		<xs:complexType>
+		<xs:sequence>
+			<xs:element name="path" type="nonempty" minOccurs="0" maxOccurs="unbounded" />
+			<xs:element name="file" type="nonempty" minOccurs="0" maxOccurs="unbounded" />
+		</xs:sequence>
+		</xs:complexType>
+		</xs:element>
+		<xs:element name="properties" minOccurs="0">
+		<xs:complexType>
+		<xs:sequence>
+			<xs:element name="property" type="property" minOccurs="0" maxOccurs="unbounded" />
+		</xs:sequence>
+		</xs:complexType>
+		</xs:element>
+	</xs:sequence>
+	</xs:complexType>
+	</xs:element>
+
+	<xs:element name="jndi">
+	<xs:complexType>
+		<xs:sequence>
+			<xs:element name="environment" minOccurs="0" maxOccurs="1">
+			<xs:complexType>
+			<xs:sequence>
+				<xs:element name="property" type="property" minOccurs="1" maxOccurs="unbounded" />
+			</xs:sequence>
+			</xs:complexType>
+			</xs:element>
+		</xs:sequence>
+		<xs:attribute name="implementation" type="xs:string" use="required" />
+	</xs:complexType>
+	</xs:element>
+
+	<xs:element name="worker">
+	<xs:complexType>
+	<xs:sequence>
+		<xs:element name="class" type="nonempty" />
+		<xs:element name="threads" type="positive" />
+		<xs:element name="delay" type="positive" />
+	</xs:sequence>
+	</xs:complexType>
+	</xs:element>
+	
+	<xs:element name="snmp">
+	<xs:complexType>
+	<xs:sequence>
+		<xs:element name="property" type="property" minOccurs="0" maxOccurs="unbounded" />
+	</xs:sequence>
+	</xs:complexType>
+	</xs:element>
+	
+	<xs:element name="datasources">
+	<xs:complexType>
+	<xs:sequence>
+		<xs:element name="jdbc" minOccurs="1" maxOccurs="unbounded">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="property" type="property" minOccurs="0" maxOccurs="unbounded" />
+			</xs:sequence>
+			<xs:attribute name="name" type="xs:string" use="required" />
+			<xs:attribute name="driver" type="xs:string" use="required" />
+			<xs:attribute name="url" type="xs:string" use="required" />
+		</xs:complexType>
+		</xs:element>
+	</xs:sequence>
+	</xs:complexType>
+	</xs:element>
+	
+	<xs:element name="mqxconnectors">
+	<xs:complexType>
+	<xs:sequence>
+		<xs:element name="mqxconnector" minOccurs="1" maxOccurs="unbounded">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="context">
+				<xs:complexType>
+				<xs:sequence>
+					<xs:element name="property" type="property" minOccurs="0" maxOccurs="unbounded" />
+				</xs:sequence>
+				</xs:complexType>
+				</xs:element>
+					<xs:element name="queues">
+					<xs:complexType>
+					<xs:sequence>
+						<xs:element name="queue" minOccurs="1" maxOccurs="unbounded">
+						<xs:complexType>
+							<xs:sequence>
+								<xs:element name="property" type="property" minOccurs="0" maxOccurs="unbounded" />
+							</xs:sequence>
+							<xs:attribute name="name" type="xs:string" use="required" />
+						</xs:complexType>
+						</xs:element>
+					</xs:sequence>
+					</xs:complexType>
+					</xs:element>
+			</xs:sequence>
+			<xs:attribute name="name" type="xs:string" use="required" />
+			<xs:attribute name="driver" type="xs:string" use="required" />
+		</xs:complexType>
+		</xs:element>
+	</xs:sequence>
+	</xs:complexType>
+	</xs:element>
+
+	<xs:simpleType name="nonempty">
+		<xs:restriction base="xs:string">
+			<xs:minLength value="1" />
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="positive">
+		<xs:restriction base="xs:int">
+			<xs:minInclusive value="1" />
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:complexType name="property">
+		<xs:sequence />
+		<xs:attribute name="name" type="xs:string" use="required" />
+		<xs:attribute name="value" type="xs:string" use="required" />
+	</xs:complexType>
+</xs:schema>

@@ -1,1 +1,73 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<config>
+	<!-- bootstrap -->
+	<jvm>
+		<!-- flags na munheca: -server -Xbatch -->
+		<minMemory>512</minMemory>
+		<maxMemory>2048</maxMemory>
+		<vmflags>xpto</vmflags>
+		<classpath>
+			<path>qualquerlugar</path>
+			<file>qualquer arquivo</file>
+		</classpath>
+		<properties>
+			<property name="java.lib.path" value="qualquerlugar" />
+		</properties>
+	</jvm>
+
+	<!-- Runner -->
+	<jndi implementation="org.crypthing.things.appservice.ServicesFactory" />
+	<worker>
+		<class>uma</class>
+		<threads>10</threads>
+		<delay>2</delay>
+	</worker>
+
+	<!-- java:snmp -->
+	<snmp>
+		<property name="org.crypthing.things.SNMPTrap" value="org.crypthing.things.SNMPTrap" />
+		<property name="org.crypthing.things.batch.udpAddress" value="127.0.0.1/8163" />
+		<property name="org.crypthing.things.batch.rootOID" value="0.1.4320" />
+		<property name="org.crypthing.things.batch.retry" value="2" />
+		<property name="org.crypthing.things.batch.timeout" value="5000" />
+	</snmp>
+
+	<!-- java:jdbc/ -->
+	<datasources>
+		<!-- java:jdbc/oracns -->
+		<jdbc name="oracns" driver="oracle.jdbc.OracleDriver" url="jdbc:oracle:oci:@orades01">
+			<property name="Password" value="zxclvbn"/>
+			<property name="User" value="usr_cns"/>
+			<property name="ServerName" value="10.192.230.89"/>
+			<property name="PortNumber" value="1521"/>
+		</jdbc>
+	</datasources>
+
+	<!-- java:mqx -->
+	<mqxconnectors>
+		<mqxconnector name="mqdes" driver="elegante">
+			<context>
+				<property name="address" value="10.192.224.110(1414)" />
+				<property name="channel" value="RJNT011B.TO.RJD1" />
+				<property name="manager" value="RJD1" />
+			</context>
+			<queues>
+				<queue name="getqueue">
+					<property name="object" value="LQ.REQ.ICE.TR" />
+					<property name="input" value="true" />
+					<property name="convert" value="false" />
+					<property name="convertMsgId" value="false" />
+					<property name="convertCorrelId" value="false" />
+					<property name="msgMaxLen" value="1024" />
+				</queue>
+				<queue name="putqueue">
+					<property name="object" value="LQ.RSP.CNS.AUDIT" />
+					<property name="input" value="false" />
+					<property name="convert" value="false" />
+					<property name="convertMsgId" value="false" />
+					<property name="convertCorrelId" value="false" />
+				</queue>
+			</queues>
+		</mqxconnector>
+	</mqxconnectors>
+</config>
