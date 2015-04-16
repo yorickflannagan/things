@@ -21,9 +21,15 @@
 		<class>uma</class>
 		<threads>10</threads>
 		<delay>2</delay>
+		<restartable>true</restartable>
+		<sleep></sleep>
 	</worker>
 
-	<!-- java:snmp -->
+	<!-- Sandobox
+	<sandbox>
+		<property name="property.name" value="property.value" />
+	</sandbox> -->
+
 	<snmp>
 		<property name="org.crypthing.things.SNMPTrap" value="org.crypthing.things.SNMPTrap" />
 		<property name="org.crypthing.things.batch.udpAddress" value="127.0.0.1/8163" />
@@ -35,7 +41,7 @@
 	<!-- java:jdbc/ -->
 	<datasources>
 		<!-- java:jdbc/oracns -->
-		<jdbc name="oracns" driver="oracle.jdbc.OracleDriver" url="jdbc:oracle:oci:@orades01">
+		<jdbc name="oracns" driver="oracle.jdbc.OracleDriver" url="jdbc:oracle:oci:@orades01" validationQuery="select * from dual">
 			<property name="Password" value="zxclvbn"/>
 			<property name="User" value="usr_cns"/>
 			<property name="ServerName" value="10.192.230.89"/>

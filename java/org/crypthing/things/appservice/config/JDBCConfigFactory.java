@@ -8,7 +8,7 @@ public final class JDBCConfigFactory implements ObjectCreationFactory<JDBCConfig
 {
 	private Digester me;
 	@Override
-	public JDBCConfig createObject(Attributes attr) throws Exception { return new JDBCConfig(attr.getValue("name"), attr.getValue("driver"), attr.getValue("url")); }
+	public JDBCConfig createObject(Attributes attr) throws Exception { return new JDBCConfig(attr.getValue("name"), attr.getValue("driver"), attr.getValue("url"), attr.getValue("validationQuery")); }
 	@Override
 	public Digester getDigester() { return me; }
 	@Override

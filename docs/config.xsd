@@ -7,6 +7,7 @@
 		<xs:element ref="jvm" minOccurs="0" />
 		<xs:element ref="jndi" />
 		<xs:element ref="worker" />
+		<xs:element ref="sandbox" minOccurs="0" />
 		<xs:element ref="snmp" minOccurs="0" />
 		<xs:element ref="datasources" minOccurs="0" />
 		<xs:element ref="mqxconnectors" minOccurs="0" />
@@ -60,6 +61,16 @@
 		<xs:element name="class" type="nonempty" />
 		<xs:element name="threads" type="positive" />
 		<xs:element name="delay" type="positive" />
+		<xs:element name="restartable" type="xs:boolean" />
+		<xs:element name="sleep" type="xs:int" minOccurs="0" />
+	</xs:sequence>
+	</xs:complexType>
+	</xs:element>
+
+	<xs:element name="sandbox">
+	<xs:complexType>
+	<xs:sequence>
+		<xs:element name="property" type="property" minOccurs="0" maxOccurs="unbounded" />
 	</xs:sequence>
 	</xs:complexType>
 	</xs:element>
@@ -83,6 +94,7 @@
 			<xs:attribute name="name" type="xs:string" use="required" />
 			<xs:attribute name="driver" type="xs:string" use="required" />
 			<xs:attribute name="url" type="xs:string" use="required" />
+			<xs:attribute name="validationQuery" type="xs:string" use="optional" />
 		</xs:complexType>
 		</xs:element>
 	</xs:sequence>

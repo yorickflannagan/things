@@ -8,8 +8,8 @@ public final class ConnectorConfig extends HashMap<String, QueueConfig>
 	private static final long serialVersionUID = -1588464613738084352L;
 	private String name;
 	private String driver;
-	public ConnectorConfig(final String name, final String driver) { this.name = name; this.driver = driver; }
 	private ConfigProperties context = new ConfigProperties();
+	public ConnectorConfig(final String name, final String driver) { this.name = name; this.driver = driver; }
 	public String getName() { return name; }
 	public void setName(final String name) { this.name = name; }
 	public String getDriver() { return driver; }
