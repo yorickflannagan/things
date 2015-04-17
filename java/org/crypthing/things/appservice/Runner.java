@@ -169,7 +169,7 @@ public final class Runner
 
 	public static void main(String[] args)
 	{
-		if (args.length != 2) usage();
+    		if (args.length != 2) usage();
 		final File config = new File(args[0]);
 		final File schema = new File(args[1]);
 		if (!config.exists() || !schema.exists()) usage();

@@ -18,11 +18,10 @@
 	<!-- Runner -->
 	<jndi implementation="org.crypthing.things.appservice.ServicesFactory" />
 	<worker>
-		<class>uma</class>
-		<threads>10</threads>
-		<delay>2</delay>
+		<class>br.gov.caixa.mqx.test.StuffSausage</class>
+		<threads>1</threads>
 		<restartable>true</restartable>
-		<sleep></sleep>
+		<sleep>2000</sleep>
 	</worker>
 
 	<!-- Sandobox
@@ -45,13 +44,17 @@
 			<property name="Password" value="zxclvbn"/>
 			<property name="User" value="usr_cns"/>
 			<property name="ServerName" value="10.192.230.89"/>
+			<property name="PortNumber" value="1530"/>
+			<!-- 
 			<property name="PortNumber" value="1521"/>
+			 -->
 		</jdbc>
 	</datasources>
 
 	<!-- java:mqx -->
 	<mqxconnectors>
-		<mqxconnector name="mqdes" driver="elegante">
+		<!-- java:mqx/mqdes -->
+		<mqxconnector name="mqdes" driver="br.gov.caixa.mqx.MQXConnection">
 			<context>
 				<property name="address" value="10.192.224.110(1414)" />
 				<property name="channel" value="RJNT011B.TO.RJD1" />
@@ -72,6 +75,21 @@
 					<property name="convert" value="false" />
 					<property name="convertMsgId" value="false" />
 					<property name="convertCorrelId" value="false" />
+				</queue>
+				<queue name="putgetqueue">
+					<property name="object" value="LQ.REQ.ICE.TR" />
+					<property name="input" value="false" />
+					<property name="convert" value="false" />
+					<property name="convertMsgId" value="false" />
+					<property name="convertCorrelId" value="false" />
+				</queue>
+				<queue name="getputqueue">
+					<property name="object" value="LQ.RSP.CNS.AUDIT" />
+					<property name="input" value="true" />
+					<property name="convert" value="false" />
+					<property name="convertMsgId" value="false" />
+					<property name="convertCorrelId" value="false" />
+					<property name="msgMaxLen" value="1024" />
 				</queue>
 			</queues>
 		</mqxconnector>

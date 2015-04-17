@@ -18,7 +18,7 @@ import javax.naming.NamingException;
 public class MemoryContext implements Context
 {
 	private Map<String, Object> env = new ConcurrentHashMap<String, Object>(); 
-	public MemoryContext() {}
+	public MemoryContext() { env.put("", this); }
 	@Override public Object lookupLink(Name arg0) throws NamingException { return null; }
 	@Override public Object lookupLink(String arg0) throws NamingException { return null; }
 	@Override public Object addToEnvironment(String arg0, Object arg1) throws NamingException { return null; }

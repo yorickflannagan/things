@@ -45,7 +45,7 @@ public class MQXFactory extends Reference implements ResourceProvider, ReleaseRe
 				final Iterator<String> it = this.config.keySet().iterator();
 				while (it.hasNext())
 				{
-					final IMQXQueue queue = tconn.openQueue(this.config.get(it.next()));
+					final IMQXQueue queue = tconn.openQueue(this.config.get(it.next()).getName());
 					queue.close();
 				}
 			}
@@ -100,14 +100,14 @@ public class MQXFactory extends Reference implements ResourceProvider, ReleaseRe
 		@Override public void commit() throws MQXConnectionBrokenException, MQXShutDownException, MQXConnectionException { conn.commit(); }
 		@Override public void back() throws MQXConnectionBrokenException, MQXShutDownException, MQXConnectionException { conn.back(); }
 		@Override public void close() throws MQXIllegalStateException, MQXConnectionException {}
-		private void forceClose() throws MQXIllegalStateException, MQXConnectionException { conn.close(); }
 		@Override public boolean isValid() { return conn.isValid(); }
+		private void forceClose() throws MQXIllegalStateException, MQXConnectionException { conn.close(); }
 		@Override
 		public IMQXQueue openQueue(final String name) throws MQXIllegalStateException, MQXIllegalArgumentException, MQXConnectionException
 		{
-			final QueueConfig queue = config.get(name);
-			if (queue == null) throw new MQXIllegalArgumentException("Queue name not found");
-			return conn.openQueue(queue);
+			final QueueConfig qCfg = config.get(name);
+			if (qCfg == null) throw new MQXIllegalArgumentException("Queue name not found");
+			return conn.openQueue(qCfg);
 		}
 	}
 }

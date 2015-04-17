@@ -50,8 +50,14 @@ public class DataSourceFactory extends Reference implements DataSource, Resource
 		if (!(config instanceof JDBCConfig)) throw new ConfigException(new IllegalArgumentException());
 		this.config = (JDBCConfig) config;
 		this.trap = trap;
-		try { Class.forName(this.config.getDriver()); }
-		catch (final ClassNotFoundException e) { throw new ConfigException("Could not load JDBC driver", e); }
+		try
+		{
+			Class.forName(this.config.getDriver());
+			final ConnectionWraper conn = new ConnectionWraper(DriverManager.getConnection(this.config.getUrl(), this.config));
+			conn.close();
+			conn.forceClose();
+		}
+		catch (final Throwable e) { throw new ConfigException("Could not load JDBC driver", e); }
 		subscriber.addReleaseResourceListener(this);
 	}
 
