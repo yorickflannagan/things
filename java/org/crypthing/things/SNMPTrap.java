@@ -65,11 +65,11 @@ public class SNMPTrap implements Serializable
 	private static final String VAR_CAUSE_MESSAGE_ENTRY	= "eventCauseMessage";
 	private static final String VAR_JVM_NAME_ENTRY		= "JVMName";
 
-	private static final String TIMER_RELATIVE_OID		= ".1.1";
-	private static final String MESSAGE_RELATIVE_OID	= ".1.2";
-	private static final String CAUSE_RELATIVE_OID		= ".1.3";
-	private static final String CAUSEMSG_RELATIVE_OID	= ".1.4";
-	private static final String JVM_NAME_RELATIVE_OID	= ".1.5";
+	public static final String TIMER_RELATIVE_OID		= ".1.1";
+	public static final String MESSAGE_RELATIVE_OID		= ".1.2";
+	public static final String CAUSE_RELATIVE_OID		= ".1.3";
+	public static final String CAUSEMSG_RELATIVE_OID	= ".1.4";
+	public static final String JVM_NAME_RELATIVE_OID	= ".1.5";
 
 	private static final long serialVersionUID = 7827169216381363122L;
 
@@ -131,7 +131,7 @@ public class SNMPTrap implements Serializable
 		{
 			pdu.add(new VariableBinding(vars.get(VAR_CAUSE_ENTRY), new OctetString(e.getClass().getName())));
 			final String msg = e.getMessage();
-			if (msg != null && msg != "") pdu.add(new VariableBinding(vars.get(VAR_CAUSE_MESSAGE_ENTRY), new OctetString(msg)));
+			if (msg != null && msg.length() > 0) pdu.add(new VariableBinding(vars.get(VAR_CAUSE_MESSAGE_ENTRY), new OctetString(msg)));
 		}
 		return pdu;
 	}

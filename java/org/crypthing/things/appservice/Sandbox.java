@@ -50,15 +50,10 @@ public abstract class Sandbox extends Thread implements ShutdownEventDispatcher,
 			boolean onceMore = true;
 			do
 			{
-				try
-				{
-					onceMore = execute();
-					billingListener.incSuccess();
-				}
+				try { onceMore = execute(); }
 				catch (final IOException | SQLException e)
 				{
 					pDispatcher.fire(new ProcessingEvent(this, ProcessingEventType.warning, "Unhandled IO or SQLException", e));
-					billingListener.incFailure();
 					if (!isRestartable) throw e;
 				}
 				if (isRunning && onceMore && sleeptime > 0) Thread.sleep(sleeptime);
@@ -78,7 +73,7 @@ public abstract class Sandbox extends Thread implements ShutdownEventDispatcher,
 		interrupt();
 	}
 
-	public void init(final Properties props, final LifecycleEventDispatcher lcDispatcher, final ProcessingEventDispatcher pDispatcher) throws ConfigException {}
+	public void init(final Properties props, final LifecycleEventDispatcher lcDispatcher, final ProcessingEventDispatcher pDispatcher, final BillingEventListener billing) throws ConfigException {}
 	public void destroy() {}
 	public abstract boolean execute() throws IOException, SQLException;
 }

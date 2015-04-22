@@ -14,13 +14,11 @@ import org.crypthing.things.appservice.config.QueueConfig;
 import org.crypthing.things.events.ProcessingEvent;
 import org.crypthing.things.events.ProcessingEventListener;
 import org.crypthing.things.events.ProcessingEvent.ProcessingEventType;
-import org.crypthing.things.mqx.IMQXConnection;
-import org.crypthing.things.mqx.IMQXQueue;
-import org.crypthing.things.mqx.MQXConnectionBrokenException;
-import org.crypthing.things.mqx.MQXConnectionException;
-import org.crypthing.things.mqx.MQXIllegalArgumentException;
-import org.crypthing.things.mqx.MQXIllegalStateException;
-import org.crypthing.things.mqx.MQXShutDownException;
+import org.crypthing.things.messaging.MQXConnection;
+import org.crypthing.things.messaging.MQXConnectionException;
+import org.crypthing.things.messaging.MQXIllegalArgumentException;
+import org.crypthing.things.messaging.MQXIllegalStateException;
+import org.crypthing.things.messaging.MQXQueue;
 
 public class MQXFactory extends Reference implements ResourceProvider, ReleaseResourceListener
 {
@@ -28,7 +26,6 @@ public class MQXFactory extends Reference implements ResourceProvider, ReleaseRe
 	private static final Map<Long, MQXConnectionWrapper> instances = new ConcurrentHashMap<Long, MQXConnectionWrapper>();
 	private ConnectorConfig config;
 	private ProcessingEventListener trap;
-
 	public MQXFactory(final String name) { super(MQXFactory.class.getName(), new StringRefAddr("java:mqx", name)); }
 	
 	@Override
@@ -45,7 +42,7 @@ public class MQXFactory extends Reference implements ResourceProvider, ReleaseRe
 				final Iterator<String> it = this.config.keySet().iterator();
 				while (it.hasNext())
 				{
-					final IMQXQueue queue = tconn.openQueue(this.config.get(it.next()).getName());
+					final MQXQueue queue = tconn.openQueue(this.config.get(it.next()).getName());
 					queue.close();
 				}
 			}
@@ -66,7 +63,7 @@ public class MQXFactory extends Reference implements ResourceProvider, ReleaseRe
 		}
 	}
 
-	public IMQXConnection getConnection() throws MQXConnectionException
+	public MQXConnection getConnection() throws MQXConnectionException
 	{
 		long id = Thread.currentThread().getId();
 		MQXConnectionWrapper ret = instances.get(id);
@@ -82,7 +79,7 @@ public class MQXFactory extends Reference implements ResourceProvider, ReleaseRe
 		MQXConnectionWrapper ret = null;
 		try
 		{
-			final IMQXConnection conn = (IMQXConnection) Class.forName(config.getDriver()).newInstance();
+			final MQXConnection conn = (MQXConnection) Class.forName(config.getDriver()).newInstance();
 			conn.initConnection(config.getContext());
 			ret = new MQXConnectionWrapper(conn);
 		}
@@ -90,20 +87,20 @@ public class MQXFactory extends Reference implements ResourceProvider, ReleaseRe
 		return ret;
 	}
 
-	public class MQXConnectionWrapper implements IMQXConnection
+	public class MQXConnectionWrapper implements MQXConnection
 	{
-		private final IMQXConnection conn;
-		private MQXConnectionWrapper(final IMQXConnection connection) { conn = connection; }
-		@Override public void initConnection(final Properties props) throws MQXIllegalArgumentException { throw new MQXIllegalArgumentException(); }
-		@Override public IMQXQueue openQueue(final Properties props) throws MQXIllegalStateException, MQXIllegalArgumentException, MQXConnectionException { throw new MQXIllegalArgumentException(); }
-		@Override public void begin() throws MQXConnectionBrokenException, MQXShutDownException, MQXConnectionException { conn.begin(); }
-		@Override public void commit() throws MQXConnectionBrokenException, MQXShutDownException, MQXConnectionException { conn.commit(); }
-		@Override public void back() throws MQXConnectionBrokenException, MQXShutDownException, MQXConnectionException { conn.back(); }
+		private final MQXConnection conn;
+		private MQXConnectionWrapper(final MQXConnection connection) { conn = connection; }
+		@Override public void initConnection(final Properties props) throws MQXIllegalArgumentException { throw new MQXIllegalArgumentException("Unsupported operation"); }
+		@Override public MQXQueue openQueue(final Properties props) throws MQXIllegalStateException, MQXIllegalArgumentException, MQXConnectionException { throw new MQXIllegalArgumentException("Unsupported operation"); }
+		@Override public void begin() throws MQXConnectionException { conn.begin(); }
+		@Override public void commit() throws MQXConnectionException { conn.commit(); }
+		@Override public void back() throws MQXConnectionException { conn.back(); }
 		@Override public void close() throws MQXIllegalStateException, MQXConnectionException {}
 		@Override public boolean isValid() { return conn.isValid(); }
 		private void forceClose() throws MQXIllegalStateException, MQXConnectionException { conn.close(); }
 		@Override
-		public IMQXQueue openQueue(final String name) throws MQXIllegalStateException, MQXIllegalArgumentException, MQXConnectionException
+		public MQXQueue openQueue(final String name) throws MQXIllegalStateException, MQXIllegalArgumentException, MQXConnectionException
 		{
 			final QueueConfig qCfg = config.get(name);
 			if (qCfg == null) throw new MQXIllegalArgumentException("Queue name not found");

@@ -3,34 +3,38 @@
 	<!-- bootstrap -->
 	<jvm>
 		<!-- flags na munheca: -server -Xbatch -->
-		<minMemory>512</minMemory>
-		<maxMemory>2048</maxMemory>
-		<vmflags>xpto</vmflags>
+		<minMemory>32</minMemory>	<!-- -Xms (em megabytes) -->
+		<maxMemory>128</maxMemory>	<!-- -Xmx (em mega) -->
+		<vmflags>xpto</vmflags>		<!-- Outros -X -->
 		<classpath>
-			<path>qualquerlugar</path>
-			<file>qualquer arquivo</file>
+			<path>/home/magut/development/sefipx/facilities/eclipse/mqx/bin</path>
+			<path>/home/magut/development/3rdparty/oracle/ojdbc7.jar</path>
+			<path>/home/magut/development/3rdparty/snmp4j-2.3.3/dist/snmp4j-2.3.3.jar</path>
+			<!-- Seu JAR entra aqui -->
+			<path>/home/magut/development/sefipx/facilities/eclipse/mqx-test/bin</path>
 		</classpath>
 		<properties>
-			<property name="java.lib.path" value="qualquerlugar" />
+			<!-- Requerido se não estiver em /usr/lib nem LD_LIBRARY_PATH estiver definida -->
+			<property	name="java.library.path"
+						value="/home/magut/development/sefipx/mqclient/dist/debug:/home/magut/development/3rdparty/oracle" />
 		</properties>
 	</jvm>
 
 	<!-- Runner -->
 	<jndi implementation="org.crypthing.things.appservice.ServicesFactory" />
-	<worker>
-		<class>br.gov.caixa.mqx.test.BasicBatch</class>
-		<threads>1</threads>
+	<worker implementation="br.gov.caixa.mqx.test.BasicBatch">
+		<threads>10</threads>
 		<restartable>false</restartable>
 		<sleep>2000</sleep>
 	</worker>
 
 	<sandbox>
 		<property name="max-commit" value="20" />
-		<property name="max-put" value="100" />
+		<property name="max-put" value="10" />
 	</sandbox>
 
 	<snmp>
-		<property name="org.crypthing.things.SNMPTrap" value="org.crypthing.things.SNMPTrap" />
+		<property name="org.crypthing.things.SNMPTrap" value="br.gov.caixa.mqx.MQXTrap" />
 		<property name="org.crypthing.things.batch.udpAddress" value="127.0.0.1/8163" />
 		<property name="org.crypthing.things.batch.rootOID" value="0.1.4320" />
 		<property name="org.crypthing.things.batch.retry" value="2" />
@@ -52,42 +56,42 @@
 	<!-- java:mqx -->
 	<mqxconnectors>
 		<!-- java:mqx/mqdes -->
-		<mqxconnector name="mqdes" driver="br.gov.caixa.mqx.MQXConnection">
+		<mqxconnector name="mqdes" driver="br.gov.caixa.mqx.MQXConnectionImpl">
 			<context>
-				<property name="address" value="10.192.224.110(1414)" />
-				<property name="channel" value="RJNT011B.TO.RJD1" />
-				<property name="manager" value="RJD1" />
+				<property name="br.gov.caixa.mqx.address" value="10.192.224.110(1414)" />
+				<property name="br.gov.caixa.mqx.channel" value="RJNT011B.TO.RJD1" />
+				<property name="br.gov.caixa.mqx.manager" value="RJD1" />
 			</context>
 			<queues>
 				<queue name="getqueue">
-					<property name="object" value="LQ.REQ.ICE.TR" />
-					<property name="input" value="true" />
-					<property name="convert" value="false" />
-					<property name="convertMsgId" value="false" />
-					<property name="convertCorrelId" value="false" />
-					<property name="msgMaxLen" value="1024" />
+					<property name="br.gov.caixa.mqx.object" value="LQ.REQ.ICE.TR" />
+					<property name="br.gov.caixa.mqx.input" value="true" />
+					<property name="br.gov.caixa.mqx.convert" value="false" />
+					<property name="br.gov.caixa.mqx.convertMsgId" value="false" />
+					<property name="br.gov.caixa.mqx.convertCorrelId" value="false" />
+					<property name="br.gov.caixa.mqx.msgMaxLen" value="1024" />
 				</queue>
 				<queue name="putqueue">
-					<property name="object" value="LQ.RSP.CNS.AUDIT" />
-					<property name="input" value="false" />
-					<property name="convert" value="false" />
-					<property name="convertMsgId" value="false" />
-					<property name="convertCorrelId" value="false" />
+					<property name="br.gov.caixa.mqx.object" value="LQ.RSP.CNS.AUDIT" />
+					<property name="br.gov.caixa.mqx.input" value="false" />
+					<property name="br.gov.caixa.mqx.convert" value="false" />
+					<property name="br.gov.caixa.mqx.convertMsgId" value="false" />
+					<property name="br.gov.caixa.mqx.convertCorrelId" value="false" />
 				</queue>
 				<queue name="putgetqueue">
-					<property name="object" value="LQ.REQ.ICE.TR" />
-					<property name="input" value="false" />
-					<property name="convert" value="false" />
-					<property name="convertMsgId" value="false" />
-					<property name="convertCorrelId" value="false" />
+					<property name="br.gov.caixa.mqx.object" value="LQ.REQ.ICE.TR" />
+					<property name="br.gov.caixa.mqx.input" value="false" />
+					<property name="br.gov.caixa.mqx.convert" value="false" />
+					<property name="br.gov.caixa.mqx.convertMsgId" value="false" />
+					<property name="br.gov.caixa.mqx.convertCorrelId" value="false" />
 				</queue>
 				<queue name="getputqueue">
-					<property name="object" value="LQ.RSP.CNS.AUDIT" />
-					<property name="input" value="true" />
-					<property name="convert" value="false" />
-					<property name="convertMsgId" value="false" />
-					<property name="convertCorrelId" value="false" />
-					<property name="msgMaxLen" value="1024" />
+					<property name="br.gov.caixa.mqx.object" value="LQ.RSP.CNS.AUDIT" />
+					<property name="br.gov.caixa.mqx.input" value="true" />
+					<property name="br.gov.caixa.mqx.convert" value="false" />
+					<property name="br.gov.caixa.mqx.convertMsgId" value="false" />
+					<property name="br.gov.caixa.mqx.convertCorrelId" value="false" />
+					<property name="br.gov.caixa.mqx.msgMaxLen" value="1024" />
 				</queue>
 			</queues>
 		</mqxconnector>

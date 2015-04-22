@@ -24,8 +24,7 @@
 		<xs:element name="classpath" minOccurs="0">
 		<xs:complexType>
 		<xs:sequence>
-			<xs:element name="path" type="nonempty" minOccurs="0" maxOccurs="unbounded" />
-			<xs:element name="file" type="nonempty" minOccurs="0" maxOccurs="unbounded" />
+			<xs:element name="path" type="nonempty" minOccurs="1" maxOccurs="unbounded" />
 		</xs:sequence>
 		</xs:complexType>
 		</xs:element>
@@ -58,11 +57,11 @@
 	<xs:element name="worker">
 	<xs:complexType>
 	<xs:sequence>
-		<xs:element name="class" type="nonempty" />
 		<xs:element name="threads" type="positive" />
 		<xs:element name="restartable" type="xs:boolean" />
 		<xs:element name="sleep" type="xs:int" minOccurs="0" />
 	</xs:sequence>
+	<xs:attribute name="implementation" type="xs:string" use="required" />
 	</xs:complexType>
 	</xs:element>
 

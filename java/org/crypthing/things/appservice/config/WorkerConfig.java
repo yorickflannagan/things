@@ -7,6 +7,7 @@ public final class WorkerConfig
 	private long delay;
 	private boolean restartable;
 	private long sleep;
+	public WorkerConfig(String implementation) { impl = implementation; }
 	public String getImpl() { return impl; }
 	public void setImpl(String impl) { this.impl = impl; }
 	public int getThreads() { return threads; }

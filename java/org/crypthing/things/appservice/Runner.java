@@ -20,6 +20,7 @@ import javax.xml.validation.SchemaFactory;
 
 import org.apache.commons.digester3.Digester;
 import org.crypthing.things.SNMPTrap;
+import org.crypthing.things.appservice.config.ConfigErrorHandler;
 import org.crypthing.things.appservice.config.ConfigException;
 import org.crypthing.things.appservice.config.ConfigProperties;
 import org.crypthing.things.appservice.config.ConnectorConfigFactory;
@@ -31,17 +32,15 @@ import org.crypthing.things.appservice.config.JNDIConfigFactory;
 import org.crypthing.things.appservice.config.Property;
 import org.crypthing.things.appservice.config.QueueConfigFactory;
 import org.crypthing.things.appservice.config.RunnerConfig;
-import org.crypthing.things.appservice.config.WorkerConfig;
+import org.crypthing.things.appservice.config.WorkerConfigFactory;
 import org.crypthing.things.events.LifecycleEvent;
+import org.crypthing.things.events.LifecycleEvent.LifecycleEventType;
 import org.crypthing.things.events.LifecycleEventDispatcher;
 import org.crypthing.things.events.LogTrapperListener;
 import org.crypthing.things.events.ProcessingEvent;
-import org.crypthing.things.events.ProcessingEventDispatcher;
-import org.crypthing.things.events.LifecycleEvent.LifecycleEventType;
 import org.crypthing.things.events.ProcessingEvent.ProcessingEventType;
-import org.xml.sax.ErrorHandler;
+import org.crypthing.things.events.ProcessingEventDispatcher;
 import org.xml.sax.SAXException;
-import org.xml.sax.SAXParseException;
 
 
 public final class Runner
@@ -96,7 +95,7 @@ public final class Runner
 		worker.setShutdownEventListener(this);
 		addInterruptEventListener(worker);
 		worker.init(config.getWorker(), lcDispatcher, pDispatcher, this);
-		worker.init(config.getSandbox(), lcDispatcher, pDispatcher);
+		worker.init(config.getSandbox(), lcDispatcher, pDispatcher, this);
 		worker.start();
 	}
 
@@ -120,7 +119,7 @@ public final class Runner
 			while (itNames.hasNext()) ctx.unbind(itNames.next());
 			if (mbName != null) ManagementFactory.getPlatformMBeanServer().unregisterMBean(mbName);
 		}
-		catch (final Throwable e) { pDispatcher.fire(new ProcessingEvent(this, ProcessingEventType.error, "Error during shutdown", e)); }
+		catch (final Throwable e) { pDispatcher.fire(new ProcessingEvent(this, ProcessingEventType.warning, "Error during shutdown", e)); }
 	}
 
 	@Override public long getSuccessCount() { return success; }
@@ -215,16 +214,6 @@ public final class Runner
 	}
 	private static RunnerConfig getConfig(final File config, final File schema) throws ConfigException
 	{
-		class ConfigErrorHandler implements ErrorHandler
-		{
-			@Override
-			public void warning(SAXParseException exception) throws SAXException {}
-			@Override
-			public void error(SAXParseException exception) throws SAXException { throw new SAXException(exception); }
-			@Override
-			public void fatalError(SAXParseException exception) throws SAXException { throw new SAXException(exception); }
-		}
-
 		RunnerConfig ret;
 		final SchemaFactory fac = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
 		final DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
@@ -238,8 +227,7 @@ public final class Runner
 			final Digester digester = new Digester();
 			digester.setValidating(false);
 			digester.addObjectCreate("config", RunnerConfig.class);
-			digester.addObjectCreate("config/worker", WorkerConfig.class);
-			digester.addBeanPropertySetter("config/worker/class", "impl");
+			digester.addFactoryCreate("config/worker", WorkerConfigFactory.class);
 			digester.addBeanPropertySetter("config/worker/threads", "threads");
 			digester.addBeanPropertySetter("config/worker/delay", "delay");
 			digester.addBeanPropertySetter("config/worker/restartable", "restartable");
