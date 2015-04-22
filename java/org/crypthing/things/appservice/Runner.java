@@ -83,7 +83,11 @@ public final class Runner
 			for (int i = 0, threads = config.getWorker().getThreads(); i < threads; i++) newWorker();
 			lcDispatcher.fire(new LifecycleEvent(this, LifecycleEventType.start, "Runner initialization succeeded"));
 		}
-		catch (final Throwable e) { pDispatcher.fire(new ProcessingEvent(this, ProcessingEventType.error, "Could not launch new worker", e)); }
+		catch (final Throwable e)
+		{
+			pDispatcher.fire(new ProcessingEvent(this, ProcessingEventType.error, "Could not launch new worker", e));
+			shutdown();
+		}
 	}
 
 	private void newWorker() throws InstantiationException, IllegalAccessException, ClassNotFoundException, ConfigException

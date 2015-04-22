@@ -53,7 +53,7 @@ public class DataSourceFactory extends Reference implements DataSource, Resource
 		try
 		{
 			Class.forName(this.config.getDriver());
-			final ConnectionWraper conn = new ConnectionWraper(DriverManager.getConnection(this.config.getUrl(), this.config));
+			final ConnectionWraper conn = new ConnectionWraper(DriverManager.getConnection(this.config.getUrl(), this.config.getProperty("user-name", ""), this.config.getProperty("password", "")));
 			conn.close();
 			conn.forceClose();
 		}
@@ -80,7 +80,7 @@ public class DataSourceFactory extends Reference implements DataSource, Resource
 		ConnectionWraper ret = instances.get(id);
 		if (ret == null || !isValid(ret))
 		{
-			ret = new ConnectionWraper(DriverManager.getConnection(config.getUrl(), config));
+			ret = new ConnectionWraper(DriverManager.getConnection(this.config.getUrl(), this.config.getProperty("user-name", ""), this.config.getProperty("password", "")));
 			instances.put(id, ret);
 		}
 		return ret;

@@ -18,16 +18,16 @@
 	<!-- Runner -->
 	<jndi implementation="org.crypthing.things.appservice.ServicesFactory" />
 	<worker>
-		<class>br.gov.caixa.mqx.test.StuffSausage</class>
+		<class>br.gov.caixa.mqx.test.BasicBatch</class>
 		<threads>1</threads>
-		<restartable>true</restartable>
+		<restartable>false</restartable>
 		<sleep>2000</sleep>
 	</worker>
 
-	<!-- Sandobox
 	<sandbox>
-		<property name="property.name" value="property.value" />
-	</sandbox> -->
+		<property name="max-commit" value="20" />
+		<property name="max-put" value="100" />
+	</sandbox>
 
 	<snmp>
 		<property name="org.crypthing.things.SNMPTrap" value="org.crypthing.things.SNMPTrap" />
@@ -40,14 +40,12 @@
 	<!-- java:jdbc/ -->
 	<datasources>
 		<!-- java:jdbc/oracns -->
-		<jdbc name="oracns" driver="oracle.jdbc.OracleDriver" url="jdbc:oracle:oci:@orades01" validationQuery="select * from dual">
-			<property name="Password" value="zxclvbn"/>
-			<property name="User" value="usr_cns"/>
-			<property name="ServerName" value="10.192.230.89"/>
-			<property name="PortNumber" value="1530"/>
-			<!-- 
-			<property name="PortNumber" value="1521"/>
-			 -->
+		<jdbc	name="oracns"
+				driver="oracle.jdbc.OracleDriver"
+				url="jdbc:oracle:oci:@10.192.230.89:1530:ORADES01"
+				validationQuery="select * from dual">
+			<property name="password" value="zxc1vbn"/>
+			<property name="user-name" value="usr_cns"/>
 		</jdbc>
 	</datasources>
 
