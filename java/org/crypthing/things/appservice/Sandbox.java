@@ -15,7 +15,7 @@ import org.crypthing.things.events.ProcessingEventDispatcher;
 
 public abstract class Sandbox extends Thread implements ShutdownEventDispatcher, InterruptEventListener
 {
-	private boolean isRunning = true;
+	private boolean running = true;
 	private long sleeptime = 0;
 	private boolean isRestartable = false;
 	private ShutdownEventListener shutdownListner;
@@ -23,7 +23,7 @@ public abstract class Sandbox extends Thread implements ShutdownEventDispatcher,
 	private ProcessingEventDispatcher pDispatcher;
 	private BillingEventListener billingListener;
 
-	final void init
+	final void startup
 	(
 		final WorkerConfig config,
 		final LifecycleEventDispatcher lcDispatcher,
@@ -39,7 +39,7 @@ public abstract class Sandbox extends Thread implements ShutdownEventDispatcher,
 	}
 
 	@Override public void setShutdownEventListener(final ShutdownEventListener listener) { this.shutdownListner = listener; }
-	@Override public final void interrupt() { isRunning = false; }
+	@Override public final void shutdown() { running = false; }
 
 	@Override
 	final public void run()
@@ -56,11 +56,11 @@ public abstract class Sandbox extends Thread implements ShutdownEventDispatcher,
 					pDispatcher.fire(new ProcessingEvent(this, ProcessingEventType.warning, "Unhandled IO or SQLException", e));
 					if (!isRestartable) throw e;
 				}
-				if (isRunning && onceMore && sleeptime > 0) Thread.sleep(sleeptime);
+				if (running && onceMore && sleeptime > 0) Thread.sleep(sleeptime);
 			}
-			while (isRunning && onceMore);
+			while (running && onceMore);
 
-			if (!isRunning) shutdownListner.signal(this);
+			if (!running) shutdownListner.signal(this);
 			else shutdownListner.abandon(this);
 		}
 		catch (final Throwable e)
@@ -73,7 +73,13 @@ public abstract class Sandbox extends Thread implements ShutdownEventDispatcher,
 		interrupt();
 	}
 
-	public void init(final Properties props, final LifecycleEventDispatcher lcDispatcher, final ProcessingEventDispatcher pDispatcher, final BillingEventListener billing) throws ConfigException {}
-	public void destroy() {}
-	public abstract boolean execute() throws IOException, SQLException;
+	protected void fire(final LifecycleEvent evt) { if (evt != null) lcDispatcher.fire(evt); }
+	protected void fire(final ProcessingEvent evt) { if (evt != null) pDispatcher.fire(evt); }
+	protected boolean isRunning () { return running; }
+	protected void success() { billingListener.incSuccess(); }
+	protected void failure() { billingListener.incFailure(); }
+
+	public void startup(final Properties props) throws ConfigException {}
+	void release() {}
+	protected abstract boolean execute() throws IOException, SQLException;
 }

@@ -16,5 +16,13 @@ public final class JDBCConfig extends ConfigProperties
 	public void setUrl(String url) { this.url = url;}
 	public String getValidationQuery() { return validationQuery; }
 	public void setValidationQuery(String validationQuery) { this.validationQuery = validationQuery; }
-	@Override public String toString() { return (new StringBuilder()).append("name=").append(name).append(", driver=").append(driver).append(", url=").append(url).append(", {").append(super.toString()).append("}").toString(); }
+	@Override public String toString()
+	{
+		final StringBuilder builder = new StringBuilder(256);
+		if (name != null) builder.append("name=").append(name);
+		if (driver != null) builder.append(", driver=").append(driver);
+		if (url != null) builder.append(", url=").append(url);
+		builder.append(", {").append(super.toString()).append("}").toString();
+		return builder.toString();
+	}
 }

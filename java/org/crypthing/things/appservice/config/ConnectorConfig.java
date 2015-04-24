@@ -21,7 +21,9 @@ public final class ConnectorConfig extends HashMap<String, QueueConfig>
 	public String toString()
 	{
 		final StringBuilder builder = new StringBuilder();
-		builder.append("name=").append(name).append(", driver=").append(driver).append(", {");
+		if (name != null) builder.append("name=").append(name);
+		if (driver != null) builder.append(", driver=").append(driver);
+		builder.append(", {");
 		final Iterator<String> it = keySet().iterator();
 		while (it.hasNext())
 		{

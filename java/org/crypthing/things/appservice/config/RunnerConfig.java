@@ -24,7 +24,7 @@ public final class RunnerConfig
 	@Override public String toString()
 	{
 		final StringBuilder builder = new StringBuilder();
-		builder.append("worker={").append(worker.toString()).append("}, jndi={").append(jndi.toString()).append("}");
+		if (worker != null) builder.append("worker={").append(worker.toString()).append("}, jndi={").append(jndi.toString()).append("}");
 		if (snmp != null) builder.append(", snmp={").append(snmp.toString()).append("}");
 		if (sandbox != null) builder.append(", sandbox={").append(sandbox.toString()).append("}");
 		if (datasources != null) builder.append(", datasources={").append(datasources.toString()).append("}");

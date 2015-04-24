@@ -20,9 +20,9 @@ public final class WorkerConfig
 	public void setSleep(long sleep) { this.sleep = sleep; }
 	@Override public String toString()
 	{
-		return (new StringBuilder())
-			.append("impl=").append(impl)
-			.append(", threads=").append(threads)
+		final StringBuilder builder = new StringBuilder(128);
+		if (impl != null) builder.append("impl=").append(impl);
+		return builder.append(", threads=").append(threads)
 			.append(", delay=").append(delay)
 			.append(", restartable=").append(restartable)
 			.append(", sleep=").append(sleep)

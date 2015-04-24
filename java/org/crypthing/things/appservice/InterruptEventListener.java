@@ -4,5 +4,5 @@ import java.util.EventListener;
 
 public interface InterruptEventListener extends EventListener
 {
-	void interrupt();
+	void shutdown();
 }

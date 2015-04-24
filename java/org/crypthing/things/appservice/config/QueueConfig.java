@@ -8,5 +8,11 @@ public final class QueueConfig extends ConfigProperties
 	public QueueConfig(final String name) { this.name = name; }
 	public String getName() { return name; }
 	public void setName(String name) { this.name = name; }
-	@Override public String toString() { return (new StringBuilder()).append("name=").append(name).append("{").append(super.toString()).append("}").toString(); }
+	@Override public String toString()
+	{
+		final StringBuilder builder = new StringBuilder(512);
+		if (name != null) builder.append("name=").append(name);
+		builder.append(", properties={").append(super.toString()).append("}");
+		return builder.toString();
+	}
 }

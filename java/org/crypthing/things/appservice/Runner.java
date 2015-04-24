@@ -7,20 +7,20 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
+import java.util.concurrent.locks.ReentrantLock;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.management.ObjectName;
 import javax.naming.Binding;
 import javax.naming.InitialContext;
 import javax.naming.NamingEnumeration;
-import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.validation.SchemaFactory;
 
 import org.apache.commons.digester3.Digester;
 import org.crypthing.things.SNMPTrap;
-import org.crypthing.things.appservice.config.ConfigErrorHandler;
 import org.crypthing.things.appservice.config.ConfigException;
 import org.crypthing.things.appservice.config.ConfigProperties;
 import org.crypthing.things.appservice.config.ConnectorConfigFactory;
@@ -51,6 +51,7 @@ public final class Runner
 			InterruptEventDispatcher
 {
 	private class ShutdownHook implements Runnable { @Override public void run() { shutdown(); } }
+	private static final Logger log = Logger.getLogger(Runner.class.getName());
 	private static ObjectName mbName;
 
 	private final RunnerConfig config;
@@ -60,6 +61,8 @@ public final class Runner
 	private final ProcessingEventDispatcher pDispatcher;
 	private long success;
 	private long failure;
+	private final ReentrantLock successMutex = new ReentrantLock();
+	private final ReentrantLock failureMutex = new ReentrantLock();
 
 	public Runner(final RunnerConfig cfg) throws ConfigException
 	{
@@ -94,8 +97,8 @@ public final class Runner
 		final Sandbox worker = (Sandbox) Class.forName(config.getWorker().getImpl()).newInstance();
 		worker.setShutdownEventListener(this);
 		addInterruptEventListener(worker);
-		worker.init(config.getWorker(), lcDispatcher, pDispatcher, this);
-		worker.init(config.getSandbox(), lcDispatcher, pDispatcher, this);
+		worker.startup(config.getWorker(), lcDispatcher, pDispatcher, this);
+		worker.startup(config.getSandbox());
 		worker.start();
 	}
 
@@ -108,7 +111,7 @@ public final class Runner
 	{
 		lcDispatcher.fire(new LifecycleEvent(this, LifecycleEventType.stop, "Runner shutdown signal received"));
 		final Iterator<InterruptEventListener> it = interruptListeners.iterator();
-		while (it.hasNext()) it.next().interrupt();
+		while (it.hasNext()) it.next().shutdown();
 		try
 		{
 			final ArrayList<String> names = new ArrayList<String>();
@@ -122,15 +125,27 @@ public final class Runner
 		catch (final Throwable e) { pDispatcher.fire(new ProcessingEvent(this, ProcessingEventType.warning, "Error during shutdown", e)); }
 	}
 
-	@Override public long getSuccessCount() { return success; }
+	@Override public long getSuccessCount(){ return success; }
 	@Override public long getErrorCount() { return failure; }
 
 	/*
 	 * BillingEventListener
 	 * * * * * * * * * * * * * * * * * * * *
 	 */
-	@Override public void incSuccess() { success++; }
-	@Override public void incFailure() { failure++; }
+	@Override public void incSuccess()
+	{
+		final ReentrantLock mutex = this.successMutex;
+		mutex.lock();
+		success++;
+		mutex.unlock();
+	}
+	@Override public void incFailure()
+	{
+		final ReentrantLock mutex = this.failureMutex;
+		mutex.lock();
+		failure++;
+		mutex.unlock();
+	}
 
 	/*
 	 * ReleaseResourceEventDispatcher
@@ -148,7 +163,7 @@ public final class Runner
 	{
 		final Iterator<ReleaseResourceListener> it = resourceListeners.iterator();
 		while (it.hasNext()) it.next().release(worker.getId());
-		worker.destroy();
+		worker.release();
 	}
 	@Override
 	public void signal(final Sandbox worker)
@@ -172,13 +187,12 @@ public final class Runner
 
 	public static void main(String[] args)
 	{
-    		if (args.length != 2) usage();
+    		if (args.length < 1) usage();
 		final File config = new File(args[0]);
-		final File schema = new File(args[1]);
-		if (!config.exists() || !schema.exists()) usage();
+		if (!config.exists()) usage();
 		try
 		{
-			final RunnerConfig cfg = getConfig(config, schema);
+			final RunnerConfig cfg = getConfig(config);
 			final Runner instance = new Runner(cfg);
 			final JNDIConfig jndi = cfg.getJndi();
 			String jndiImpl;
@@ -201,27 +215,23 @@ public final class Runner
 		}
 		catch (final Throwable e)
 		{
-			e.printStackTrace();
+			log.log(Level.SEVERE, "Runner start failure", e);
 			usage();
 		}
 	}
 	private static void usage()
 	{
-		System.err.println("Usage: Runner <config-xml> <config-xsd>, where");
-		System.err.println("\t<config-xml> is the configuration XML file and");
-		System.err.println("\t<config-xsd> is the configuration schema file.");
+		log.log(Level.SEVERE, "Usage: Runner <config-xml>, where\t<config-xml> is the configuration XML file.");
 		System.exit(1);
 	}
-	private static RunnerConfig getConfig(final File config, final File schema) throws ConfigException
+	private static RunnerConfig getConfig(final File config) throws ConfigException
 	{
 		RunnerConfig ret;
-		final SchemaFactory fac = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
 		final DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+		dbf.setValidating(false);
 		try
 		{
-			dbf.setSchema(fac.newSchema(schema));
 			final DocumentBuilder doc = dbf.newDocumentBuilder();
-			doc.setErrorHandler(new ConfigErrorHandler());
 			doc.parse(config);
 
 			final Digester digester = new Digester();

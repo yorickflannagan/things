@@ -1,53 +1,26 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <config>
-	<!-- bootstrap -->
 	<jvm>
-		<!--
-		<minMemory>32</minMemory>	 -Xms (em megabytes) -->
-		<!-- 
-		<maxMemory>128</maxMemory>	-Xmx (em mega) -->
-		<!--
-		<vmflags>xpto</vmflags>		 Outros -X -->
-		<!-- Arquivo para onde a saída de Runner será redirecionada -->
-		<jmx host="10.0.2.15" port="5051">
-			<!-- See JMX documentation
-			All jmx.property names are prepend by "com.sun.management.jmxremote." 
-			<property name="jmx.property" value="jmx.property.value" />  -->
-		</jmx>
+		<jmx host="10.0.2.15" port="5052" />
 		<classpath>
-			<!-- Required classpath -->
 			<path>/home/magut/development/sefipx/facilities/eclipse/things/bin/</path>
-			<path>/home/magut/development/3rdparty/commons-digester3-3.2/commons-digester3-3.2-with-deps.jar</path>
 			<path>/home/magut/development/sefipx/facilities/eclipse/mqx/bin</path>
-			<path>/home/magut/development/3rdparty/snmp4j-2.3.3/dist/snmp4j-2.3.3.jar</path>
-			<!-- Required by java:jdbc/oracns -->
+			<path>/home/magut/development/3rdparty/commons-digester3-3.2/commons-digester3-3.2-with-deps.jar</path>
 			<path>/home/magut/development/3rdparty/oracle/ojdbc7.jar</path>
-			<!-- Seu JAR entra aqui -->
+			<path>/home/magut/development/3rdparty/snmp4j-2.3.3/dist/snmp4j-2.3.3.jar</path>
 			<path>/home/magut/development/sefipx/facilities/eclipse/mqx-test/bin</path>
 		</classpath>
-		<properties>
-			<!-- 
-			<property name="java.library.path" value="/home/magut/development/sefipx/mqclient/dist/debug:/home/magut/development/3rdparty/oracle" />
-			Requerido se não estiver em /usr/lib nem LD_LIBRARY_PATH estiver definida -->
-		</properties>
 	</jvm>
 
-	<!-- Runner -->
 	<jndi implementation="org.crypthing.things.appservice.ServicesFactory" />
 	<worker implementation="br.gov.caixa.mqx.test.BasicBatch">
-	<!-- 
-	<worker implementation="br.gov.caixa.mqx.test.Oktoberfest">
-	<worker implementation="br.gov.caixa.mqx.test.StuffSausage">
-	 -->
 		<threads>10</threads>
-		<restartable>false</restartable>
+		<restartable>true</restartable>
 		<sleep>2000</sleep>
 	</worker>
 
-	<!-- Sandbox implementation properties (if necessary) -->
 	<sandbox>
-		<property name="max-commit" value="20" />
-		<property name="max-put" value="10" />
+		<property name="max-commit" value="100" />
 	</sandbox>
 
 	<snmp>
@@ -58,9 +31,7 @@
 		<property name="org.crypthing.things.batch.timeout" value="5000" />
 	</snmp>
 
-	<!-- java:jdbc/ -->
 	<datasources>
-		<!-- java:jdbc/oracns -->
 		<jdbc	name="oracns"
 				driver="oracle.jdbc.OracleDriver"
 				url="jdbc:oracle:oci:@10.192.230.89:1530:ORADES01"
@@ -70,9 +41,7 @@
 		</jdbc>
 	</datasources>
 
-	<!-- java:mqx -->
 	<mqxconnectors>
-		<!-- java:mqx/mqdes -->
 		<mqxconnector name="mqdes" driver="br.gov.caixa.mqx.MQXConnectionImpl">
 			<context>
 				<property name="br.gov.caixa.mqx.address" value="10.192.224.110(1414)" />
@@ -94,21 +63,6 @@
 					<property name="br.gov.caixa.mqx.convert" value="false" />
 					<property name="br.gov.caixa.mqx.convertMsgId" value="false" />
 					<property name="br.gov.caixa.mqx.convertCorrelId" value="false" />
-				</queue>
-				<queue name="putgetqueue">
-					<property name="br.gov.caixa.mqx.object" value="LQ.REQ.ICE.TR" />
-					<property name="br.gov.caixa.mqx.input" value="false" />
-					<property name="br.gov.caixa.mqx.convert" value="false" />
-					<property name="br.gov.caixa.mqx.convertMsgId" value="false" />
-					<property name="br.gov.caixa.mqx.convertCorrelId" value="false" />
-				</queue>
-				<queue name="getputqueue">
-					<property name="br.gov.caixa.mqx.object" value="LQ.RSP.CNS.AUDIT" />
-					<property name="br.gov.caixa.mqx.input" value="true" />
-					<property name="br.gov.caixa.mqx.convert" value="false" />
-					<property name="br.gov.caixa.mqx.convertMsgId" value="false" />
-					<property name="br.gov.caixa.mqx.convertCorrelId" value="false" />
-					<property name="br.gov.caixa.mqx.msgMaxLen" value="1024" />
 				</queue>
 			</queues>
 		</mqxconnector>

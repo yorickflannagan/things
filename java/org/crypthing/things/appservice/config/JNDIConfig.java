@@ -8,5 +8,11 @@ public class JNDIConfig extends ConfigProperties
 	public String getImplementation() { return implementation; }
 	public void setImplementation(final String impl) { implementation = impl; }
 	@Override
-	public String toString() { return (new StringBuilder()).append("implementation=").append(implementation).append(", {").append(super.toString()).append("}").toString(); }
+	public String toString()
+	{
+		final StringBuilder builder = new StringBuilder(512);
+		if (implementation != null) builder.append("implementation=").append(implementation);
+		builder.append(", properties={").append(super.toString()).append("}");
+		return builder.toString();
+	}
 }
