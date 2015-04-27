@@ -48,13 +48,14 @@ public final class Bootstrap
 				System.err.println("-------------------------------\n");
 				e.printStackTrace();
 				System.err.println("\n-------------------------------\n\n");
+				usage();
 			}
 		}
 	}
 	private static void usage()
 	{
-		System.err.println("Usage: Bootstrap <config-xml>, where");
-		System.err.println("\t<config-xml>... is a list of at least one configuration XML file.");
+		System.err.println("Usage: Bootstrap <config-xml-list>, where");
+		System.err.println("\t<config-xml-list>... is a list of at least one service launching configuration XML file.");
 		System.exit(1);
 	}
 

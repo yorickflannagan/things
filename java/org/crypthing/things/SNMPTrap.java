@@ -76,7 +76,7 @@ public class SNMPTrap implements Serializable
 	private final CommunityTarget comtarget;
 	private final long startTime;
 	private final OID enterprise;
-	private Snmp snmp;
+	private transient Snmp snmp;
 
 	protected final Map<String, OID> vars;
 	protected final String rootOID;

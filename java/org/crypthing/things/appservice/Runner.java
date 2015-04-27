@@ -44,13 +44,14 @@ import org.xml.sax.SAXException;
 
 
 public final class Runner
-	implements	RunnerMBean,
-			ShutdownEventListener,
-			BillingEventListener,
-			ReleaseResourceEventDispatcher,
-			InterruptEventDispatcher
+implements	RunnerMBean,
+		ShutdownEventListener,
+		BillingEventListener,
+		ReleaseResourceEventDispatcher,
+		InterruptEventDispatcher
 {
 	private class ShutdownHook implements Runnable { @Override public void run() { shutdown(); } }
+	static final String MBEAN_PATTERN = "org.crypthing.things.appservice:type=Runner,name=";
 	private static final Logger log = Logger.getLogger(Runner.class.getName());
 	private static ObjectName mbName;
 
@@ -206,7 +207,7 @@ public final class Runner
 				mbName = new ObjectName
 				(
 					(new StringBuilder(256))
-					.append("org.crypthing.things.appservice:type=Runner,name=")
+					.append(MBEAN_PATTERN)
 					.append(ManagementFactory.getRuntimeMXBean().getName())
 					.toString()
 				)
