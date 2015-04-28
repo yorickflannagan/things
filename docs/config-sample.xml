@@ -1,44 +1,78 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <config>
-	<!-- bootstrap -->
+	<!--
+		Seção de configuração da JVM de cada aplicativo batch
+		Ver http://docs.oracle.com/javase/7/docs/technotes/tools/windows/java.html
+	-->
 	<jvm>
+		<minMemory>[valor]</minMemory>	<!-- Valor do parâmetro -Xms (em megabytes). Opcional. -->
+		<maxMemory>[valor]</maxMemory>	<!-- Valor do parâmetro -Xmx (em megabytes). Opcional. -->
+		<vmflags>[parâmetros]</vmflags>	<!-- Parâmetros de JVM adicionais (-server -Xbatch já são usados). Opcional -->
+
 		<!--
-		<minMemory>32</minMemory>	 -Xms (em megabytes) -->
-		<!-- 
-		<maxMemory>128</maxMemory>	-Xmx (em mega) -->
-		<!--
-		<vmflags>xpto</vmflags>		 Outros -X -->
-		<!-- Arquivo para onde a saída de Runner será redirecionada -->
-		<jmx host="10.0.2.15" port="5051">
-			<!-- See JMX documentation
-			All jmx.property names are prepend by "com.sun.management.jmxremote." 
-			<property name="jmx.property" value="jmx.property.value" />  -->
+			Configuração para JMX para comando e controle dos aplicativos. Obrigatório. 
+			Ver http://docs.oracle.com/javase/7/docs/technotes/guides/management/agent.html
+			Os atributos do elemento definem o listener JMX. Cada aplicativo deve receber um endereço diferente!
+		-->
+		<jmx host="[IP/hostname]" port="[porta]">
+			<!--
+				Configurações requeridas para JMX. Opcional.
+				As seguintes entradas são incluídas por default:
+				<property name="com.sun.management.jmxremote.ssl" value="false" />
+				<property name="com.sun.management.jmxremote.authenticate" value="false" />
+			-->
 		</jmx>
+
+		<!--
+			java.class.path requerido pelo serviço. Obrigatório.
+			Os pacotes things-*.jar e mqx-*.jar e suas dependências commons-digester3-*.jar e snmp4j-*.jar são obrigatórios. 
+		-->
 		<classpath>
-			<!-- Required classpath -->
-			<path>/home/magut/development/sefipx/facilities/eclipse/things/bin/</path>
-			<path>/home/magut/development/3rdparty/commons-digester3-3.2/commons-digester3-3.2-with-deps.jar</path>
-			<path>/home/magut/development/sefipx/facilities/eclipse/mqx/bin</path>
-			<path>/home/magut/development/3rdparty/snmp4j-2.3.3/dist/snmp4j-2.3.3.jar</path>
-			<!-- Required by java:jdbc/oracns -->
-			<path>/home/magut/development/3rdparty/oracle/ojdbc7.jar</path>
-			<!-- Seu JAR entra aqui -->
-			<path>/home/magut/development/sefipx/facilities/eclipse/mqx-test/bin</path>
+			<path>[path]/things-1.0.0.jar</path>
+			<path>[path]/mqx-0.1.0.jar</path>
+			<path>[path]/commons-digester3-3.2-with-deps.jar</path>
+			<path>[path]snmp4j-2.3.3.jar</path>
+			<path>[path]/ojdbc7.jar</path>			<!-- Utilizando JDBC, é obrigatória a declaração do driver -->
+			<path>[path]/mqx-batch_demo.jar</path>	<!-- Implementação (obrigatória) de org.crypthing.things.appservice.Sandbox -->
 		</classpath>
+
+		<!--
+			Outros valores passados com -D para a JVM. Opcional.
+			Bibliotecas dependentes de código nativo, como por exemplo o pacote mqx-*.jar e o driver JDBC da Oracle,
+			devem receber uma entrada java.library.path, onde estão definidos a localização das shared libraries
+			acionadas diretamente pela JVM.
+
+			A configuração do log Java deve ser declarada num arquivo de properties conforme descrito em
+			https://docs.oracle.com/javase/7/docs/api/java/util/logging/LogManager.html
+
+			Implementação SSL:
+			<property name="java.security.policy" value="[path]/security.properties" />
+			javax.net.ssl.keyStore
+			javax.net.ssl.keyStorePassword
+			javax.net.ssl.trustStore
+			javax.net.ssl.trustStorePassword
+		-->
 		<properties>
-			<!-- 
-			<property name="java.library.path" value="/home/magut/development/sefipx/mqclient/dist/debug:/home/magut/development/3rdparty/oracle" />
-			Requerido se não estiver em /usr/lib nem LD_LIBRARY_PATH estiver definida -->
+			<property name="java.library.path" value="[diretório de libmqx.so]:[diretório das libs da Oracle]" />
+			<property name="java.util.logging.config.file" value="[path]/logging-*.properties" />
 		</properties>
 	</jvm>
 
-	<!-- Runner -->
+	<!--
+		Implementação de JNDI. Obrigatório.
+		O atributo declara a classe que implementa a interface org.crypthing.things.appservice.BindServices.
+		A presente implementação (contexto em memória) não requer a declaração de um environment.
+		Caso isso venha a ser necessário, a sessão devem conter tantos elementos property quanto necessários.
+		Por exemplo, a implementação da Sun requer uma entrada
+		<property name="java.naming.factory.initial" value="com.sun.jndi.ldap.LdapCtxFactory" />
+	-->
 	<jndi implementation="org.crypthing.things.appservice.ServicesFactory" />
+
+	<!--
+		Configuração das threads de trabalho do aplicativo.
+		O atributo requer a classe que implementa a abstrata org.crypthing.things.appservice.Sandbox
+	-->
 	<worker implementation="br.gov.caixa.mqx.test.BasicBatch">
-	<!-- 
-	<worker implementation="br.gov.caixa.mqx.test.Oktoberfest">
-	<worker implementation="br.gov.caixa.mqx.test.StuffSausage">
-	 -->
 		<threads>10</threads>
 		<restartable>false</restartable>
 		<sleep>2000</sleep>
@@ -66,7 +100,7 @@
 				url="jdbc:oracle:oci:@10.192.230.89:1530:ORADES01"
 				validationQuery="select * from dual">
 			<property name="password" value="zxc1vbn"/>
-			<property name="user-name" value="usr_cns"/>
+			<property name="user" value="usr_cns"/>
 		</jdbc>
 	</datasources>
 

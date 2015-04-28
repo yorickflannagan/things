@@ -2,9 +2,11 @@ package org.crypthing.things.appservice;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
-import java.net.URISyntaxException;
-import java.net.URL;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Properties;
 
@@ -31,6 +33,7 @@ public final class Bootstrap
 	{
 		if (args.length < 1) usage();
 		final File schema = getSchema();
+		final String[] env = getEnv();
 		for (int i = 0; i < args.length; i++)
 		{
 			System.out.print("Loading Runner for " + args[i] + "... ");
@@ -39,8 +42,9 @@ public final class Bootstrap
 				final File config = new File(args[i]);
 				if (!config.exists()) throw new ConfigException("Could not find configuration file " + args[i], new FileNotFoundException());
 				final JVMConfig cfg = getJVMConfig(config, schema);
-				Runtime.getRuntime().exec(getCmdLine(cfg, args[i]));
-				System.out.println("Done!");
+				int exitCode = waitForProcess(Runtime.getRuntime().exec(getCmdLine(cfg, args[i]), env));
+				if (exitCode == 0) System.out.println("Done!");
+				else System.out.println("Failed with exit code " + exitCode);
 			}
 			catch (final Throwable e)
 			{
@@ -58,7 +62,6 @@ public final class Bootstrap
 		System.err.println("\t<config-xml-list>... is a list of at least one service launching configuration XML file.");
 		System.exit(1);
 	}
-
 	private static String getCmdLine(final JVMConfig config, final String arg)
 	{
 		/*
@@ -90,20 +93,57 @@ public final class Bootstrap
 			builder.append(" -D").append(key).append("=").append(source.getProperty(key));
 		}
 	}
-
-	private static final String CONFIG_SCHEMA_PATH = "/org/crypthing/things/appservice/config/config.xsd";
-	static File getSchema() throws ConfigException
+	private static String[] getEnv()
 	{
-		File ret;
-		final URL url = Bootstrap.class.getResource(CONFIG_SCHEMA_PATH);
-		if (url == null) throw new ConfigException("Could not find config schema", new FileNotFoundException());
+		final int size = System.getenv().size();
+		final ArrayList<String> env = new ArrayList<String>(size);
+		final Iterator<String> keys = System.getenv().keySet().iterator();
+		while (keys.hasNext())
+		{
+			final String key = keys.next();
+			env.add(key + "=" + System.getenv(key));
+		}
+		final String[] ret = new String[size];
+		return env.toArray(ret);
+	}
+	private static int waitForProcess(final Process p)
+	{
+		int ret;
 		try
 		{
-			ret = new File(url.toURI());
-			if (!ret.exists()) throw new ConfigException("Could not find config schema", new FileNotFoundException());
+			Thread.sleep(3000);
+			ret = p.exitValue();
 		}
-		catch (final URISyntaxException e) { throw new ConfigException("Could not find config schema", e); }
+		catch (final Throwable e) { ret = 0; }
 		return ret;
+	}
+
+	private static final String CONFIG_SCHEMA_PATH = "config.xsd";
+	static File getSchema() throws ConfigException
+	{
+		final File workaround = new File(CONFIG_SCHEMA_PATH);
+		if (workaround.exists()) workaround.delete();
+		final File ret = new File(CONFIG_SCHEMA_PATH);
+		ret.deleteOnExit();
+		try
+		{
+			final OutputStream out = new FileOutputStream(ret);
+			try
+			{
+				final InputStream in = Bootstrap.class.getResourceAsStream("/" + CONFIG_SCHEMA_PATH);
+				if (in == null) throw new ConfigException("Could not find configuration schema in JAR file");
+				try
+				{
+					final byte[] buffer = new byte[4096];
+					int i;
+					while ((i = in.read(buffer)) != -1) out.write(buffer, 0, i);
+				}
+				finally { in.close(); }
+			}
+			finally { out.close(); }
+			return ret;
+		}
+		catch (final IOException e) { throw new ConfigException("Could not load configuration schema", e); }
 	}
 
 	static JVMConfig getJVMConfig(final File config, final File schema) throws ConfigException

@@ -3,12 +3,12 @@
 	<jvm>
 		<jmx host="10.0.2.15" port="5052" />
 		<classpath>
-			<path>/home/magut/development/sefipx/facilities/eclipse/things/bin/</path>
+			<path>/home/magut/development/sefipx/facilities/eclipse/things/bin</path>
 			<path>/home/magut/development/sefipx/facilities/eclipse/mqx/bin</path>
+			<path>/home/magut/development/sefipx/facilities/eclipse/mqx-test/bin</path>
 			<path>/home/magut/development/3rdparty/commons-digester3-3.2/commons-digester3-3.2-with-deps.jar</path>
 			<path>/home/magut/development/3rdparty/oracle/ojdbc7.jar</path>
 			<path>/home/magut/development/3rdparty/snmp4j-2.3.3/dist/snmp4j-2.3.3.jar</path>
-			<path>/home/magut/development/sefipx/facilities/eclipse/mqx-test/bin</path>
 		</classpath>
 	</jvm>
 
@@ -37,7 +37,7 @@
 				url="jdbc:oracle:oci:@10.192.230.89:1530:ORADES01"
 				validationQuery="select * from dual">
 			<property name="password" value="zxc1vbn"/>
-			<property name="user-name" value="usr_cns"/>
+			<property name="user" value="usr_cns"/>
 		</jdbc>
 	</datasources>
 
