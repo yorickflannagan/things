@@ -23,13 +23,15 @@ public class LogTrapperListener implements LifecycleEventListener, ProcessingEve
 	public void warning(final ProcessingEvent e)
 	{
 		final Logger log = getLogger(e);
-		log.warning(e.getMessage());
+		log.log(Level.WARNING, e.getMessage(), e.getThroable());
 		if (trap != null) trap.send(e.isRelativeOID() ? trap.getRootOID() + "." + e.getOID() : e.getOID(), e.getMessage(), e.getThroable());
 	}
+	
 	@Override
 	public void error(final ProcessingEvent e)
 	{
 		final Logger log = getLogger(e);
+		//TODO: Remover isto.
 		log.log(Level.SEVERE, e.getMessage(), e.getThroable());
 		if (trap != null) trap.send(e.isRelativeOID() ? trap.getRootOID() + "." + e.getOID() : e.getOID(), e.getMessage(), e.getThroable());
 	}

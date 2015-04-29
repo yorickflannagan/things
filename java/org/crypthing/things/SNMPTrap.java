@@ -38,7 +38,7 @@ public class SNMPTrap implements Serializable
 		try
 		{
 			return (SNMPTrap) Class.forName(cfg.getProperty(TRAP_ENTRY))
-					.getConstructor(String.class, String.class, Integer.class, Long.class)
+					.getConstructor(String.class, String.class, int.class, long.class)
 					.newInstance(udpAddress, rootOID, retry, timeout);
 		}
 		catch (final Throwable e) { return new SNMPTrap(udpAddress, rootOID, retry, timeout); }
@@ -92,6 +92,7 @@ public class SNMPTrap implements Serializable
 		vars.put(VAR_JVM_NAME_ENTRY,		new OID(oidRoot + JVM_NAME_RELATIVE_OID));
 		rootOID = oidRoot;
 		comtarget = new CommunityTarget(new UdpAddress(udpAddress), new OctetString("public"));
+		comtarget.setVersion(SnmpConstants.version2c);
 		startTime = ManagementFactory.getRuntimeMXBean().getStartTime();
 		enterprise = new OID(oidRoot + ".0");
 		try { snmp = new Snmp(new DefaultUdpTransportMapping()); }

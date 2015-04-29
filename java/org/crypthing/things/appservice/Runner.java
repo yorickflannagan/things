@@ -50,7 +50,7 @@ implements	RunnerMBean,
 		ReleaseResourceEventDispatcher,
 		InterruptEventDispatcher
 {
-	private class ShutdownHook implements Runnable { @Override public void run() { shutdown(); } }
+	private class ShutdownHook implements Runnable { @Override public void run() { if (!hasShutdown) shutdown(); } }
 	static final String MBEAN_PATTERN = "org.crypthing.things.appservice:type=Runner,name=";
 	private static final Logger log = Logger.getLogger(Runner.class.getName());
 	private static ObjectName mbName;
@@ -64,6 +64,7 @@ implements	RunnerMBean,
 	private long failure;
 	private final ReentrantLock successMutex = new ReentrantLock();
 	private final ReentrantLock failureMutex = new ReentrantLock();
+	private boolean hasShutdown = false;
 
 	public Runner(final RunnerConfig cfg) throws ConfigException
 	{
@@ -124,6 +125,7 @@ implements	RunnerMBean,
 			if (mbName != null) ManagementFactory.getPlatformMBeanServer().unregisterMBean(mbName);
 		}
 		catch (final Throwable e) { pDispatcher.fire(new ProcessingEvent(this, ProcessingEventType.warning, "Error during shutdown", e)); }
+		hasShutdown = true;
 	}
 
 	@Override public long getSuccessCount(){ return success; }
@@ -225,6 +227,7 @@ implements	RunnerMBean,
 		log.log(Level.SEVERE, "Usage: Runner <config-xml>, where\t<config-xml> is the configuration XML file.");
 		System.exit(1);
 	}
+	
 	private static RunnerConfig getConfig(final File config) throws ConfigException
 	{
 		RunnerConfig ret;

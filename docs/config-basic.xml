@@ -14,7 +14,7 @@
 
 	<jndi implementation="org.crypthing.things.appservice.ServicesFactory" />
 	<worker implementation="br.gov.caixa.mqx.test.BasicBatch">
-		<threads>10</threads>
+		<threads>1</threads>
 		<restartable>true</restartable>
 		<sleep>2000</sleep>
 	</worker>

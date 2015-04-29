@@ -31,7 +31,7 @@
 			<path>[path]/things-1.0.0.jar</path>
 			<path>[path]/mqx-0.1.0.jar</path>
 			<path>[path]/commons-digester3-3.2-with-deps.jar</path>
-			<path>[path]snmp4j-2.3.3.jar</path>
+			<path>[path]/snmp4j-2.3.3.jar</path>
 			<path>[path]/ojdbc7.jar</path>			<!-- Utilizando JDBC, é obrigatória a declaração do driver -->
 			<path>[path]/mqx-batch_demo.jar</path>	<!-- Implementação (obrigatória) de org.crypthing.things.appservice.Sandbox -->
 		</classpath>
