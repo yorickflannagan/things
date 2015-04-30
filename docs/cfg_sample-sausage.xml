@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config>
+	<jvm>
+		<jmx host="10.0.2.15" port="5051" />
+		<classpath>
+			<path>/home/magut/development/sefipx/batch-dist/things.jar</path>
+			<path>/home/magut/development/sefipx/batch-dist/mqx.jar</path>
+			<path>/home/magut/development/sefipx/batch-dist/mqx-batch_demo.jar</path>
+			<path>/home/magut/development/sefipx/batch-dist/commons-digester.jar</path>
+			<path>/home/magut/development/sefipx/batch-dist/snmp4j.jar</path>
+		</classpath>
+		<properties>
+			<property name="java.library.path" value="/home/magut/development/sefipx/mqclient/dist/release" />
+			<property name="java.util.logging.config.file" value="/home/magut/development/sefipx/batch-dist/logging-sausage.properties" />
+		</properties>
+	</jvm>
+
+	<jndi implementation="org.crypthing.things.appservice.ServicesFactory" />
+	<worker implementation="br.gov.caixa.mqx.test.StuffSausage">
+		<threads>10</threads>
+		<restartable>true</restartable>
+		<sleep>2000</sleep>
+	</worker>
+
+	<sandbox>
+		<property name="max-put" value="30" />
+	</sandbox>
+
+	<snmp>
+		<property name="org.crypthing.things.SNMPTrap" value="br.gov.caixa.mqx.MQXTrap" />
+		<property name="org.crypthing.things.batch.udpAddress" value="127.0.0.1/8163" />
+		<property name="org.crypthing.things.batch.rootOID" value="0.1.4320" />
+		<property name="org.crypthing.things.batch.retry" value="2" />
+		<property name="org.crypthing.things.batch.timeout" value="5000" />
+	</snmp>
+
+	<mqxconnectors>
+		<mqxconnector name="mqdes" driver="br.gov.caixa.mqx.MQXConnectionImpl">
+			<context>
+				<property name="br.gov.caixa.mqx.address" value="10.192.224.110(1414)" />
+				<property name="br.gov.caixa.mqx.channel" value="RJNT011B.TO.RJD1" />
+				<property name="br.gov.caixa.mqx.manager" value="RJD1" />
+			</context>
+			<queues>
+				<queue name="putgetqueue">
+					<property name="br.gov.caixa.mqx.object" value="LQ.REQ.ICE.TR" />
+					<property name="br.gov.caixa.mqx.input" value="false" />
+					<property name="br.gov.caixa.mqx.convert" value="false" />
+					<property name="br.gov.caixa.mqx.convertMsgId" value="false" />
+					<property name="br.gov.caixa.mqx.convertCorrelId" value="false" />
+				</queue>
+			</queues>
+		</mqxconnector>
+	</mqxconnectors>
+</config>
