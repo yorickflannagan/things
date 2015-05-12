@@ -3,22 +3,18 @@
 	<jvm>
 		<jmx host="10.0.2.15" port="5052" />
 		<classpath>
-			<path>/home/magut/development/sefipx/batch-dist/things.jar</path>
-			<path>/home/magut/development/sefipx/batch-dist/mqx.jar</path>
-			<path>/home/magut/development/sefipx/batch-dist/mqx-batch_demo.jar</path>
-			<path>/home/magut/development/sefipx/batch-dist/commons-digester.jar</path>
-			<path>/home/magut/development/sefipx/batch-dist/snmp4j.jar</path>
+			<path>/home/magut/development/sefipx/facilities/eclipse/things/bin</path>
+			<path>/home/magut/development/sefipx/facilities/eclipse/mqx/bin</path>
+			<path>/home/magut/development/sefipx/facilities/eclipse/mqx-test/bin</path>
+			<path>/home/magut/development/3rdparty/commons-digester3-3.2/commons-digester3-3.2-with-deps.jar</path>
 			<path>/home/magut/development/3rdparty/oracle/ojdbc7.jar</path>
+			<path>/home/magut/development/3rdparty/snmp4j-2.3.3/dist/snmp4j-2.3.3.jar</path>
 		</classpath>
-		<properties>
-			<property name="java.library.path" value="/home/magut/development/sefipx/batch-dist/:/home/magut/development/3rdparty/oracle" />
-			<property name="java.util.logging.config.file" value="/home/magut/development/sefipx/batch-dist/logging-basic.properties" />
-		</properties>
 	</jvm>
 
 	<jndi implementation="org.crypthing.things.appservice.ServicesFactory" />
 	<worker implementation="br.gov.caixa.mqx.test.BasicBatch">
-		<threads>10</threads>
+		<threads>1</threads>
 		<restartable>true</restartable>
 		<sleep>2000</sleep>
 	</worker>

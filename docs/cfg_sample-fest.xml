@@ -10,7 +10,7 @@
 			<path>/home/magut/development/sefipx/batch-dist/snmp4j.jar</path>
 		</classpath>
 		<properties>
-			<property name="java.library.path" value="/home/magut/development/sefipx/mqclient/dist/release" />
+			<property name="java.library.path" value="/home/magut/development/sefipx/batch-dist/" />
 			<property name="java.util.logging.config.file" value="/home/magut/development/sefipx/batch-dist/logging-fest.properties" />
 		</properties>
 	</jvm>

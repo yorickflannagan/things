@@ -4,7 +4,7 @@
 	<xs:element name="config">
 	<xs:complexType>
 	<xs:sequence>
-		<xs:element ref="jvm" minOccurs="0" />
+		<xs:element ref="jvm" />
 		<xs:element ref="jndi" />
 		<xs:element ref="worker" />
 		<xs:element ref="sandbox" minOccurs="0" />

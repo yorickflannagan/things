@@ -1,68 +1,189 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <config>
+	<!--
+		Seção de configuração da JVM de cada aplicativo batch
+		Ver http://docs.oracle.com/javase/7/docs/technotes/tools/windows/java.html
+	-->
 	<jvm>
-		<jmx host="10.0.2.15" port="5052" />
+		<minMemory>[valor]</minMemory>	<!-- Valor do parâmetro -Xms (em megabytes). Opcional. -->
+		<maxMemory>[valor]</maxMemory>	<!-- Valor do parâmetro -Xmx (em megabytes). Opcional. -->
+		<vmflags>[parâmetros]</vmflags>	<!-- Parâmetros de JVM adicionais (-server -Xbatch já são usados internamente). Opcional -->
+
+		<!--
+			Configuração para JMX para comando e controle dos aplicativos. Obrigatório. 
+			Ver http://docs.oracle.com/javase/7/docs/technotes/guides/management/agent.html
+			Os atributos do elemento são obrigatórios e definem o listener JMX deste aplicativo em particular.
+
+			Os elementos internos são opcionais e dependentes dos requisitos para a conexão JMX.
+			As seguintes entradas são incluídas por default e, portanto, não precisam ser declaradas:
+			<property name="com.sun.management.jmxremote.ssl" value="false" />
+			<property name="com.sun.management.jmxremote.authenticate" value="false" />
+		-->
+		<jmx host="[IP/hostname]" port="[porta]" />
+
+		<!--
+			java.class.path requerido pelo serviço. Obrigatório.
+			O pacote things-*.jar e suas dependências commons-digester3-*.jar e snmp4j-*.jar são de declaração obrigatória.
+			Sob Unix, é possível utilizar links simbólicos para os arquivos.
+		-->
 		<classpath>
-			<path>/home/magut/development/sefipx/facilities/eclipse/things/bin</path>
-			<path>/home/magut/development/sefipx/facilities/eclipse/mqx/bin</path>
-			<path>/home/magut/development/sefipx/facilities/eclipse/mqx-test/bin</path>
-			<path>/home/magut/development/3rdparty/commons-digester3-3.2/commons-digester3-3.2-with-deps.jar</path>
-			<path>/home/magut/development/3rdparty/oracle/ojdbc7.jar</path>
-			<path>/home/magut/development/3rdparty/snmp4j-2.3.3/dist/snmp4j-2.3.3.jar</path>
+			<path>[path]/things-1.0.0.jar</path>
+			<path>[path]/commons-digester3-3.2-with-deps.jar</path>
+			<path>[path]/snmp4j-2.3.3.jar</path>
+			<path>[path]/mqx-0.1.0.jar</path>		<!-- No acesso ao MQSeries, é obrigatória a declaração do pacote de implementação do driver -->
+			<path>[path]/ojdbc7.jar</path>			<!-- Utilizando JDBC, é obrigatória a declaração do pacote de implementação do driver -->
+			<path>[path]/mqx-batch_demo.jar</path>	<!-- Pacote de implementação de org.crypthing.things.appservice.Sandbox, isto é, a aplicação de negócio -->
 		</classpath>
+
+		<!--
+			Outros valores passados com -D para a JVM. Opcional.
+			TODO: Implementação SSL:
+			javax.net.ssl.keyStoreType
+			javax.net.ssl.keyStore
+			javax.net.ssl.keyStorePassword
+			javax.net.ssl.trustStoreType
+			javax.net.ssl.trustStore
+			javax.net.ssl.trustStorePassword
+		-->
+		<properties>
+			<!--
+				Bibliotecas dependentes de código nativo. Por exemplo, o pacote mqx-*.jar e o driver JDBC da Oracle,
+				devem receber uma entrada java.library.path, onde é definida a localização das shared libraries
+				acionadas diretamente pela JVM.
+			-->
+			<property name="java.library.path" value="[diretório de libmqx.so]:[diretório das libs da Oracle]" />
+			<!--
+				A configuração do log Java deve ser declarada num arquivo de properties conforme descrito em
+				https://docs.oracle.com/javase/7/docs/api/java/util/logging/LogManager.html. Aqui deve ser declarada
+				a localização deste arquivo.
+			-->
+			<property name="java.util.logging.config.file" value="[path]/logging-*.properties" />
+		</properties>
 	</jvm>
 
+	<!--
+		Implementação de JNDI. Obrigatório.
+		O atributo declara a classe que implementa a interface org.crypthing.things.appservice.BindServices,
+		utilizada para o bind entre URIs e drivers.
+		A presente implementação (contexto em memória) não requer a declaração de um environment e, portanto,
+		não requer a declaração de elementos internos.
+		Caso isso venha a ser necessário, a sessão devem conter tantos elementos property quanto necessários.
+		Por exemplo, a implementação da Sun requer pelo menos uma entrada
+		<property name="java.naming.factory.initial" value="com.sun.jndi.ldap.LdapCtxFactory" />
+	-->
 	<jndi implementation="org.crypthing.things.appservice.ServicesFactory" />
-	<worker implementation="br.gov.caixa.mqx.test.BasicBatch">
-		<threads>1</threads>
-		<restartable>true</restartable>
-		<sleep>2000</sleep>
+
+	<!--
+		Configuração das threads de trabalho do aplicativo.
+		O atributo requer a especificação da classe que implementa a abstrata org.crypthing.things.appservice.Sandbox.
+		Todos os elementos são obrigatórios.
+	-->
+	<worker implementation="[nome qualificado da classe]">
+		<threads>[valor]</threads>				<!-- Quantidade de threads de trabalho -->
+		<restartable>[boolean]</restartable>	<!-- true se a aplicação deve rodar como um daemon -->
+		<sleep>[valor]</sleep>					<!-- Tempo em milissegundos de aguardo entre duas execuções de cada thread -->
 	</worker>
 
+	<!--
+		Configuração personalizada da implementação de org.crypthing.things.appservice.Sandbox. Opcional.
+		Cada aplicação implementada pode ter uma seção diferente.
+	-->
 	<sandbox>
-		<property name="max-commit" value="100" />
+		<property name="[nome da propriedade]" value="[valor]" />
 	</sandbox>
 
+	<!--
+		Configuração SNMP. Opcional.
+		Caso a seção esteja definida, algumas das propriedades serão obrigatórias (ver abaixo).
+	-->
 	<snmp>
-		<property name="org.crypthing.things.SNMPTrap" value="br.gov.caixa.mqx.MQXTrap" />
-		<property name="org.crypthing.things.batch.udpAddress" value="127.0.0.1/8163" />
-		<property name="org.crypthing.things.batch.rootOID" value="0.1.4320" />
-		<property name="org.crypthing.things.batch.retry" value="2" />
-		<property name="org.crypthing.things.batch.timeout" value="5000" />
+		<property name="org.crypthing.things.SNMPTrap" value="br.gov.caixa.mqx.MQXTrap" />	<!-- Implementação SNMP. Obrigatório -->
+		<property name="org.crypthing.things.batch.udpAddress" value="[host/IP]/[porta]" />	<!-- Endereço de destino nas mensagens. Obrigatório -->
+		<property name="org.crypthing.things.batch.rootOID" value="[OID]" />				<!-- OID raiz das mensagens. Obrigatório -->
+		<property name="org.crypthing.things.batch.retry" value="[valor]" />				<!-- Quantidade de tentativas de envio. Opcional -->
+		<property name="org.crypthing.things.batch.timeout" value="[valor]" />				<!-- Timeout do envio. Opcional -->
 	</snmp>
 
+	<!--
+		Configuração JNDI dos data sources utilizados. Opcional.
+	-->
 	<datasources>
-		<jdbc	name="oracns"
-				driver="oracle.jdbc.OracleDriver"
-				url="jdbc:oracle:oci:@10.192.230.89:1530:ORADES01"
-				validationQuery="select * from dual">
-			<property name="password" value="zxc1vbn"/>
-			<property name="user" value="usr_cns"/>
+		<!--
+			Configuração do data source específico.
+			O lookup JNDI deve ser feito pela URI "java:jdbc/[nome arbitrário].
+			Os seguintes atributos podem ser utilizados:
+			name: nome arbitrário do data source para o lookup JNDI; por exemplo, orades. Obrigatório.
+			driver: driver JDBC utilizado; por exemplo, oracle.jdbc.OracleDriver. Obrigatório.
+			url: string de conexão requerida pelo driver; por exemplo, jdbc:oracle:oci:@10.192.230.89:1530:ORADES01. Obrigatório.
+			validationQuery: comando SQL utilizado para testar a sanidade da conexão; por exemplo, select * from dual. Opcional.
+			Se este atributo não estiver definido, é utilizada a estratégia de atribuir seguidamente o auto-commit.
+		-->
+		<jdbc name="[nome arbitrário]" driver="[driver utilizado]" url="[string de conexão]" validationQuery="[comando SQL]">
+			<!--
+				Os elementos internos são dependentes do banco de dados. Por exemplo, a autenticação no Oracle requer,
+				obrigatoriamente as propriedades ilustradas abaixo, exatamente com os nomes apontados.
+			-->
+			<property name="user" value="[usuário]"/>
+			<property name="password" value="[senha]"/>
 		</jdbc>
 	</datasources>
 
+	<!--
+		Configuração JNDI dos conectores utilizados. Opcional.
+	-->
 	<mqxconnectors>
-		<mqxconnector name="mqdes" driver="br.gov.caixa.mqx.MQXConnectionImpl">
+		<!--
+			Configuração do conector MQSeries.
+			O lookup JNDI deve ser feito pela URI "java:mqx/[nome arbitrário].
+			Os atributos são obrigatórios, a saber:
+			name: nome arbitrário para o lookup JNDI; por exemplo, mqdes.
+			driver: driver utilizado para acesso. Obrigatório.
+		-->
+		<mqxconnector name="[nome arbitrário]" driver="br.gov.caixa.mqx.MQXConnectionImpl">
+			<!--
+				Contexto requerido para a conexão com o servidor alvo. Obrigatório.
+			-->
 			<context>
-				<property name="br.gov.caixa.mqx.address" value="10.192.224.110(1414)" />
-				<property name="br.gov.caixa.mqx.channel" value="RJNT011B.TO.RJD1" />
-				<property name="br.gov.caixa.mqx.manager" value="RJD1" />
+				<!--
+					Os elementos contidos são dependentes do driver utilizado. No caso do conector
+					br.gov.caixa.mqx.MQXConnectionImpl para acesso ao MQSeries, as seguintes propriedades são obrigatórias:
+				-->
+				<property name="br.gov.caixa.mqx.address" value="[IP(porta)]" />	<!-- Endereço do listener MQSeries -->
+				<property name="br.gov.caixa.mqx.channel" value="[canal]" />		<!-- Nome do canal a ser utilizado -->
+				<property name="br.gov.caixa.mqx.manager" value="[manager]" />		<!-- Nome do queue manager a ser utilizado -->
 			</context>
+			<!--
+				Definição das filas a serem utilizadas pelo conector. Obrigatório.
+				A seção deve conter pelo menos uma definição de fila.
+			-->
 			<queues>
-				<queue name="getqueue">
-					<property name="br.gov.caixa.mqx.object" value="LQ.REQ.ICE.TR" />
-					<property name="br.gov.caixa.mqx.input" value="true" />
-					<property name="br.gov.caixa.mqx.convert" value="false" />
-					<property name="br.gov.caixa.mqx.convertMsgId" value="false" />
-					<property name="br.gov.caixa.mqx.convertCorrelId" value="false" />
-					<property name="br.gov.caixa.mqx.msgMaxLen" value="1024" />
-				</queue>
-				<queue name="putqueue">
-					<property name="br.gov.caixa.mqx.object" value="LQ.RSP.CNS.AUDIT" />
-					<property name="br.gov.caixa.mqx.input" value="false" />
-					<property name="br.gov.caixa.mqx.convert" value="false" />
-					<property name="br.gov.caixa.mqx.convertMsgId" value="false" />
-					<property name="br.gov.caixa.mqx.convertCorrelId" value="false" />
+				<!--
+					Definição de acesso a uma fila. O atributo name é obrigatório e representa
+					um nome arbitrário utilizado internamente pela aplicação.
+				-->
+				<queue name="[nome arbitrário]">
+					<!-- 
+						Os elementos contidos são dependentes do driver utilizado. No caso do conector
+						br.gov.caixa.mqx.MQXConnectionImpl para acesso ao MQSeries, as propriedades a seguir são obrigatórias.
+						Note que br.gov.caixa.mqx.input deve ser true se a fila for utilizada para GET; para PUT utilize false.
+						Se esta propriedade estiver marcada como true a propriedade br.gov.caixa.mqx.msgMaxLen, referente ao
+						tamanho mínimo do buffer de mensagens recebidas deve obrigatOriamente conter um valor; caso contrário,
+						ela não deve estar presente.
+						
+						A propriedade br.gov.caixa.mqx.convert deve conter um valor true somente no caso de ser requerida
+						a conversão das mensagens de UTF-8 para EBCDIC (e vice-versa). Atenção: o driver
+						br.gov.caixa.mqx.MQXConnectionImpl somente utiliza encoding UTF-8!
+
+						As propriedades br.gov.caixa.mqx.convertMsgId e br.gov.caixa.mqx.convertCorrelId somente devem conter
+						valor true se a aplicação desejar gerar ela mesma os atributos MsgId e CorrelId e, além disso,
+						precisar que tais valores recebam a conversão de encoding.
+					-->
+					<property name="br.gov.caixa.mqx.object" value="[nome da fila]" />
+					<property name="br.gov.caixa.mqx.input" value="[boolean]" />
+					<property name="br.gov.caixa.mqx.convert" value="[boolean]" />
+					<property name="br.gov.caixa.mqx.convertMsgId" value="[boolean]" />
+					<property name="br.gov.caixa.mqx.convertCorrelId" value="[boolean]" />
+					<property name="br.gov.caixa.mqx.msgMaxLen" value="[valor]" />
 				</queue>
 			</queues>
 		</mqxconnector>
