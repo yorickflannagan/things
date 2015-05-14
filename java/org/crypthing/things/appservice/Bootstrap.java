@@ -67,8 +67,9 @@ public final class Bootstrap
 		/*
 		 * see http://docs.oracle.com/cd/E26576_01/doc.312/e24936/tuning-java.htm#GSPTG00069
 		 */
+		final String filesep = System.getProperty("file.separator", "/");
 		final StringBuilder builder = new StringBuilder(256);
-		builder.append(System.getProperty("java.home")).append("/bin/");
+		builder.append(System.getProperty("java.home")).append(filesep).append("bin").append(filesep);
 		builder.append(System.getProperty("os.name", "").toLowerCase().indexOf("win") >= 0 ? "java.exe" : "java");
 		builder.append(" -server -Xbatch");
 		if (config.getMinMemory() > 0) builder.append(" -Xms").append(config.getMinMemory()).append("m");
