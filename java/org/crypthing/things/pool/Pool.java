@@ -21,6 +21,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Logger;
 
 import org.crypthing.things.DaemonThreadFactory;
@@ -53,6 +54,7 @@ public final class Pool<P> extends Overseer<Pool<P>, Pool<P>>
 	private ScheduledExecutorService service;
 	private boolean interrupted = false;
 	private boolean interruptAsSoonPossible = false;
+	private final ReentrantLock mutex = new ReentrantLock();
 
 
 	/**
@@ -232,10 +234,10 @@ public final class Pool<P> extends Overseer<Pool<P>, Pool<P>>
 	 */
 	public P borrow() throws PoolOverflowException
 	{
-		synchronized (this)
-		{
-			if (interrupted || interruptAsSoonPossible) throw new PoolOverflowException("Cannot borrow an interrupted pool");
-		}
+		final ReentrantLock mutex = this.mutex;
+		mutex.lock();
+		try { if (interrupted || interruptAsSoonPossible) throw new PoolOverflowException("Cannot borrow an interrupted pool"); }
+		finally { mutex.unlock(); }
 		P ret = null;
 		if (stack.size() == 0)
 		{
@@ -283,7 +285,9 @@ public final class Pool<P> extends Overseer<Pool<P>, Pool<P>>
 	@Override
 	public void interrupt()
 	{
-		synchronized (this)
+		final ReentrantLock mutex = this.mutex;
+		mutex.lock();
+		try
 		{
 			if (interrupted) return;
 			if (stack.isFull())
@@ -297,6 +301,7 @@ public final class Pool<P> extends Overseer<Pool<P>, Pool<P>>
 			}
 			else interruptAsSoonPossible = true;
 		}
+		finally { mutex.unlock(); }
 	}
 	
 	public ExecutionState getStatus()

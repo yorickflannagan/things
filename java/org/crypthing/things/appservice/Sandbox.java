@@ -21,21 +21,19 @@ public abstract class Sandbox extends Thread implements ShutdownEventDispatcher,
 	private ShutdownEventListener shutdownListner;
 	private LifecycleEventDispatcher lcDispatcher;
 	private ProcessingEventDispatcher pDispatcher;
-	private BillingEventListener billingListener;
+	private long iSuccess = 0, iFailure = 0;
 
 	final void startup
 	(
 		final WorkerConfig config,
 		final LifecycleEventDispatcher lcDispatcher,
-		final ProcessingEventDispatcher pDispatcher,
-		final BillingEventListener billing
+		final ProcessingEventDispatcher pDispatcher
 	) throws ConfigException
 	{
 		sleeptime = config.getSleep();
 		isRestartable = config.isRestartable();
 		this.lcDispatcher = lcDispatcher;
 		this.pDispatcher = pDispatcher;
-		billingListener = billing;
 	}
 
 	@Override public void setShutdownEventListener(final ShutdownEventListener listener) { this.shutdownListner = listener; }
@@ -66,7 +64,7 @@ public abstract class Sandbox extends Thread implements ShutdownEventDispatcher,
 		catch (final Throwable e)
 		{
 			pDispatcher.fire(new ProcessingEvent(this, ProcessingEventType.error, "Unhandled exception received", e));
-			billingListener.incFailure();
+			iFailure++;
 			shutdownListner.abort(this);
 		}
 		lcDispatcher.fire(new LifecycleEvent(this, LifecycleEventType.stop,  "Sandbox thread " + getId() + "has ended"));
@@ -76,9 +74,12 @@ public abstract class Sandbox extends Thread implements ShutdownEventDispatcher,
 	protected void fire(final LifecycleEvent evt) { if (evt != null) lcDispatcher.fire(evt); }
 	protected void fire(final ProcessingEvent evt) { if (evt != null) pDispatcher.fire(evt); }
 	protected boolean isRunning () { return running; }
-	protected void success() { billingListener.incSuccess(); }
-	protected void failure() { billingListener.incFailure(); }
 
+	protected void success() { iSuccess++; }
+	protected void failure() { iFailure++; }
+	long getSuccess() { return iSuccess; }
+	long getFailure() { return iFailure; }
+	
 	public void startup(final Properties props) throws ConfigException {}
 	void release() {}
 	protected abstract boolean execute() throws IOException, SQLException;

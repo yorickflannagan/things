@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
-import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -46,7 +45,6 @@ import org.xml.sax.SAXException;
 public final class Runner
 implements	RunnerMBean,
 		ShutdownEventListener,
-		BillingEventListener,
 		ReleaseResourceEventDispatcher,
 		InterruptEventDispatcher
 {
@@ -60,11 +58,8 @@ implements	RunnerMBean,
 	private final Set<InterruptEventListener> interruptListeners;
 	private final LifecycleEventDispatcher lcDispatcher;
 	private final ProcessingEventDispatcher pDispatcher;
-	private long success;
-	private long failure;
-	private final ReentrantLock successMutex = new ReentrantLock();
-	private final ReentrantLock failureMutex = new ReentrantLock();
 	private boolean hasShutdown = false;
+	private Sandbox[] workers;
 
 	public Runner(final RunnerConfig cfg) throws ConfigException
 	{
@@ -84,7 +79,8 @@ implements	RunnerMBean,
 	{
 		try
 		{
-			for (int i = 0, threads = config.getWorker().getThreads(); i < threads; i++) newWorker();
+			workers = new Sandbox[config.getWorker().getThreads()];
+			for (int i = 0, threads = config.getWorker().getThreads(); i < threads; i++) workers[i] = newWorker();
 			lcDispatcher.fire(new LifecycleEvent(this, LifecycleEventType.start, "Runner initialization succeeded"));
 		}
 		catch (final Throwable e)
@@ -94,14 +90,15 @@ implements	RunnerMBean,
 		}
 	}
 
-	private void newWorker() throws InstantiationException, IllegalAccessException, ClassNotFoundException, ConfigException
+	private Sandbox newWorker() throws InstantiationException, IllegalAccessException, ClassNotFoundException, ConfigException
 	{
 		final Sandbox worker = (Sandbox) Class.forName(config.getWorker().getImpl()).newInstance();
 		worker.setShutdownEventListener(this);
 		addInterruptEventListener(worker);
-		worker.startup(config.getWorker(), lcDispatcher, pDispatcher, this);
+		worker.startup(config.getWorker(), lcDispatcher, pDispatcher);
 		worker.startup(config.getSandbox());
 		worker.start();
+		return worker;
 	}
 
 	/*
@@ -128,26 +125,19 @@ implements	RunnerMBean,
 		hasShutdown = true;
 	}
 
-	@Override public long getSuccessCount(){ return success; }
-	@Override public long getErrorCount() { return failure; }
-
-	/*
-	 * BillingEventListener
-	 * * * * * * * * * * * * * * * * * * * *
-	 */
-	@Override public void incSuccess()
+	@Override public long getSuccessCount()
 	{
-		final ReentrantLock mutex = this.successMutex;
-		mutex.lock();
-		success++;
-		mutex.unlock();
+		if (workers == null) return -1;
+		long success = 0;
+		for (int i = 0; i < workers.length; i++) success += workers[i].getSuccess();
+		return success;
 	}
-	@Override public void incFailure()
+	@Override public long getErrorCount()
 	{
-		final ReentrantLock mutex = this.failureMutex;
-		mutex.lock();
-		failure++;
-		mutex.unlock();
+		if (workers == null) return -1;
+		long failure = 0;
+		for (int i = 0; i < workers.length; i++) failure += workers[i].getFailure();
+		return failure;
 	}
 
 	/*

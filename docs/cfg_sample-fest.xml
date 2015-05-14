@@ -8,9 +8,13 @@
 			<path>/home/magut/development/sefipx/batch-dist/mqx-batch_demo.jar</path>
 			<path>/home/magut/development/sefipx/batch-dist/commons-digester.jar</path>
 			<path>/home/magut/development/sefipx/batch-dist/snmp4j.jar</path>
+			<path>/opt/mqm/java/lib/com.ibm.mq.jar</path>
 		</classpath>
 		<properties>
+			<property name="java.library.path" value="/home/magut/development/sefipx/batch-dist/:/opt/mqm/java/lib/" />
+			<!--
 			<property name="java.library.path" value="/home/magut/development/sefipx/batch-dist/" />
+			-->
 			<property name="java.util.logging.config.file" value="/home/magut/development/sefipx/batch-dist/logging-fest.properties" />
 		</properties>
 	</jvm>
@@ -31,14 +35,24 @@
 	</snmp>
 
 	<mqxconnectors>
+		<!--
+		<mqxconnector name="mqdes" driver="br.gov.caixa.mqx.test.IBMConnectorImpl">
+		-->
 		<mqxconnector name="mqdes" driver="br.gov.caixa.mqx.MQXConnectionImpl">
 			<context>
 				<property name="br.gov.caixa.mqx.address" value="10.192.224.110(1414)" />
+			<!--
+				<property name="br.gov.caixa.mqx.address" value="10.192.224.110" />
+				-->
 				<property name="br.gov.caixa.mqx.channel" value="RJNT011B.TO.RJD1" />
 				<property name="br.gov.caixa.mqx.manager" value="RJD1" />
 			</context>
 			<queues>
 				<queue name="getputqueue">
+				
+					<!--
+					<property name="br.gov.caixa.mqx.object" value="LQ.REQ.ICE.TR" />
+					-->
 					<property name="br.gov.caixa.mqx.object" value="LQ.RSP.CNS.AUDIT" />
 					<property name="br.gov.caixa.mqx.input" value="true" />
 					<property name="br.gov.caixa.mqx.convert" value="false" />

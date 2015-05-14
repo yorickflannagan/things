@@ -21,6 +21,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -40,6 +41,7 @@ public final class EventConsumer<P, M> implements Interruptible, Serializable, R
 	private LinkedBlockingQueue<QueuedEvent<P>> queue;
 	private final EventProcessorFactory<P, M> factory;
 	private boolean isRunning = true;
+	private final ReentrantLock mutex = new ReentrantLock();
 
 
 	public EventConsumer(final EventProcessorFactory<P, M> factory)
@@ -88,10 +90,10 @@ public final class EventConsumer<P, M> implements Interruptible, Serializable, R
 	 */
 	public void interrupt()
 	{
-		synchronized (this)
-		{
-			isRunning = false;
-		}
+		final ReentrantLock mutex = this.mutex;
+		mutex.lock();
+		isRunning = false;
+		mutex.unlock();
 		final QueuedEvent<P> event = new QueuedEvent<P>()
 		{
 			private static final long serialVersionUID = 5284524332768520239L;
