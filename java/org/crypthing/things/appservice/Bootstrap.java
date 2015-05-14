@@ -47,14 +47,16 @@ public final class Bootstrap
 				System.out.print("***************\nwith command line: [");
 				System.out.print(cmd);
 				System.out.println("]");
+
 				final Process pid = Runtime.getRuntime().exec(cmd, env);
+				int exitCode = waitForProcess(pid);
+
 				String out = readFully(pid.getErrorStream());
 				System.out.println("***************\nError output:");
 				System.out.println(out);
 				out = readFully(pid.getInputStream());
 				System.out.println("***************\nDefault output:");
 				System.out.println(out);
-				int exitCode = waitForProcess(pid);
 				if (exitCode == 0) System.out.println("***************\nDone!\n");
 				else System.out.println("***************\nFailed with exit code " + exitCode + "\n");
 			}
@@ -74,7 +76,7 @@ public final class Bootstrap
 		final InputStreamReader reader = new InputStreamReader(stream);
 		final StringBuilder builder = new StringBuilder(512);
 		int i;
-		try { while ((i = reader.read(buffer)) > 0) builder.append(buffer, 0, i); }
+		try { while (stream.available() > 0 && (i = reader.read(buffer)) > 0) builder.append(buffer, 0, i); }
 		catch (final Exception e) {}
 		return builder.toString();
 	}
