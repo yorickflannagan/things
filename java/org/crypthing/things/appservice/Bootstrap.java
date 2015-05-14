@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -36,15 +37,26 @@ public final class Bootstrap
 		final String[] env = getEnv();
 		for (int i = 0; i < args.length; i++)
 		{
-			System.out.print("Loading Runner for " + args[i] + "... ");
+			System.out.println("Loading Runner for " + args[i] + "... ");
 			try
 			{
 				final File config = new File(args[i]);
 				if (!config.exists()) throw new ConfigException("Could not find configuration file " + args[i], new FileNotFoundException());
 				final JVMConfig cfg = getJVMConfig(config, schema);
-				int exitCode = waitForProcess(Runtime.getRuntime().exec(getCmdLine(cfg, args[i]), env));
-				if (exitCode == 0) System.out.println("Done!");
-				else System.out.println("Failed with exit code " + exitCode);
+				final String cmd = getCmdLine(cfg, args[i]);
+				System.out.print("***************\nwith command line: [");
+				System.out.print(cmd);
+				System.out.println("]");
+				final Process pid = Runtime.getRuntime().exec(cmd, env);
+				String out = readFully(pid.getErrorStream());
+				System.out.println("***************\nError output:");
+				System.out.println(out);
+				out = readFully(pid.getInputStream());
+				System.out.println("***************\nDefault output:");
+				System.out.println(out);
+				int exitCode = waitForProcess(pid);
+				if (exitCode == 0) System.out.println("***************\nDone!\n");
+				else System.out.println("***************\nFailed with exit code " + exitCode + "\n");
 			}
 			catch (final Throwable e)
 			{
@@ -55,6 +67,16 @@ public final class Bootstrap
 				usage();
 			}
 		}
+	}
+	private static String readFully(final InputStream stream)
+	{
+		final char[] buffer = new char[128];
+		final InputStreamReader reader = new InputStreamReader(stream);
+		final StringBuilder builder = new StringBuilder(512);
+		int i;
+		try { while ((i = reader.read(buffer)) > 0) builder.append(buffer, 0, i); }
+		catch (final Exception e) {}
+		return builder.toString();
 	}
 	private static void usage()
 	{
