@@ -14,9 +14,6 @@ import javax.management.ObjectName;
 import javax.naming.Binding;
 import javax.naming.InitialContext;
 import javax.naming.NamingEnumeration;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.commons.digester3.Digester;
 import org.crypthing.things.SNMPTrap;
@@ -221,13 +218,8 @@ implements	RunnerMBean,
 	private static RunnerConfig getConfig(final File config) throws ConfigException
 	{
 		RunnerConfig ret;
-		final DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-		dbf.setValidating(false);
 		try
 		{
-			final DocumentBuilder doc = dbf.newDocumentBuilder();
-			doc.parse(config);
-
 			final Digester digester = new Digester();
 			digester.setValidating(false);
 			digester.addObjectCreate("config", RunnerConfig.class);
@@ -281,7 +273,7 @@ implements	RunnerMBean,
 			if ((ret = digester.parse(config)) == null) throw new ConfigException("Unexpected error: could not set configuration map");
 			return ret;
 		}
-		catch (SAXException | ParserConfigurationException | IOException e)
+		catch (SAXException | IOException e)
 		{
 			throw new ConfigException("Invalid XML configuration file", e);
 		}
