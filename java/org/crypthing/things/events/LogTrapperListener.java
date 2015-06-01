@@ -15,24 +15,20 @@ public class LogTrapperListener implements LifecycleEventListener, ProcessingEve
 	@Override
 	public void info(final ProcessingEvent e)
 	{
-		final Logger log = getLogger(e);
-		log.info(e.getMessage());
+		getLogger(e).info(e.getMessage());
 		if (trap != null) trap.send(e.isRelativeOID() ? trap.getRootOID() + "." + e.getOID() : e.getOID(), e.getMessage(), e.getThroable());
 	}
 	@Override
 	public void warning(final ProcessingEvent e)
 	{
-		final Logger log = getLogger(e);
-		log.log(Level.WARNING, e.getMessage(), e.getThroable());
+		getLogger(e).log(Level.WARNING, e.getMessage(), e.getThroable());
 		if (trap != null) trap.send(e.isRelativeOID() ? trap.getRootOID() + "." + e.getOID() : e.getOID(), e.getMessage(), e.getThroable());
 	}
 	
 	@Override
 	public void error(final ProcessingEvent e)
 	{
-		final Logger log = getLogger(e);
-		//TODO: Remover isto.
-		log.log(Level.SEVERE, e.getMessage(), e.getThroable());
+		getLogger(e).log(Level.SEVERE, e.getMessage(), e.getThroable());
 		if (trap != null) trap.send(e.isRelativeOID() ? trap.getRootOID() + "." + e.getOID() : e.getOID(), e.getMessage(), e.getThroable());
 	}
 	@Override
@@ -45,15 +41,13 @@ public class LogTrapperListener implements LifecycleEventListener, ProcessingEve
 	@Override
 	public void work(final LifecycleEvent e)
 	{
-		final Logger log = getLogger(e);
-		log.info(e.getMessage());
+		getLogger(e).info(e.getMessage());
 		if (trap != null) trap.send(e.isRelativeOID() ? trap.getRootOID() + "." + e.getOID() : e.getOID(), e.getMessage(), null);
 	}
 	@Override
 	public void stop(final LifecycleEvent e)
 	{
-		final Logger log = getLogger(e);
-		log.info(e.getMessage());
+		getLogger(e).info(e.getMessage());
 		if (trap != null) trap.send(e.isRelativeOID() ? trap.getRootOID() + "." + e.getOID() : e.getOID(), e.getMessage(), null);
 	}
 	private Logger getLogger(final Event e)
