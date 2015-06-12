@@ -2,6 +2,9 @@
 <!--
 	Requires gtx-env
 	for debug call DEBUG=1
+	Required environment:
+		JDIGESTER_JAR: JDigester
+		JSNMP_JAR: SNMP4J
 -->
 <project basedir = "." default = "build" name = "things">
 	<target name = "init">
