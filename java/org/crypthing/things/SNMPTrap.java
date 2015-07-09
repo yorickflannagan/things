@@ -37,7 +37,7 @@ public class SNMPTrap implements Serializable
 		final long timeout = getLongValue(cfg.getProperty(TIMEOUT_ENTRY), 5000);
 		try
 		{
-			return (SNMPTrap) Class.forName(cfg.getProperty(TRAP_ENTRY))
+			return (SNMPTrap) Thread.currentThread().getContextClassLoader().loadClass(cfg.getProperty(TRAP_ENTRY))
 					.getConstructor(String.class, String.class, int.class, long.class)
 					.newInstance(udpAddress, rootOID, retry, timeout);
 		}
