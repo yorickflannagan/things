@@ -19,15 +19,13 @@ import org.apache.commons.digester3.Digester;
 import org.crypthing.things.SNMPTrap;
 import org.crypthing.things.appservice.config.ConfigException;
 import org.crypthing.things.appservice.config.ConfigProperties;
-import org.crypthing.things.appservice.config.ConnectorConfigFactory;
 import org.crypthing.things.appservice.config.ConnectorsConfig;
 import org.crypthing.things.appservice.config.DataSourcesConfig;
 import org.crypthing.things.appservice.config.JDBCConfigFactory;
 import org.crypthing.things.appservice.config.JNDIConfig;
-import org.crypthing.things.appservice.config.JNDIConfigFactory;
 import org.crypthing.things.appservice.config.Property;
-import org.crypthing.things.appservice.config.QueueConfigFactory;
 import org.crypthing.things.appservice.config.RunnerConfig;
+import org.crypthing.things.appservice.config.SNMPConfig;
 import org.crypthing.things.appservice.config.WorkerConfigFactory;
 import org.crypthing.things.events.LifecycleEvent;
 import org.crypthing.things.events.LifecycleEvent.LifecycleEventType;
@@ -230,23 +228,15 @@ implements	RunnerMBean,
 			digester.addBeanPropertySetter("config/worker/sleep", "sleep");
 			digester.addSetNext("config/worker", "setWorker");
 
-			digester.addFactoryCreate("config/jndi", JNDIConfigFactory.class);
-			digester.addObjectCreate("config/jndi/environment/property", Property.class);
-			digester.addSetProperties("config/jndi/environment/property");
-			digester.addSetNext("config/jndi/environment/property", "add");
-			digester.addSetNext("config/jndi", "setJndi");
-			
+			JNDIConfig.setConfig(digester, "config", "setJndi");
+
 			digester.addObjectCreate("config/sandbox", ConfigProperties.class);
 			digester.addObjectCreate("config/sandbox/property", Property.class);
 			digester.addSetProperties("config/sandbox/property");
 			digester.addSetNext("config/sandbox/property", "add");
 			digester.addSetNext("config/sandbox", "setSandbox");
 			
-			digester.addObjectCreate("config/snmp", ConfigProperties.class);
-			digester.addObjectCreate("config/snmp/property", Property.class);
-			digester.addSetProperties("config/snmp/property");
-			digester.addSetNext("config/snmp/property", "add");
-			digester.addSetNext("config/snmp", "setSnmp");
+			SNMPConfig.setConfig(digester, "config", "setSnmp");
 			
 			digester.addObjectCreate("config/datasources", DataSourcesConfig.class);
 			digester.addFactoryCreate("config/datasources/jdbc", JDBCConfigFactory.class);
@@ -256,20 +246,8 @@ implements	RunnerMBean,
 			digester.addSetNext("config/datasources/jdbc", "addJDBC");
 			digester.addSetNext("config/datasources", "setDatasources");
 
-			digester.addObjectCreate("config/mqxconnectors", ConnectorsConfig.class);
-			digester.addFactoryCreate("config/mqxconnectors/mqxconnector", ConnectorConfigFactory.class);
-			digester.addObjectCreate("config/mqxconnectors/mqxconnector/context", ConfigProperties.class);
-			digester.addObjectCreate("config/mqxconnectors/mqxconnector/context/property", Property.class);
-			digester.addSetProperties("config/mqxconnectors/mqxconnector/context/property");
-			digester.addSetNext("config/mqxconnectors/mqxconnector/context/property", "add");
-			digester.addSetNext("config/mqxconnectors/mqxconnector/context", "setContext");
-			digester.addFactoryCreate("config/mqxconnectors/mqxconnector/queues/queue", QueueConfigFactory.class);
-			digester.addObjectCreate("config/mqxconnectors/mqxconnector/queues/queue/property", Property.class);
-			digester.addSetProperties("config/mqxconnectors/mqxconnector/queues/queue/property");
-			digester.addSetNext("config/mqxconnectors/mqxconnector/queues/queue/property", "add");
-			digester.addSetNext("config/mqxconnectors/mqxconnector/queues/queue", "add");
-			digester.addSetNext("config/mqxconnectors/mqxconnector", "add");
-			digester.addSetNext("config/mqxconnectors", "setConnectors");
+			ConnectorsConfig.setConfig(digester, "config", "setConnectors");
+
 			if ((ret = digester.parse(config)) == null) throw new ConfigException("Unexpected error: could not set configuration map");
 			return ret;
 		}

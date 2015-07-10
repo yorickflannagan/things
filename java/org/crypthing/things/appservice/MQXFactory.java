@@ -18,6 +18,7 @@ import org.crypthing.things.messaging.MQXConnection;
 import org.crypthing.things.messaging.MQXConnectionException;
 import org.crypthing.things.messaging.MQXIllegalArgumentException;
 import org.crypthing.things.messaging.MQXIllegalStateException;
+import org.crypthing.things.messaging.MQXMessage;
 import org.crypthing.things.messaging.MQXQueue;
 
 public class MQXFactory extends Reference implements ResourceProvider, ReleaseResourceListener
@@ -105,6 +106,11 @@ public class MQXFactory extends Reference implements ResourceProvider, ReleaseRe
 			final QueueConfig qCfg = config.get(name);
 			if (qCfg == null) throw new MQXIllegalArgumentException("Queue name not found");
 			return conn.openQueue(qCfg);
+		}
+		@Override
+		public MQXMessage call(final String putQueue, final String getQueue, final MQXMessage msg, final int timeout) throws MQXIllegalStateException, MQXIllegalArgumentException, MQXConnectionException
+		{
+			return conn.call(putQueue, getQueue, msg, timeout);
 		}
 	}
 }

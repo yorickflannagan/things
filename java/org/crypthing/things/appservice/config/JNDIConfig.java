@@ -1,7 +1,18 @@
 package org.crypthing.things.appservice.config;
 
+import org.apache.commons.digester3.Digester;
+
 public class JNDIConfig extends ConfigProperties
 {
+	public static void setConfig(final Digester digester, final String xmlPath, final String setMethod)
+	{
+		digester.addFactoryCreate(xmlPath + "/jndi", JNDIConfigFactory.class);
+		digester.addObjectCreate(xmlPath + "/jndi/environment/property", Property.class);
+		digester.addSetProperties(xmlPath + "/jndi/environment/property");
+		digester.addSetNext(xmlPath + "/jndi/environment/property", "add");
+		if (setMethod != null) digester.addSetNext(xmlPath + "/jndi", setMethod);
+	}
+
 	private static final long serialVersionUID = -5641513766776895743L;
 	private String implementation;
 	public JNDIConfig(final String impl) { implementation = impl; }
