@@ -108,9 +108,9 @@ public class MQXFactory extends Reference implements ResourceProvider, ReleaseRe
 			return conn.openQueue(qCfg);
 		}
 		@Override
-		public MQXMessage call(final String putQueue, final String getQueue, final MQXMessage msg, final int timeout) throws MQXIllegalStateException, MQXIllegalArgumentException, MQXConnectionException
+		public MQXMessage call(final String putQueue, int expire, final String getQueue, final MQXMessage msg, final int timeout) throws MQXIllegalStateException, MQXIllegalArgumentException, MQXConnectionException
 		{
-			return conn.call(putQueue, getQueue, msg, timeout);
+			return conn.call(putQueue, expire, getQueue, msg, timeout);
 		}
 	}
 }

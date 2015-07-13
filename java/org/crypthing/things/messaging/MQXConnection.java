@@ -11,6 +11,7 @@ public interface MQXConnection
 	void begin() throws MQXConnectionException;
 	void commit() throws MQXConnectionException;
 	void back() throws MQXConnectionException;
-	MQXMessage call(String putQueue, String getQueue, MQXMessage msg, int timeout) throws MQXIllegalStateException, MQXIllegalArgumentException, MQXConnectionException;
+	// TODO: Must receive expiration time (in tenths of a second)
+	MQXMessage call(String putQueue, int expire, String getQueue, MQXMessage msg, int timeout) throws MQXIllegalStateException, MQXIllegalArgumentException, MQXConnectionException;
 	boolean isValid();
 }
