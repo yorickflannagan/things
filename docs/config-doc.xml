@@ -82,6 +82,7 @@
 		<threads>[valor]</threads>				<!-- Quantidade de threads de trabalho -->
 		<restartable>[boolean]</restartable>	<!-- true se a aplicação deve rodar como um daemon -->
 		<sleep>[valor]</sleep>					<!-- Tempo em milissegundos de aguardo entre duas execuções de cada thread -->
+		<heartbeat>60000</heartbeat>			<!-- Intervalo em milissegundos entre dois sinais de heartbeat -->
 	</worker>
 
 	<!--
@@ -184,6 +185,22 @@
 					<property name="br.gov.caixa.mqx.convertMsgId" value="[boolean]" />
 					<property name="br.gov.caixa.mqx.convertCorrelId" value="[boolean]" />
 					<property name="br.gov.caixa.mqx.msgMaxLen" value="[valor]" />
+
+					<!-- 
+						Integração ao Barramento Caixa
+						Configuração requerida para as filas de PUT (br.gov.caixa.mqx.input = false):
+							put.timeout: tempo máximo (em milissegundos) de aguardo pelo envio da requisição. Default: 4000
+							put.expire: tempo (em décimos de segundo) máximo de vida da requisição na fila MQ. Default: 800
+						Configuração requerida para as filas de GET (br.gov.caixa.mqx.input = true):
+							get.timeout: tempo máximo de aguardo (em milissegundos) pela recepção da mensagem de resposta. Default 4000
+							pool.size: tamanho máximo do pool de conexões à fila de GET. Default: 5
+							pool.timeout: tempo máximo (em milissegundos) de aguardo pela obtenção de uma conexão do pool. Default: 4000
+					-->
+					<property name="br.gov.caixa.mqx.put.timeout" value="[valor]" />
+					<property name="br.gov.caixa.mqx.put.expire" value="[valor]" />
+					<property name="br.gov.caixa.mqx.get.timeout" value="[valor]" />
+					<property name="br.gov.caixa.mqx.pool.size" value="[valor]" />
+					<property name="br.gov.caixa.mqx.pool.timeout" value="[valor]" />
 				</queue>
 			</queues>
 		</mqxconnector>

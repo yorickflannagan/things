@@ -226,6 +226,7 @@ implements	RunnerMBean,
 			digester.addBeanPropertySetter("config/worker/delay", "delay");
 			digester.addBeanPropertySetter("config/worker/restartable", "restartable");
 			digester.addBeanPropertySetter("config/worker/sleep", "sleep");
+			digester.addBeanPropertySetter("config/worker/heartbeat", "heartbeat");
 			digester.addSetNext("config/worker", "setWorker");
 
 			JNDIConfig.setConfig(digester, "config", "setJndi");
