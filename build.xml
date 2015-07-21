@@ -84,7 +84,7 @@
 			</manifest>
 		</jar>
 		<exec executable="ln" os="Linux">
-			<arg line="-s ${dist.dir}/${target.file} ${dist.dir}/things.jar"/>
+			<arg line="-s ${target.file} ${dist.dir}/things.jar"/>
 		</exec>
 	</target>
 </project>
