@@ -59,6 +59,7 @@
 	<target name = "clean" depends = "init">
 		<delete dir = "${bin.dir}" />
 		<delete file = "${dist.dir}/${target.file}" />
+		<delete file = "${dist.dir}/things.jar" />
 	</target>
 
 	<target name = "compile" depends = "check">
@@ -82,5 +83,8 @@
 				<attribute name = "Implementation-Version" value = "${package.version} ${TODAY}" />
 			</manifest>
 		</jar>
+		<exec executable="ln" os="Linux">
+			<arg line="-s ${dist.dir}/${target.file} ${dist.dir}/things.jar"/>
+		</exec>
 	</target>
 </project>

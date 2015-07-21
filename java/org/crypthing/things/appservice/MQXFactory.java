@@ -109,9 +109,14 @@ public class MQXFactory extends Reference implements ResourceProvider, ReleaseRe
 		}
 		@Override public MQXMessage call(final String putQueue, final String getQueue, final MQXMessage msg) throws MQXIllegalStateException, MQXIllegalArgumentException, MQXConnectionException
 		{
-			openQueue(putQueue);
-			openQueue(getQueue);
-			return conn.call(putQueue, getQueue, msg);
+			if (msg == null || msg.getMessage() == null) throw new MQXIllegalArgumentException("Request message must not be null");
+			final MQXQueue out = openQueue(putQueue);
+			final MQXQueue in = openQueue(getQueue);
+			final MQXMessage fMsg = out.send(msg);
+			fMsg.setCorrelId(fMsg.getMsgId());
+			fMsg.setMsgId(null);
+			fMsg.setMessage(null);
+			return in.receive(fMsg);
 		}
 	}
 }
