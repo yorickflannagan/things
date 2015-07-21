@@ -40,7 +40,7 @@
 		<property name = "project.resources" value = "${env.CRYPTHINGS}/docs/config.xsd" />
 	</target>
 
-	<target name = "check" depends = "init">
+	<target name = "check" depends = "init, clean">
 		<echo message = "package.version"> ${package.version} </echo>
 		<echo message = "src.dir"> ${src.dir} </echo>
 		<echo message = "bin.dir"> ${bin.dir} </echo>
