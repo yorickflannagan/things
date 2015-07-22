@@ -168,7 +168,7 @@
 						br.gov.caixa.mqx.MQXConnectionImpl para acesso ao MQSeries, as propriedades a seguir são obrigatórias.
 						Note que br.gov.caixa.mqx.input deve ser true se a fila for utilizada para GET; para PUT utilize false.
 						Se esta propriedade estiver marcada como true a propriedade br.gov.caixa.mqx.msgMaxLen, referente ao
-						tamanho mínimo do buffer de mensagens recebidas deve obrigatOriamente conter um valor; caso contrário,
+						tamanho mínimo do buffer de mensagens recebidas deve obrigatoriamente conter um valor; caso contrário,
 						ela não deve estar presente.
 						
 						A propriedade br.gov.caixa.mqx.convert deve conter um valor true somente no caso de ser requerida
