@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config>
+	<jvm>
+		<jmx host="10.0.2.15" port="5052" />
+		<classpath>
+			<path>/home/dsvs/development/sefipx/facilities/eclipse/things/bin</path>
+			<path>/home/dsvs/development/sefipx/facilities/eclipse/mqx/bin</path>
+			<path>/home/dsvs/development/sefipx/facilities/eclipse/mqx-test/bin</path>
+			<path>/home/dsvs/development/3rdparty/digester/commons-digester3-3.2-with-deps.jar</path>
+			<path>/home/dsvs/development/3rdparty/snmp4j-2.3.3/dist/snmp4j-2.3.3.jar</path>
+		</classpath>
+		<properties>
+			<property name="java.util.logging.config.file" value="/home/dsvs/development/sefipx/things/docs/logging-broker.properties" />
+			<property name="java.library.path" value="/opt/mqm/java/lib/:/home/dsvs/development/sefipx/mqclient/dist/release" />
+		</properties>
+	</jvm>
+
+	<jndi implementation="org.crypthing.things.appservice.ServicesFactory" />
+	<worker implementation="br.gov.caixa.mqx.test.BrokerTest">
+		<threads>1</threads>
+		<restartable>true</restartable>
+		<sleep>2000</sleep>
+		<heartbeat>0</heartbeat>
+	</worker>
+
+	<sandbox>
+		<property name="broker-request" value="/home/dsvs/development/test/broker/MUNICIPIOS_ES.xml" />
+	</sandbox>
+
+	<snmp>
+		<property name="org.crypthing.things.SNMPTrap" value="br.gov.caixa.mqx.MQXTrap" />
+		<property name="org.crypthing.things.batch.udpAddress" value="127.0.0.1/8163" />
+		<property name="org.crypthing.things.batch.rootOID" value="0.1.4320" />
+		<property name="org.crypthing.things.batch.retry" value="2" />
+		<property name="org.crypthing.things.batch.timeout" value="5000" />
+	</snmp>
+
+	<mqxconnectors>
+		<!--
+			Configuração do conector MQSeries para o Broker da Caixa.
+			Os atributos são obrigatórios, a saber:
+			name: nome arbitrário para a obtenção da factory; por exemplo, mqdes.
+			driver: driver utilizado para acesso. Obrigatório.
+		-->
+		
+		<mqxconnector name="mqdes" driver="br.gov.caixa.mqx.MQXConnectionImpl">
+			<context>
+				<property name="br.gov.caixa.mqx.address" value="rjd2.des.corerj.caixa(1414)" />
+				<property name="br.gov.caixa.mqx.channel" value="SYSTEM.DEF.SVRCONN" />
+				<!-- 
+				<property name="br.gov.caixa.mqx.channel" value="RJNT011B.TO.RJD1" />
+				 -->
+				<property name="br.gov.caixa.mqx.manager" value="RJD1" />
+			</context>
+			<queues>
+				<queue name="brokerRequest">
+					<property name="br.gov.caixa.mqx.object" value="SIICO.REQ.LOCALIDADES" />
+					<property name="br.gov.caixa.mqx.input" value="false" />
+					<property name="br.gov.caixa.mqx.convert" value="false" />
+					<property name="br.gov.caixa.mqx.convertMsgId" value="false" />
+					<property name="br.gov.caixa.mqx.convertCorrelId" value="false" />
+
+					<property name="br.gov.caixa.mqx.put.timeout" value="60000" />
+					<property name="br.gov.caixa.mqx.put.expire" value="6000" />
+				</queue>
+				<queue name="brokerResponse">
+					<property name="br.gov.caixa.mqx.object" value="SIICO.RSP.LOCALIDADES" />
+					<property name="br.gov.caixa.mqx.input" value="true" />
+					<property name="br.gov.caixa.mqx.convert" value="false" />
+					<property name="br.gov.caixa.mqx.convertMsgId" value="false" />
+					<property name="br.gov.caixa.mqx.convertCorrelId" value="false" />
+					<property name="br.gov.caixa.mqx.msgMaxLen" value="1024" />
+
+					<property name="br.gov.caixa.mqx.get.timeout" value="60000" />
+					<property name="br.gov.caixa.mqx.pool.size" value="5" />
+					<property name="br.gov.caixa.mqx.pool.timeout" value="4000" />
+				</queue>
+			</queues>
+		</mqxconnector>
+	</mqxconnectors>
+</config>
