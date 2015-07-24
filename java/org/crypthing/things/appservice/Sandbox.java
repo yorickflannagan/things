@@ -16,19 +16,21 @@ import org.crypthing.things.events.ProcessingEventDispatcher;
 public abstract class Sandbox extends Thread implements ShutdownEventDispatcher, InterruptEventListener
 {
 	private boolean running = true;
-	private long sleeptime = 0;
+	private long sleeptime;
 	private boolean isRestartable = false;
-	private long heartbeat = 0;
+	private long heartbeat;
 	private ShutdownEventListener shutdownListner;
 	private LifecycleEventDispatcher lcDispatcher;
 	private ProcessingEventDispatcher pDispatcher;
-	private long iSuccess = 0, iFailure = 0;
+	private long iSuccess, iFailure;
+	private Properties props;
 
 	final void startup
 	(
 		final WorkerConfig config,
 		final LifecycleEventDispatcher lcDispatcher,
-		final ProcessingEventDispatcher pDispatcher
+		final ProcessingEventDispatcher pDispatcher,
+		final Properties sbProps
 	) throws ConfigException
 	{
 		sleeptime = config.getSleep();
@@ -36,6 +38,7 @@ public abstract class Sandbox extends Thread implements ShutdownEventDispatcher,
 		heartbeat = config.getHeartbeat();
 		this.lcDispatcher = lcDispatcher;
 		this.pDispatcher = pDispatcher;
+		props = sbProps;
 	}
 
 	@Override public void setShutdownEventListener(final ShutdownEventListener listener) { this.shutdownListner = listener; }
@@ -47,6 +50,7 @@ public abstract class Sandbox extends Thread implements ShutdownEventDispatcher,
 		lcDispatcher.fire(new LifecycleEvent(this, LifecycleEventType.start, "Sandbox thread " + getId() + "has started"));
 		try
 		{
+			startup(props);
 			long lastSignal = System.currentTimeMillis();
 			boolean onceMore = true;
 			do

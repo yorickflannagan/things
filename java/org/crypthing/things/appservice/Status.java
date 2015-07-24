@@ -63,8 +63,8 @@ public final class Status
 			final ObjectName obName = it.hasNext() ? it.next() : null;
 			if (obName == null)
 			{
-				System.err.println("Given URL has no JMX service listening...");
-				usage();
+				System.err.println("Given URL has no Runner " + Runner.MBEAN_PATTERN + " or it was not started yet");
+				System.exit(1);
 			}
 			long lastMeasure = getValue(mbean, obName, "SuccessCount");
 			long lastStamp = System.currentTimeMillis();

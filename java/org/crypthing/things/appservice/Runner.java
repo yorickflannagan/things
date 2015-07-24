@@ -55,6 +55,7 @@ implements	RunnerMBean,
 	private final ProcessingEventDispatcher pDispatcher;
 	private boolean hasShutdown = false;
 	private Sandbox[] workers;
+	private boolean ready = false;
 
 	public Runner(final RunnerConfig cfg) throws ConfigException
 	{
@@ -77,6 +78,7 @@ implements	RunnerMBean,
 			workers = new Sandbox[config.getWorker().getThreads()];
 			for (int i = 0, threads = config.getWorker().getThreads(); i < threads; i++) workers[i] = newWorker();
 			lcDispatcher.fire(new LifecycleEvent(this, LifecycleEventType.start, "Runner initialization succeeded"));
+			ready = true;
 		}
 		catch (final Throwable e)
 		{
@@ -90,8 +92,7 @@ implements	RunnerMBean,
 		final Sandbox worker = (Sandbox) Class.forName(config.getWorker().getImpl()).newInstance();
 		worker.setShutdownEventListener(this);
 		addInterruptEventListener(worker);
-		worker.startup(config.getWorker(), lcDispatcher, pDispatcher);
-		worker.startup(config.getSandbox());
+		worker.startup(config.getWorker(), lcDispatcher, pDispatcher, config.getSandbox());
 		worker.start();
 		return worker;
 	}
@@ -122,14 +123,14 @@ implements	RunnerMBean,
 
 	@Override public long getSuccessCount()
 	{
-		if (workers == null) return -1;
+		if (!ready) return -1;
 		long success = 0;
 		for (int i = 0; i < workers.length; i++) success += workers[i].getSuccess();
 		return success;
 	}
 	@Override public long getErrorCount()
 	{
-		if (workers == null) return -1;
+		if (!ready) return -1;
 		long failure = 0;
 		for (int i = 0; i < workers.length; i++) failure += workers[i].getFailure();
 		return failure;

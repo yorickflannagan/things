@@ -24,7 +24,7 @@
 	</worker>
 
 	<sandbox>
-		<property name="broker-request" value="/home/dsvs/development/test/broker/MUNICIPIOS_ES.xml" />
+		<property name="broker-request" value="/media/sf_shared/broker/MUNICIPIOS_ES.xml" />
 	</sandbox>
 
 	<snmp>
