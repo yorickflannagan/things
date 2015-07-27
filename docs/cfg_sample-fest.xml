@@ -30,8 +30,6 @@
 		<property name="org.crypthing.things.SNMPTrap" value="br.gov.caixa.mqx.MQXTrap" />
 		<property name="org.crypthing.things.batch.udpAddress" value="127.0.0.1/8163" />
 		<property name="org.crypthing.things.batch.rootOID" value="0.1.4320" />
-		<property name="org.crypthing.things.batch.retry" value="2" />
-		<property name="org.crypthing.things.batch.timeout" value="5000" />
 	</snmp>
 
 	<mqxconnectors>

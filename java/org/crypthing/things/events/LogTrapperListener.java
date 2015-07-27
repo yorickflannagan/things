@@ -2,6 +2,7 @@ package org.crypthing.things.events;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -15,27 +16,36 @@ public class LogTrapperListener implements LifecycleEventListener, ProcessingEve
 	@Override
 	public void info(final ProcessingEvent e)
 	{
-		getLogger(e).info(e.getMessage());
-		if (trap != null) trap.send(e.isRelativeOID() ? trap.getRootOID() + "." + e.getOID() : e.getOID(), e.getMessage(), e.getThroable());
+		String msg = e.getMessage();
+		final Throwable ex = e.getThroable();
+		if (ex != null) msg = "Message ID: " + UUID.randomUUID().toString() + " - " + msg;
+		getLogger(e).info(msg);
+		if (trap != null) trap.send(e.isRelativeOID() ? trap.getRootOID() + "." + e.getOID() : e.getOID(), msg, ex);
 	}
 	@Override
 	public void warning(final ProcessingEvent e)
 	{
-		getLogger(e).log(Level.WARNING, e.getMessage(), e.getThroable());
-		if (trap != null) trap.send(e.isRelativeOID() ? trap.getRootOID() + "." + e.getOID() : e.getOID(), e.getMessage(), e.getThroable());
+		String msg = e.getMessage();
+		final Throwable ex = e.getThroable();
+		if (ex != null) msg = "Message ID: " + UUID.randomUUID().toString() + " - " + msg;
+		getLogger(e).log(Level.WARNING, msg, ex);
+		if (trap != null) trap.send(e.isRelativeOID() ? trap.getRootOID() + "." + e.getOID() : e.getOID(), msg, ex);
 	}
 	
 	@Override
 	public void error(final ProcessingEvent e)
 	{
-		getLogger(e).log(Level.SEVERE, e.getMessage(), e.getThroable());
-		if (trap != null) trap.send(e.isRelativeOID() ? trap.getRootOID() + "." + e.getOID() : e.getOID(), e.getMessage(), e.getThroable());
+		String msg = e.getMessage();
+		final Throwable ex = e.getThroable();
+		if (ex != null) msg = "Message ID: " + UUID.randomUUID().toString() + " - " + msg;
+		getLogger(e).log(Level.SEVERE, msg, ex);
+		if (trap != null) trap.send(e.isRelativeOID() ? trap.getRootOID() + "." + e.getOID() : e.getOID(), msg, ex);
 	}
+
 	@Override
 	public void start(final LifecycleEvent e)
 	{
-		final Logger log = getLogger(e);
-		log.info(e.getMessage());
+		getLogger(e).info(e.getMessage());
 		if (trap != null) trap.send(e.isRelativeOID() ? trap.getRootOID() + "." + e.getOID() : e.getOID(), e.getMessage(), null);
 	}
 	@Override

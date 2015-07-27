@@ -47,7 +47,7 @@ public class SNMPTrap implements Serializable
 	protected final Map<String, OID> vars;
 	protected final String rootOID;
 
-	public SNMPTrap(final String udpAddress, final String oidRoot, int retry, long timeout)
+	public SNMPTrap(final String udpAddress, final String oidRoot)
 	{
 		if (udpAddress == null || udpAddress.length() == 0 || oidRoot == null || oidRoot.length() == 0) throw new IllegalArgumentException();
 		vars = new HashMap<String, OID>();

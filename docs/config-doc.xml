@@ -101,8 +101,6 @@
 		<property name="org.crypthing.things.SNMPTrap" value="br.gov.caixa.mqx.MQXTrap" />	<!-- Implementação SNMP. Obrigatório -->
 		<property name="org.crypthing.things.batch.udpAddress" value="[host/IP]/[porta]" />	<!-- Endereço de destino nas mensagens. Obrigatório -->
 		<property name="org.crypthing.things.batch.rootOID" value="[OID]" />				<!-- OID raiz das mensagens. Obrigatório -->
-		<property name="org.crypthing.things.batch.retry" value="[valor]" />				<!-- Quantidade de tentativas de envio. Opcional -->
-		<property name="org.crypthing.things.batch.timeout" value="[valor]" />				<!-- Timeout do envio. Opcional -->
 	</snmp>
 
 	<!--
