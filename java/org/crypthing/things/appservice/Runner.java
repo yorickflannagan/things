@@ -19,6 +19,7 @@ import org.apache.commons.digester3.Digester;
 import org.crypthing.things.SNMPTrap;
 import org.crypthing.things.appservice.config.ConfigException;
 import org.crypthing.things.appservice.config.ConfigProperties;
+import org.crypthing.things.appservice.config.ConfigReader;
 import org.crypthing.things.appservice.config.ConnectorsConfig;
 import org.crypthing.things.appservice.config.DataSourcesConfig;
 import org.crypthing.things.appservice.config.JDBCConfigFactory;
@@ -250,7 +251,7 @@ implements	RunnerMBean,
 
 			ConnectorsConfig.setConfig(digester, "config", "setConnectors");
 
-			if ((ret = digester.parse(config)) == null) throw new ConfigException("Unexpected error: could not set configuration map");
+			if ((ret = digester.parse(new ConfigReader(config))) == null) throw new ConfigException("Unexpected error: could not set configuration map");
 			return ret;
 		}
 		catch (SAXException | IOException e)

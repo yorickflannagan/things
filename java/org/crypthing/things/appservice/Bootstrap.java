@@ -22,6 +22,7 @@ import org.crypthing.things.appservice.config.ClasspathConfig;
 import org.crypthing.things.appservice.config.ConfigErrorHandler;
 import org.crypthing.things.appservice.config.ConfigException;
 import org.crypthing.things.appservice.config.ConfigProperties;
+import org.crypthing.things.appservice.config.ConfigReader;
 import org.crypthing.things.appservice.config.JMXConfig;
 import org.crypthing.things.appservice.config.JMXConfigFactory;
 import org.crypthing.things.appservice.config.JVMConfig;
@@ -206,7 +207,7 @@ public final class Bootstrap
 			digester.addSetNext("config/jvm/properties/property", "add");
 			digester.addSetNext("config/jvm/properties", "setProperties");
 
-			if ((ret = digester.parse(config)) == null) throw new ConfigException("Unexpected error: could not set configuration map");
+			if ((ret = digester.parse(new ConfigReader(config))) == null) throw new ConfigException("Unexpected error: could not set configuration map");
 			return ret;
 		}
 		catch (SAXException | ParserConfigurationException | IOException e) { throw new ConfigException("Invalid XML configuration file", e); }
