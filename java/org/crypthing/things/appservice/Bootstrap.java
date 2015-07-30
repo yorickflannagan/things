@@ -27,6 +27,7 @@ import org.crypthing.things.appservice.config.JMXConfig;
 import org.crypthing.things.appservice.config.JMXConfigFactory;
 import org.crypthing.things.appservice.config.JVMConfig;
 import org.crypthing.things.appservice.config.Property;
+import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 public final class Bootstrap
@@ -182,7 +183,7 @@ public final class Bootstrap
 			dbf.setSchema(fac.newSchema(schema));
 			final DocumentBuilder doc = dbf.newDocumentBuilder();
 			doc.setErrorHandler(new ConfigErrorHandler());
-			doc.parse(config);
+			doc.parse(new InputSource(new ConfigReader(config)));
 
 			final Digester digester = new Digester();
 			digester.setValidating(false);

@@ -14,9 +14,11 @@ export LD_LIBRARY_PATH="$ORACLE_OCI:$MQ_LIB"
 # -----
 # As dependências Java requeridas para a execução do Bootstrap Things são apenas as que seguem.
 # As demais são definidas nos arquivos de configuração correspondentes
-JDIGESTER_JAR="/home/magut/development/sefipx/batch-dist/commons-digester.jar"
-JTHINGS_JAR="/home/magut/development/sefipx/batch-dist/things.jar"
+HOME_DIR="/home/magut/development/sefipx/batch-dist"
+JDIGESTER_JAR="$HOME_DIR/commons-digester.jar"
+JTHINGS_JAR="$HOME_DIR/things.jar"
 export JAVA_CLASS_PATH="$JDIGESTER_JAR:$JTHINGS_JAR"
 export JAVA_HOME="/home/magut/development/3rdparty/jdk"
 export PATH="$JAVA_HOME/jre/bin:$PATH"
-
+export EXECUTION_DIR="$HOME_DIR"
+export CONFIG_LOCATION="$HOME_DIR"

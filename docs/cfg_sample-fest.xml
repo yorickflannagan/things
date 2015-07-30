@@ -1,21 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--
+	Requer expostadas as variáveis de ambiente:
+		EXECUTION_DIR: localização dos pacotes dependentes
+		CONFIG_LOCATION: localização dos arquivos de configuração das seções
+ -->
+<!DOCTYPE config [
+	<!ENTITY SNMP-CONF SYSTEM "${ENV.CONFIG_LOCATION}/snmp.conf" >
+	<!ENTITY MQ-CONF   SYSTEM "${ENV.CONFIG_LOCATION}/mqseries.conf" >
+	<!ENTITY MQ-CTX    SYSTEM "${ENV.CONFIG_LOCATION}/mqseries.context" >
+]>
 <config>
 	<jvm>
 		<jmx host="10.0.2.15" port="5053" />
 		<classpath>
-			<path>/home/magut/development/sefipx/batch-dist/things.jar</path>
-			<path>/home/magut/development/sefipx/batch-dist/mqx.jar</path>
-			<path>/home/magut/development/sefipx/batch-dist/mqx-batch_demo.jar</path>
-			<path>/home/magut/development/sefipx/batch-dist/commons-digester.jar</path>
-			<path>/home/magut/development/sefipx/batch-dist/snmp4j.jar</path>
-			<path>/opt/mqm/java/lib/com.ibm.mq.jar</path>
+			<path>${ENV.EXECUTION_DIR}/things.jar</path>
+			<path>${ENV.EXECUTION_DIR}/mqx.jar</path>
+			<path>${ENV.EXECUTION_DIR}/mqx-batch_demo.jar</path>
+			<path>${ENV.EXECUTION_DIR}/commons-digester.jar</path>
+			<path>${ENV.EXECUTION_DIR}/snmp4j.jar</path>
 		</classpath>
 		<properties>
-			<property name="java.library.path" value="/home/magut/development/sefipx/batch-dist/:/opt/mqm/java/lib/" />
-			<!--
-			<property name="java.library.path" value="/home/magut/development/sefipx/batch-dist/" />
-			-->
-			<property name="java.util.logging.config.file" value="/home/magut/development/sefipx/batch-dist/logging-fest.properties" />
+			<property name="java.library.path" value="${ENV.EXECUTION_DIR}" />
+			<property name="java.util.logging.config.file" value="${ENV.CONFIG_LOCATION}/logging-fest.properties" />
 		</properties>
 	</jvm>
 
@@ -26,39 +32,7 @@
 		<sleep>2000</sleep>
 	</worker>
 
-	<snmp>
-		<property name="org.crypthing.things.SNMPTrap" value="br.gov.caixa.mqx.MQXTrap" />
-		<property name="org.crypthing.things.batch.udpAddress" value="127.0.0.1/8163" />
-		<property name="org.crypthing.things.batch.rootOID" value="0.1.4320" />
-	</snmp>
+	&SNMP-CONF;	<!-- Declaração da configuração SNMP -->
+	&MQ-CONF;	<!-- Declaração da configuração MQSeries -->
 
-	<mqxconnectors>
-		<!--
-		<mqxconnector name="mqdes" driver="br.gov.caixa.mqx.test.IBMConnectorImpl">
-		-->
-		<mqxconnector name="mqdes" driver="br.gov.caixa.mqx.MQXConnectionImpl">
-			<context>
-				<property name="br.gov.caixa.mqx.address" value="10.216.80.110(1414)" />
-			<!--
-				<property name="br.gov.caixa.mqx.address" value="10.216.80.110" />
-				-->
-				<property name="br.gov.caixa.mqx.channel" value="RJNT011B.TO.RJD1" />
-				<property name="br.gov.caixa.mqx.manager" value="RJD1" />
-			</context>
-			<queues>
-				<queue name="getputqueue">
-				
-					<property name="br.gov.caixa.mqx.object" value="LQ.REQ.ICE.TR" />
-					<!--
-					<property name="br.gov.caixa.mqx.object" value="LQ.RSP.CNS.AUDIT" />
-					-->
-					<property name="br.gov.caixa.mqx.input" value="true" />
-					<property name="br.gov.caixa.mqx.convert" value="false" />
-					<property name="br.gov.caixa.mqx.convertMsgId" value="false" />
-					<property name="br.gov.caixa.mqx.convertCorrelId" value="false" />
-					<property name="br.gov.caixa.mqx.msgMaxLen" value="1024" />
-				</queue>
-			</queues>
-		</mqxconnector>
-	</mqxconnectors>
 </config>
