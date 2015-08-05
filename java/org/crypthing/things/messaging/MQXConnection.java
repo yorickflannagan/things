@@ -13,4 +13,5 @@ public interface MQXConnection
 	void back() throws MQXConnectionException;
 	MQXMessage call(String putQueue, String getQueue, MQXMessage msg) throws MQXIllegalStateException, MQXIllegalArgumentException, MQXConnectionException;
 	boolean isValid();
+	boolean isTransaction();
 }
