@@ -8,17 +8,17 @@
 # pela variável LD_LIBRARY_PATH. As shared libraries carregadas diretamente pela JVM (System.loadLibrary())
 # devem estar definidas na variável de ambiente Java apropriada nos arquivos de configuração da aplicação.
 # Presentemente, são requeridas as shared libraries do cliente IBM MQSeries e do Oracle OCI
-ORACLE_OCI="/home/magut/development/3rdparty/oracle"
+ORACLE_OCI="$HOME/development/3rdparty/oracle"
 MQ_LIB="/opt/mqm/lib"
 export LD_LIBRARY_PATH="$ORACLE_OCI:$MQ_LIB"
 # -----
 # As dependências Java requeridas para a execução do Bootstrap Things são apenas as que seguem.
 # As demais são definidas nos arquivos de configuração correspondentes
-HOME_DIR="/home/magut/development/sefipx/batch-dist"
+HOME_DIR="$HOME/development/sefipx/batch-dist"
 JDIGESTER_JAR="$HOME_DIR/commons-digester.jar"
 JTHINGS_JAR="$HOME_DIR/things.jar"
 export JAVA_CLASS_PATH="$JDIGESTER_JAR:$JTHINGS_JAR"
-export JAVA_HOME="/home/magut/development/3rdparty/jdk"
+export JAVA_HOME="$HOME/development/3rdparty/jdk"
 export PATH="$JAVA_HOME/jre/bin:$PATH"
 export EXECUTION_DIR="$HOME_DIR"
 export CONFIG_LOCATION="$HOME_DIR"
