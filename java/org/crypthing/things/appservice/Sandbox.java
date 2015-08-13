@@ -69,7 +69,7 @@ public abstract class Sandbox extends Thread implements ShutdownEventDispatcher,
 				if (running && onceMore && sleeptime > 0) Thread.sleep(sleeptime);
 			}
 			while (running && onceMore);
-
+			release();
 			if (!running) shutdownListner.signal(this);
 			else shutdownListner.abandon(this);
 		}
@@ -93,6 +93,6 @@ public abstract class Sandbox extends Thread implements ShutdownEventDispatcher,
 	long getFailure() { return iFailure; }
 	
 	public void startup(final Properties props) throws ConfigException {}
-	void release() {}
+	public void release() {}
 	protected abstract boolean execute() throws IOException, SQLException;
 }
