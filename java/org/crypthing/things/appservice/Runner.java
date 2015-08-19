@@ -6,7 +6,10 @@ import java.lang.management.ManagementFactory;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -49,14 +52,19 @@ implements	RunnerMBean,
 	private static final Logger log = Logger.getLogger(Runner.class.getName());
 	private static ObjectName mbName;
 
+	private final ReentrantLock lock = new ReentrantLock();
 	private final RunnerConfig config;
 	private final Set<ReleaseResourceListener> resourceListeners;
 	private final Set<InterruptEventListener> interruptListeners;
 	private final LifecycleEventDispatcher lcDispatcher;
 	private final ProcessingEventDispatcher pDispatcher;
 	private boolean hasShutdown = false;
-	private Sandbox[] workers;
+	private Map<Integer, Sandbox> workers = new ConcurrentHashMap<Integer, Sandbox>();
 	private boolean ready = false;
+	private int maxWorker = 0;
+	private int minWorker = 0;
+	private long acumulatedSucess;
+	private long acumulatedFailure;
 
 	public Runner(final RunnerConfig cfg) throws ConfigException
 	{
@@ -76,10 +84,33 @@ implements	RunnerMBean,
 	{
 		try
 		{
-			workers = new Sandbox[config.getWorker().getThreads()];
-			for (int i = 0, threads = config.getWorker().getThreads(); i < threads; i++) workers[i] = newWorker();
+			for (int i = 0, threads = config.getWorker().getThreads(); i < threads; i++) workers.put(maxWorker++, newWorker());
 			lcDispatcher.fire(new LifecycleEvent(this, LifecycleEventType.start, "Runner initialization succeeded"));
 			ready = true;
+			int goal = config.getWorker().getGoal();
+			if(goal >0)
+			{
+				int ramp = config.getWorker().getRamp();
+				int adjustDelay = config.getWorker().getAdjustDelay();
+				ThreadAdvisor ted = new ThreadAdvisor(goal, ramp); 
+				try{Thread.sleep(adjustDelay);}catch(InterruptedException e){}
+				while(ready)
+				{
+					int go = ted.whichWay(workers.size(), getSuccessCount());
+					if(go!=0)
+					{
+						if(go>0)
+						{
+							addWorker();
+						}
+						else
+						{
+							removeWorker();
+						}
+					}
+					try{Thread.sleep(adjustDelay);}catch(InterruptedException e){}
+				} 
+			}
 		}
 		catch (final Throwable e)
 		{
@@ -88,9 +119,74 @@ implements	RunnerMBean,
 		}
 	}
 
+	private void addWorker() throws InstantiationException, IllegalAccessException, ClassNotFoundException, ConfigException {
+		ReentrantLock _lock = lock;
+		lock.lock();
+		try
+		{
+			workers.put(maxWorker++, newWorker());
+		}finally
+		{
+			_lock.unlock();
+		}		
+	}
+
+	private void removeWorker() {
+		Sandbox worker = null; 
+		long accSuccess = 0;
+		long accFailure = 0;
+		ReentrantLock _lock = lock;
+		lock.lock();
+		try
+		{
+			worker = workers.remove(minWorker++);
+			if(worker == null) return;
+			accSuccess = worker.getSuccess();
+			accFailure = worker.getFailure();
+			acumulatedFailure +=accSuccess;
+			acumulatedSucess +=accFailure;
+		}finally
+		{
+			_lock.unlock();
+		}				
+		
+		worker.shutdown();
+		int waiting = 79;
+		Thread.yield();
+		while(worker.isAlive() && waiting > -40)
+		{
+			// Total de 60 segundos -> 79 ==> -39 = 60 steps de -2 em -2
+			// sleep de  410((120-79)*10) a 1590((120-(-39))*10) ==> (410+1590)/2*60 = 60000ms = 60s
+			try{Thread.sleep((120-waiting)*10);}catch(InterruptedException e){}
+			waiting-=2;
+		}
+		if(worker.isAlive())
+		{
+			try{worker.interrupt();}catch(Throwable t){}
+		}
+		lock.lock();
+		try
+		{
+			acumulatedFailure -=accSuccess;
+			acumulatedSucess  -=accFailure;
+			accSuccess = worker.getSuccess();
+			accFailure = worker.getFailure();
+			acumulatedFailure +=accSuccess;
+			acumulatedSucess +=accFailure;
+		}finally
+		{
+			_lock.unlock();
+		}
+	}
+
+	private Class<? extends Sandbox> sandboxClass = null;
 	private Sandbox newWorker() throws InstantiationException, IllegalAccessException, ClassNotFoundException, ConfigException
 	{
-		final Sandbox worker = (Sandbox) Class.forName(config.getWorker().getImpl()).newInstance();
+		if(sandboxClass == null)
+		{
+			sandboxClass = Class.forName(config.getWorker().getImpl()).asSubclass(Sandbox.class);
+		}
+		final Sandbox worker = sandboxClass.newInstance();
 		worker.setShutdownEventListener(this);
 		addInterruptEventListener(worker);
 		worker.startup(config.getWorker(), lcDispatcher, pDispatcher, config.getSandbox());
@@ -105,6 +201,8 @@ implements	RunnerMBean,
 	@Override
 	public void shutdown()
 	{
+		
+		ready = false;
 		lcDispatcher.fire(new LifecycleEvent(this, LifecycleEventType.stop, "Runner shutdown signal received"));
 		final Iterator<InterruptEventListener> it = interruptListeners.iterator();
 		while (it.hasNext()) it.next().shutdown();
@@ -126,14 +224,40 @@ implements	RunnerMBean,
 	{
 		if (!ready) return -1;
 		long success = 0;
-		for (int i = 0; i < workers.length; i++) success += workers[i].getSuccess();
+		ReentrantLock _lock = lock;
+		lock.lock();
+		try
+		{
+			success = acumulatedSucess;
+		}finally
+		{
+			_lock.unlock();
+		}
+		for (int i = minWorker; i < maxWorker; i++) 
+		{
+			Sandbox worker = workers.get(i);
+			if(worker != null) { success += worker.getSuccess(); }
+		}
 		return success;
 	}
 	@Override public long getErrorCount()
 	{
 		if (!ready) return -1;
 		long failure = 0;
-		for (int i = 0; i < workers.length; i++) failure += workers[i].getFailure();
+		ReentrantLock _lock = lock;
+		lock.lock();
+		try
+		{
+			failure = acumulatedFailure;
+		}finally
+		{
+			_lock.unlock();
+		}
+		for (int i = minWorker; i < maxWorker; i++) 
+		{
+			Sandbox worker = workers.get(i);
+			if(worker != null) { failure += worker.getFailure(); }
+		}
 		return failure;
 	}
 
@@ -225,6 +349,8 @@ implements	RunnerMBean,
 			digester.addObjectCreate("config", RunnerConfig.class);
 			digester.addFactoryCreate("config/worker", WorkerConfigFactory.class);
 			digester.addBeanPropertySetter("config/worker/threads", "threads");
+			digester.addBeanPropertySetter("config/worker/goal", "goal");
+			digester.addBeanPropertySetter("config/worker/ramp", "ramp");
 			digester.addBeanPropertySetter("config/worker/delay", "delay");
 			digester.addBeanPropertySetter("config/worker/restartable", "restartable");
 			digester.addBeanPropertySetter("config/worker/sleep", "sleep");
