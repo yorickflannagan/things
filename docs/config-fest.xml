@@ -3,12 +3,15 @@
 	<jvm>
 		<jmx host="10.0.2.15" port="5053" />
 		<classpath>
-			<path>/home/magut/development/sefipx/facilities/eclipse/things/bin</path>
-			<path>/home/magut/development/sefipx/facilities/eclipse/mqx/bin</path>
-			<path>/home/magut/development/sefipx/facilities/eclipse/mqx-test/bin</path>
-			<path>/home/magut/development/3rdparty/commons-digester3-3.2/commons-digester3-3.2-with-deps.jar</path>
-			<path>/home/magut/development/3rdparty/snmp4j-2.3.3/dist/snmp4j-2.3.3.jar</path>
+			<path>${ENV.HOME}/development/sefipx/facilities/eclipse/things/bin</path>
+			<path>${ENV.HOME}/development/sefipx/facilities/eclipse/mqx/bin</path>
+			<path>${ENV.HOME}/development/sefipx/facilities/eclipse/mqx-test/bin</path>
+                        <path>${ENV.JDIGESTER_JAR}</path>
+                        <path>${ENV.JSNMP_JAR}</path>
 		</classpath>
+		<properties>
+			<property name="java.util.logging.config.file" value="${ENV.CONFIG_LOCATION}/logging-fest.properties" />
+		</properties>
 	</jvm>
 
 	<jndi implementation="org.crypthing.things.appservice.ServicesFactory" />
@@ -16,6 +19,9 @@
 		<threads>10</threads>
 		<restartable>true</restartable>
 		<sleep>2000</sleep>
+                <goal>200</goal>
+                <ramp>10</ramp>
+                <goalMeasure>3000</goalMeasure>
 	</worker>
 
 	<snmp>

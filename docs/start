@@ -2,6 +2,6 @@
 #
 # Script de lançamento das aplicações batch geridas pelo pacote Things.
 # Os argumentos esperados são os arquivos configuração referentes às aplicações a serem lançadas
-source environment
+source $(dirname $0)/environment
 java -cp "$JAVA_CLASS_PATH" org.crypthing.things.appservice.Bootstrap $*
 

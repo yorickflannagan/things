@@ -5,6 +5,6 @@
 # $1: arquivo de configuração da aplicação a ser verificada. Obrigatório.
 # $2: quantidade de amostras a serem tomadas. Opcional. Default: 1.
 # $3: tempo (em milissegundos) de aguardo entre cada amostra. Opcional. Default: 0.
-source environment
+source $(dirname $0)/environment
 java -cp "$JAVA_CLASS_PATH" org.crypthing.things.appservice.Status $*
 

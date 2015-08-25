@@ -3,19 +3,25 @@
 	<jvm>
 		<jmx host="10.0.2.15" port="5051" />
 		<classpath>
-			<path>/home/magut/development/sefipx/facilities/eclipse/things/bin</path>
-			<path>/home/magut/development/sefipx/facilities/eclipse/mqx/bin</path>
-			<path>/home/magut/development/sefipx/facilities/eclipse/mqx-test/bin</path>
-			<path>/home/magut/development/3rdparty/commons-digester3-3.2/commons-digester3-3.2-with-deps.jar</path>
-			<path>/home/magut/development/3rdparty/snmp4j-2.3.3/dist/snmp4j-2.3.3.jar</path>
+			<path>${ENV.HOME}/development/sefipx/facilities/eclipse/things/bin</path>
+			<path>${ENV.HOME}/development/sefipx/facilities/eclipse/mqx/bin</path>
+			<path>${ENV.HOME}/development/sefipx/facilities/eclipse/mqx-test/bin</path>
+                        <path>${ENV.JDIGESTER_JAR}</path>
+                        <path>${ENV.JSNMP_JAR}</path>
 		</classpath>
+		<properties>
+			<property name="java.util.logging.config.file" value="${ENV.CONFIG_LOCATION}/logging-sausage.properties" />
+		</properties>
 	</jvm>
 
 	<jndi implementation="org.crypthing.things.appservice.ServicesFactory" />
 	<worker implementation="br.gov.caixa.mqx.test.StuffSausage">
-		<threads>1</threads>
+		<threads>10</threads>
 		<restartable>false</restartable>
 		<sleep>2000</sleep>
+                <goal>200</goal>
+                <ramp>10</ramp>
+                <goalMeasure>3000</goalMeasure>
 	</worker>
 
 	<sandbox>
@@ -43,7 +49,7 @@
 			</context>
 			<queues>
 				<queue name="putgetqueue">
-					<property name="br.gov.caixa.mqx.object" value="LQ.REQ.ICE.TR" />
+					<property name="br.gov.caixa.mqx.object" value="LQ.RSP.CNS.AUDIT" />
 					<property name="br.gov.caixa.mqx.input" value="false" />
 					<property name="br.gov.caixa.mqx.convert" value="false" />
 					<property name="br.gov.caixa.mqx.convertMsgId" value="false" />

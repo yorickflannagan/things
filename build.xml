@@ -12,7 +12,7 @@
 
 		<property environment = "env"/>
 
-		<property name = "package.version" value = "1.2.0" />
+		<property name = "package.version" value = "1.3.0" />
 		<property name = "src.dir" value = "java" />
 		<property name = "bin.dir" value = "java-bin" />
 		<condition property = "dist.dir" value = "dist/debug" else = "dist/release">
@@ -22,13 +22,6 @@
 			</and>
 		</condition>
 		<property name = "target.file" value = "things-${package.version}.jar" />
-		<condition property = "javac.debug" value = "true" else = "false">
-			<and>
-				<equals arg1="${DEBUG}" arg2="1" />
-				<isset property="DEBUG" />
-			</and>
-		</condition>
-		<property name = "debug.level" value = "source,lines,vars" />
 		<property name = "target" value = "1.7"/>
 		<property name = "source" value = "1.7"/>
 
@@ -46,8 +39,6 @@
 		<echo message = "bin.dir"> ${bin.dir} </echo>
 		<echo message = "dist.dir"> ${dist.dir} </echo>
 		<echo message = "target.file"> ${target.file} </echo>
-		<echo message = "javac.debug"> ${javac.debug} </echo>
-		<echo message = "debug.level"> ${debug.level} </echo>
 		<echo message = "target"> ${target} </echo>
 		<echo message = "source"> ${source} </echo>
 		<echo message = "project.classpath"> ${project.classpath} </echo>
@@ -63,8 +54,8 @@
 	</target>
 
 	<target name = "compile" depends = "check">
-		<javac	debug = "${javac.debug}"
-				debuglevel = "${debug.level}"
+		<javac	debug = "true"
+				debuglevel = "source,lines,vars"
 				srcdir = "${src.dir}"
 				destdir = "${bin.dir}"
 				classpath = "${project.classpath}"

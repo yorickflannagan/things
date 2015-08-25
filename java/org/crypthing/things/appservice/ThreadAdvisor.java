@@ -5,15 +5,26 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.Locale;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class ThreadAdvisor {
 	
 	private long goal;
 	private Map<Integer, Average> performance = new HashMap<Integer, Average>();
+	private static Logger log = Logger.getLogger(ThreadAdvisor.class.getName());
 	private int soften;
 	private int softenRatio;
+	private long accRatio;
+	
+	private static final int EXTASIS_RATIO = 3;
+	private static final int WISE_RATIO = 50;
+	private static final int TOO_WISE_RATIO = 100;
+	
+	
+	private int sandwichExtasis = EXTASIS_RATIO;
+	private int wiseBoredomExtasis = EXTASIS_RATIO;
 	
 	public class Average
 	{
@@ -37,11 +48,12 @@ public class ThreadAdvisor {
 				// Atenuate, but don't ignore;
 				if(average > 0)
 				{
-					if(value < average*2/3) value = (value + 5*average)/6;
-					if(value > average*3/2) value = (value + 3*average)/4;					
+					if(value < average*1/3) value = (value + 3*average)/4;
+					if(value > average*3)   value = (value + 3*average)/4;					
 				}
 				double result = value + average*weigth++;
 				average =result/weigth;
+				if(weigth>TOO_WISE_RATIO) weigth = WISE_RATIO;
 			}
 		}
 	}
@@ -52,57 +64,131 @@ public class ThreadAdvisor {
 		this.softenRatio = softenRatio;
 	}
 	
-	
+	private double accConsume;
 	public int whichWay(int threads, double consume)
 	{
-		Average current = performance.get(threads);
-		if(current==null)
+		int r = 0;	
+		try
 		{
-				current = new Average(threads);
-				performance.put(threads, current);
-		}
-		current.acumulate(consume);
-		
-		if(soften > 0)
-		{
-			soften--;
-			return 0;
-		}
-		
-		if(consume < goal && ((int)consume) > 0)
-		{
-			Average best = findBest(current);
-			soften = softenRatio;
-			if(best.average > current.average)
+			if(log.isLoggable(Level.FINE)) log.fine("Advisor: Threads=>" + threads + ", Consume=>" + format(consume) );
+			Average current = performance.get(threads);
+			if(current==null)
 			{
-				return (best.threads -  current.threads) > 0 ? 1 : threads > 1 ? -1: 0;
-			} 
-			else
-			{
-				//We are the best and yet, not good enough. Look around for expansion... 
-				return performance.get(threads+1) == null ? 1 : threads > 1 && performance.get(threads-1)==null ? -1:0;
+					current = new Average(threads);
+					performance.put(threads, current);
+					if(log.isLoggable(Level.FINE)) log.fine("Advisor: Current Null, created.");
+					soften = softenRatio;
 			}
-		}
-		else
-		{
-			soften = softenRatio;
-			if(threads > 1)
+			current.acumulate(consume);
+			accConsume += consume;
+			accRatio++;
+			
+			if(soften > 0)
 			{
-				if(consume > goal*1.05)
+				if(log.isLoggable(Level.FINE)) log.fine("Advisor: soften period:" + soften);
+				soften--;
+				return 0;
+			}
+			
+			
+			if(accConsume <= (current.average*accRatio)*0.1)
+			{
+				if(log.isLoggable(Level.FINE)) 
 				{
-					Average projection = performance.get(threads-1);
-					if(projection != null && projection.weigth > 30 && projection.average < goal) return 0; else return  -1;
+					log.fine("Advisor: Will return -1 because of below statistics:");
+					log.fine("Advisor: AccConsume:" + format(accConsume));
+					log.fine("Advisor: current.average:" + format(current.average));
+					log.fine("Advisor: accRatio:" + accRatio);
 				}
+				r = -1;
+			}
+			else if(current.average < goal)
+			{
+				if(log.isLoggable(Level.FINE)) log.fine("Advisor: goal:" + goal + " not achieved. Current average: " + format(current.average) + " Finding best direction.");
+				Average best = findBest(current);
+				if(best.threads != current.threads)
+				{
+					r = (best.threads -  current.threads) > 0 ? 1 : threads > 1 ? -1: 0;
+					if(log.isLoggable(Level.FINE)) log.fine("Advisor: Going from " + current.threads + " to " + best.threads + " direction.");
+				} 
 				else
 				{
-					if((int)consume == 0)
+					//We are the best and yet, not good enough. Look around for expansion... 
+					r = performance.get(threads+1) == null || consume > current.average * 1.1 ? 1 : threads > 1 && (performance.get(threads-1)==null  || consume < current.average * 0.9) ? -1:0;
+					if(log.isLoggable(Level.FINE)) 
 					{
-						return -1;
+						log.fine("Advisor: Currently at the best thread count, but still don't achieve the goal. Lets do something returning :" + r);
+						log.fine("Current Average:" + format(current.average));
+						log.fine("Thread " + (current.threads + 1) + ((performance.get(threads+1)==null) ? " Not" : "") + " Present");
+						log.fine("Thread " + (current.threads -1 ) + ((performance.get(threads-1)==null) ? " Not" : "") + " Present");
+					}
+					if(r==0)
+					{
+						if(log.isLoggable(Level.FINE)) log.fine("Advisor: 0 for long times can be harmful. Extasis on:" + sandwichExtasis);
+						sandwichExtasis--;
+						if(sandwichExtasis < 0)
+						{
+							if(log.isLoggable(Level.FINE)) log.fine("Advisor: 0 for long times can be harmful. Breaking boundaries.");
+							sandwichExtasis = EXTASIS_RATIO;
+							performance.remove(threads-1);
+							performance.remove(threads+1);
+						}
+					}
+					else
+					{
+						sandwichExtasis = EXTASIS_RATIO;
+						if(log.isLoggable(Level.FINE)) log.fine("Advisor: Arms streched again. SandwichExtasis on:" + sandwichExtasis);
+					}
+				}
+			}
+			else
+			{
+				if(log.isLoggable(Level.FINE)) log.fine("Advisor: Goal achieved!!!");
+				if(current.average > goal*1.05)
+				{
+					if(log.isLoggable(Level.FINE)) log.fine("Advisor: Perhaps too much. Current average:" + format(current.average) + " Goal: " + goal + ". Lets see statistics if we can fire someone.");
+					Average projection = performance.get(threads-1);
+					r = (projection != null && projection.weigth >= WISE_RATIO && projection.average < goal) ? 0 :-1;
+					if(log.isLoggable(Level.FINE)) 
+					{
+						if(projection !=null) {
+							log.fine("Advisor: Projection Average :" + format(projection.average) + " for " +  (threads-1) + " workers.");
+							log.fine("Advisor: Projection Weigth  :" + projection.weigth + " for " +  (threads-1) + " workers.");
+						} else
+						{
+							log.fine("Advisor: No Projection for:" +  (threads-1) + " workers.");
+						}
+						if(r < 0) log.fine("Advisor: Statistics say we can fire :" + r + " workers.");
+						else
+						{
+							wiseBoredomExtasis--;
+							log.fine("Advisor: Statistics say we better stay were we are.");
+							if(wiseBoredomExtasis <= 0)
+							{
+								log.fine("Advisor: Perhaps they think thenselves too smart. Next time think again.");
+								projection.weigth = WISE_RATIO - softenRatio;
+								wiseBoredomExtasis = EXTASIS_RATIO;
+							}
+						}
 					}
 				}
 			}
 		}
-		return 0;
+		catch(Throwable t)
+		{
+			log.log(Level.SEVERE, "Error on ThreadAdvisor, returning 0",t);
+		}
+		
+		if(threads ==1 && r == -1)
+		{
+			if(log.isLoggable(Level.FINE)) log.fine("Advisor: Cant reduce threads to 0.");
+			r = 0;
+		}
+		
+		accConsume = 0;
+		accRatio=0;
+		soften = softenRatio;
+		return r;
 	}
 
 
@@ -116,9 +202,6 @@ public class ThreadAdvisor {
 	}
 	public void printAverages()
 	{
-		NumberFormat nf = NumberFormat.getInstance(Locale.ITALY);
-		nf.setMaximumFractionDigits(2);
-		nf.setMinimumFractionDigits(2);
 		System.out.println("Thread\t Average");
 		
 		Average[] avg = new Average[performance.size()];
@@ -134,7 +217,7 @@ public class ThreadAdvisor {
 		});
 		for(Average a: avg)
 		{
-			System.out.println(a.threads + "\t"+ nf.format(a.average));
+			System.out.println(a.threads + "\t"+ format(a.average));
 		}
 	}
 	
@@ -143,6 +226,16 @@ public class ThreadAdvisor {
 		return performance.values();
 	}
 	
+	static NumberFormat nf = NumberFormat.getInstance();
+	static {
+		nf.setMaximumFractionDigits(2);
+		nf.setMinimumFractionDigits(2);
+	}
+	
+	private static String format(double value)
+	{
+		return nf.format(value);
+	}
 	
 	
 

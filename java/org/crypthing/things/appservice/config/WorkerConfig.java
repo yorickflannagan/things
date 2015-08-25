@@ -5,8 +5,8 @@ public final class WorkerConfig
 	private String impl;
 	private int threads;
 	private int goal;
-	private int ramp;
-	private int adjustDelay;
+	private int ramp = 10;
+	private int goalMeasure = 1000;
 	private long delay;
 	private boolean restartable;
 	private long sleep;
@@ -48,10 +48,10 @@ public final class WorkerConfig
 	public void setRamp(int ramp) {
 		this.ramp = ramp;
 	}
-	public int getAdjustDelay() {
-		return adjustDelay;
+	public int getGoalMeasure() {
+		return goalMeasure;
 	}
-	public void setAdjustDelay(int adjustDelay) {
-		this.adjustDelay = adjustDelay;
+	public void setGoalMeasure(int goalMeasure) {
+		this.goalMeasure = goalMeasure;
 	}
 }

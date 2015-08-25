@@ -70,7 +70,7 @@ public final class Status
 			long lastStamp = System.currentTimeMillis();
 			int i = 0;
 			System.out.println("Listening to service " + service);
-			System.out.println("Success\tError\tThroughput");
+			System.out.println("Success\tError\tThroughput\tWorkers");
 			do
 			{
 				Thread.sleep(interval);
@@ -82,6 +82,7 @@ public final class Status
 				long hit = (currentStamp - lastStamp) / 1000;
 				if (hit > 0) builder.append((currentMeasure - lastMeasure) / hit).append("/s");
 				else builder.append("?");
+				builder.append("\t\t").append(getValue(mbean, obName, "WorkerCount")).append("\t");
 				lastMeasure = currentMeasure;
 				lastStamp = currentStamp;
 				System.out.println(builder.toString());
@@ -90,10 +91,11 @@ public final class Status
 		}
 		finally { jmxc.close(); }
 	}
-	private static long getValue(final MBeanServerConnection mbean, ObjectName obName, final String method) throws IOException, JMException
+	
+	@SuppressWarnings("unchecked")
+	private static <T> T getValue(final MBeanServerConnection mbean, ObjectName obName, final String method) throws IOException, JMException
 	{
 		final Object ret = mbean.getAttribute(obName, method);
-		if (!(ret instanceof Long)) throw new JMException(method + " method has returned an invalid value");
-		return (long) ret;
+		return (T) ret;
 	}
 }

@@ -48,7 +48,7 @@ implements	RunnerMBean,
 		InterruptEventDispatcher
 {
 	private class ShutdownHook implements Runnable { @Override public void run() { if (!hasShutdown) shutdown(); } }
-	static final String MBEAN_PATTERN = "org.crypthing.things.appservice:type=Runner,name=";
+	public static final String MBEAN_PATTERN = "org.crypthing.things.appservice:type=Runner,name=";
 	private static final Logger log = Logger.getLogger(Runner.class.getName());
 	private static ObjectName mbName;
 
@@ -90,13 +90,17 @@ implements	RunnerMBean,
 			int goal = config.getWorker().getGoal();
 			if(goal >0)
 			{
+				long sucessCurrent = 0;
+				long sucessLast = 0;
 				int ramp = config.getWorker().getRamp();
-				int adjustDelay = config.getWorker().getAdjustDelay();
+				int adjustDelay = config.getWorker().getGoalMeasure();
 				ThreadAdvisor ted = new ThreadAdvisor(goal, ramp); 
 				try{Thread.sleep(adjustDelay);}catch(InterruptedException e){}
 				while(ready)
 				{
-					int go = ted.whichWay(workers.size(), getSuccessCount());
+					sucessCurrent = getSuccessCount();
+					int go = ted.whichWay(workers.size(), sucessCurrent - sucessLast);
+					sucessLast = sucessCurrent;
 					if(go!=0)
 					{
 						if(go>0)
@@ -143,8 +147,8 @@ implements	RunnerMBean,
 			if(worker == null) return;
 			accSuccess = worker.getSuccess();
 			accFailure = worker.getFailure();
-			acumulatedFailure +=accSuccess;
-			acumulatedSucess +=accFailure;
+			acumulatedFailure +=accFailure;
+			acumulatedSucess +=accSuccess;
 		}finally
 		{
 			_lock.unlock();
@@ -162,6 +166,7 @@ implements	RunnerMBean,
 		}
 		if(worker.isAlive())
 		{
+			log.severe("It's a sad thing, but worker " + worker.getId() + " was killed. Regret nothing, until its too late. Then regret everything.");
 			try{worker.interrupt();}catch(Throwable t){}
 		}
 		lock.lock();
@@ -350,6 +355,7 @@ implements	RunnerMBean,
 			digester.addFactoryCreate("config/worker", WorkerConfigFactory.class);
 			digester.addBeanPropertySetter("config/worker/threads", "threads");
 			digester.addBeanPropertySetter("config/worker/goal", "goal");
+			digester.addBeanPropertySetter("config/worker/goalMeasure", "goalMeasure");
 			digester.addBeanPropertySetter("config/worker/ramp", "ramp");
 			digester.addBeanPropertySetter("config/worker/delay", "delay");
 			digester.addBeanPropertySetter("config/worker/restartable", "restartable");
@@ -384,5 +390,10 @@ implements	RunnerMBean,
 		{
 			throw new ConfigException("Invalid XML configuration file", e);
 		}
+	}
+
+	@Override
+	public int getWorkerCount() {
+		return workers.size();
 	}
 }
