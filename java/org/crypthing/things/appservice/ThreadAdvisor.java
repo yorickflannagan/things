@@ -19,12 +19,13 @@ public class ThreadAdvisor {
 	private long accRatio;
 	
 	private static final int EXTASIS_RATIO = 3;
+	private static final int WISE_EXTASIS_RATIO = 10;
 	private static final int WISE_RATIO = 50;
 	private static final int TOO_WISE_RATIO = 100;
 	
 	
 	private int sandwichExtasis = EXTASIS_RATIO;
-	private int wiseBoredomExtasis = EXTASIS_RATIO;
+	private int wiseBoredomExtasis = WISE_EXTASIS_RATIO;
 	
 	public class Average
 	{
@@ -114,7 +115,7 @@ public class ThreadAdvisor {
 				else
 				{
 					//We are the best and yet, not good enough. Look around for expansion... 
-					r = performance.get(threads+1) == null || consume > current.average * 1.1 ? 1 : threads > 1 && (performance.get(threads-1)==null  || consume < current.average * 0.9) ? -1:0;
+					r = performance.get(threads+1) == null || accConsume/accRatio > current.average * 1.1  || performance.get(threads+1).weigth < WISE_RATIO  ? 1 : threads > 1 && (performance.get(threads-1)==null  || accConsume/accRatio < current.average * 0.9 || performance.get(threads-1).weigth < WISE_RATIO) ? -1:0;
 					if(log.isLoggable(Level.FINE)) 
 					{
 						log.fine("Advisor: Currently at the best thread count, but still don't achieve the goal. Lets do something returning :" + r);
@@ -124,7 +125,10 @@ public class ThreadAdvisor {
 					}
 					if(r==0)
 					{
-						if(log.isLoggable(Level.FINE)) log.fine("Advisor: 0 for long times can be harmful. Extasis on:" + sandwichExtasis);
+						if(sandwichExtasis > 0)
+						{
+							if(log.isLoggable(Level.FINE)) log.fine("Advisor: 0 for long times can be harmful. Extasis on:" + sandwichExtasis);
+						}
 						sandwichExtasis--;
 						if(sandwichExtasis < 0)
 						{
@@ -136,8 +140,11 @@ public class ThreadAdvisor {
 					}
 					else
 					{
-						sandwichExtasis = EXTASIS_RATIO;
-						if(log.isLoggable(Level.FINE)) log.fine("Advisor: Arms streched again. SandwichExtasis on:" + sandwichExtasis);
+						if(sandwichExtasis != EXTASIS_RATIO)
+						{
+							sandwichExtasis = EXTASIS_RATIO;
+							if(log.isLoggable(Level.FINE)) log.fine("Advisor: Arms streched again. SandwichExtasis on:" + sandwichExtasis);
+						}
 					}
 				}
 			}
@@ -167,7 +174,7 @@ public class ThreadAdvisor {
 							{
 								log.fine("Advisor: Perhaps they think thenselves too smart. Next time think again.");
 								projection.weigth = WISE_RATIO - softenRatio;
-								wiseBoredomExtasis = EXTASIS_RATIO;
+								wiseBoredomExtasis = WISE_EXTASIS_RATIO;
 							}
 						}
 					}
@@ -177,13 +184,21 @@ public class ThreadAdvisor {
 		catch(Throwable t)
 		{
 			log.log(Level.SEVERE, "Error on ThreadAdvisor, returning 0",t);
+			r = 0;
 		}
 		
 		if(threads ==1 && r == -1)
 		{
-			if(log.isLoggable(Level.FINE)) log.fine("Advisor: Cant reduce threads to 0.");
+			if(log.isLoggable(Level.FINE)) log.fine("Advisor: Can't reduce threads to 0.");
 			r = 0;
 		}
+
+		if(r != 0 )
+		{
+			sandwichExtasis = EXTASIS_RATIO;
+			wiseBoredomExtasis = WISE_EXTASIS_RATIO;
+		}
+		
 		
 		accConsume = 0;
 		accRatio=0;

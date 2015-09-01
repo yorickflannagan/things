@@ -66,7 +66,7 @@ public abstract class Sandbox extends Thread implements ShutdownEventDispatcher,
 					lcDispatcher.fire(new LifecycleEvent(this, LifecycleEventType.work, "Sandbox thread " + getId() + "is alive and running"));
 					lastSignal = System.currentTimeMillis();
 				}
-				if (running && onceMore && sleeptime > 0) Thread.sleep(sleeptime);
+				if (running && onceMore && sleeptime > 0) try { Thread.sleep(sleeptime);} catch(InterruptedException e) {}
 			}
 			while (running && onceMore);
 			release();

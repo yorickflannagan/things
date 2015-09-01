@@ -14,7 +14,7 @@ export LD_LIBRARY_PATH="$LD_LIBRARY_PATH"
 # As dependências Java requeridas para a execução do Bootstrap Things são apenas as que seguem.
 # As demais são definidas nos arquivos de configuração correspondentes
 HOME_DIR="$HOME/development/sefipx/things/docs"
-JTHINGS_JAR="$CRYPTHINGS/dist/release/things-1.2.0.jar"
+JTHINGS_JAR="$CRYPTHINGS/dist/release/things-1.3.1.jar"
 export JAVA_CLASS_PATH="$JDIGESTER_JAR:$JTHINGS_JAR"
 export JAVA_HOME="$JAVA_HOME"
 export PATH="$JAVA_HOME/jre/bin:$PATH"

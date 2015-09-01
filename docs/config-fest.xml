@@ -19,9 +19,9 @@
 		<threads>10</threads>
 		<restartable>true</restartable>
 		<sleep>2000</sleep>
-                <goal>200</goal>
+                <goal>20000</goal>
                 <ramp>10</ramp>
-                <goalMeasure>3000</goalMeasure>
+                <goalMeasure>2000</goalMeasure>
 	</worker>
 
 	<snmp>

@@ -19,7 +19,7 @@
 		<threads>10</threads>
 		<restartable>false</restartable>
 		<sleep>2000</sleep>
-                <goal>200</goal>
+                <goal>20000</goal>
                 <ramp>10</ramp>
                 <goalMeasure>3000</goalMeasure>
 	</worker>

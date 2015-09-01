@@ -139,6 +139,7 @@ implements	RunnerMBean,
 		Sandbox worker = null; 
 		long accSuccess = 0;
 		long accFailure = 0;
+		
 		ReentrantLock _lock = lock;
 		lock.lock();
 		try
@@ -161,7 +162,7 @@ implements	RunnerMBean,
 		{
 			// Total de 60 segundos -> 79 ==> -39 = 60 steps de -2 em -2
 			// sleep de  410((120-79)*10) a 1590((120-(-39))*10) ==> (410+1590)/2*60 = 60000ms = 60s
-			try{Thread.sleep((120-waiting)*10);}catch(InterruptedException e){}
+			try{Thread.sleep((120-waiting)*10);}catch(InterruptedException e){ }
 			waiting-=2;
 		}
 		if(worker.isAlive())
@@ -172,12 +173,12 @@ implements	RunnerMBean,
 		lock.lock();
 		try
 		{
-			acumulatedFailure -=accSuccess;
-			acumulatedSucess  -=accFailure;
+			acumulatedSucess  -=accSuccess;
+			acumulatedFailure -=accFailure;
 			accSuccess = worker.getSuccess();
 			accFailure = worker.getFailure();
-			acumulatedFailure +=accSuccess;
-			acumulatedSucess +=accFailure;
+			acumulatedFailure +=accFailure;
+			acumulatedSucess  +=accSuccess;
 		}finally
 		{
 			_lock.unlock();
