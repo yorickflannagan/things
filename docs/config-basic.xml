@@ -45,6 +45,18 @@
 		</jdbc>
 	</datasources>
 
+	<cursors>
+		<cursor>
+			<name>lacuna</name>
+			<datasource>oracns</datasource>
+			<implementation>br.gov.caixa.sample.CursorReader</implementation>
+			<sleepBeetwenRun>3000</sleepBeetwenRun>
+			<maxMemoryRecords>1000</maxMemoryRecords>
+		</cursor>
+	</cursors>
+
+
+
 	<mqxconnectors>
 		<mqxconnector name="mqdes" driver="br.gov.caixa.mqx.MQXConnectionImpl">
 			<context>

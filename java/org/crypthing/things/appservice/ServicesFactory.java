@@ -8,6 +8,7 @@ import javax.naming.NamingException;
 
 import org.crypthing.things.appservice.config.ConfigException;
 import org.crypthing.things.appservice.config.RunnerConfig;
+import org.crypthing.things.appservice.db.CursorFactory;
 import org.crypthing.things.events.ProcessingEventListener;
 
 public class ServicesFactory implements BindServices
@@ -39,5 +40,17 @@ public class ServicesFactory implements BindServices
 				context.bind("java:mqx/" + key, connector);
 			}
 		}
+		if(cfg.getCursors() !=null)
+		{
+			final Iterator<String> it = cfg.getCursors().keySet().iterator();
+			while (it.hasNext())
+			{
+				final String key = it.next();
+				final CursorFactory cursorf = new CursorFactory(key);
+				cursorf.init(cfg.getCursors().get(key), subscriber, trap);
+				context.bind("java:cursor/" + key, cursorf);
+			}
+		}
+		
 	}
 }

@@ -9,6 +9,9 @@ public final class RunnerConfig
 	private ConfigProperties sandbox;
 	private DataSourcesConfig datasources;
 	private ConnectorsConfig connectors;
+	private CursorsConfig cursors;
+	
+	
 	public WorkerConfig getWorker() { return worker; }
 	public void setWorker(WorkerConfig worker) { this.worker = worker; }
 	public JNDIConfig getJndi() { return jndi; }
@@ -21,6 +24,8 @@ public final class RunnerConfig
 	public void setDatasources(DataSourcesConfig datasources) { this.datasources = datasources; }
 	public ConnectorsConfig getConnectors() { return connectors; }
 	public void setConnectors(ConnectorsConfig connectors) { this.connectors = connectors; }
+	public CursorsConfig getCursors() {return cursors;}
+	public void setCursors(CursorsConfig cursors) {this.cursors = cursors;}
 	@Override public String toString()
 	{
 		final StringBuilder builder = new StringBuilder();
@@ -29,6 +34,7 @@ public final class RunnerConfig
 		if (sandbox != null) builder.append(", sandbox={").append(sandbox.toString()).append("}");
 		if (datasources != null) builder.append(", datasources={").append(datasources.toString()).append("}");
 		if (connectors != null) builder.append(", connectors={").append(connectors.toString()).append("}");
+		if (cursors != null) builder.append(", cursors={").append(cursors.toString()).append("}");
 		return builder.toString();
 	}
 }

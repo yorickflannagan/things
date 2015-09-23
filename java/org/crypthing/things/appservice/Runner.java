@@ -24,6 +24,8 @@ import org.crypthing.things.appservice.config.ConfigException;
 import org.crypthing.things.appservice.config.ConfigProperties;
 import org.crypthing.things.appservice.config.ConfigReader;
 import org.crypthing.things.appservice.config.ConnectorsConfig;
+import org.crypthing.things.appservice.config.CursorConfig;
+import org.crypthing.things.appservice.config.CursorsConfig;
 import org.crypthing.things.appservice.config.DataSourcesConfig;
 import org.crypthing.things.appservice.config.JDBCConfigFactory;
 import org.crypthing.things.appservice.config.JNDIConfig;
@@ -48,6 +50,7 @@ implements	RunnerMBean,
 		InterruptEventDispatcher
 {
 	private class ShutdownHook implements Runnable { @Override public void run() { if (!hasShutdown) shutdown(); } }
+	private static Runner instance; 
 	public static final String MBEAN_PATTERN = "org.crypthing.things.appservice:type=Runner,name=";
 	private static final Logger log = Logger.getLogger(Runner.class.getName());
 	private static ObjectName mbName;
@@ -313,7 +316,7 @@ implements	RunnerMBean,
 		try
 		{
 			final RunnerConfig cfg = getConfig(config);
-			final Runner instance = new Runner(cfg);
+			instance = new Runner(cfg);
 			final JNDIConfig jndi = cfg.getJndi();
 			String jndiImpl;
 			if (jndi == null || (jndiImpl = jndi.getImplementation()) == null) throw new ConfigException("Config entry required: /config/jndi/implementation");
@@ -339,13 +342,19 @@ implements	RunnerMBean,
 			usage();
 		}
 	}
+	
+	public static Runner getInstance()
+	{
+		return instance;
+	}
+	
 	private static void usage()
 	{
 		log.log(Level.SEVERE, "Usage: Runner <config-xml>, where\t<config-xml> is the configuration XML file.");
 		System.exit(1);
 	}
 	
-	private static RunnerConfig getConfig(final File config) throws ConfigException
+	public static RunnerConfig getConfig(final File config) throws ConfigException
 	{
 		RunnerConfig ret;
 		try
@@ -381,6 +390,19 @@ implements	RunnerMBean,
 			digester.addSetNext("config/datasources/jdbc/property", "add");
 			digester.addSetNext("config/datasources/jdbc", "addJDBC");
 			digester.addSetNext("config/datasources", "setDatasources");
+			
+			
+			
+			digester.addObjectCreate("config/cursors", CursorsConfig.class);
+			digester.addObjectCreate("config/cursors/cursor", CursorConfig.class);
+			digester.addBeanPropertySetter("config/cursors/cursor/name", "name");
+			digester.addBeanPropertySetter("config/cursors/cursor/datasource", "datasource");
+			digester.addBeanPropertySetter("config/cursors/cursor/implementation", "implementation");
+			digester.addBeanPropertySetter("config/cursors/cursor/maxMemoryRecords", "maxMemoryRecords");
+			digester.addBeanPropertySetter("config/cursors/cursor/sleepBeetwenRun", "sleepBeetwenRun");
+			digester.addSetNext("config/cursors/cursor", "addCursor");						
+			digester.addSetNext("config/cursors", "setCursors");						
+			
 
 			ConnectorsConfig.setConfig(digester, "config", "setConnectors");
 
