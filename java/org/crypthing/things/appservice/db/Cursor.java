@@ -135,6 +135,11 @@ public class Cursor implements CursorMBean, InterruptEventListener {
 					currentIndex = 0;
 					stack.remove(0);
 				}
+				else
+				{
+					//TODO: testar consistência.
+					currentIndex = -1;
+				}
 			} finally {
 				_currentIndiceMutex.unlock();
 			}

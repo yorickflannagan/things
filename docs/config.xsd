@@ -10,6 +10,7 @@
 		<xs:element ref="sandbox" minOccurs="0" />
 		<xs:element ref="snmp" minOccurs="0" />
 		<xs:element ref="datasources" minOccurs="0" />
+		<xs:element ref="cursors" minOccurs="0" />
 		<xs:element ref="mqxconnectors" minOccurs="0" />
 	</xs:sequence>
 	</xs:complexType>
@@ -106,6 +107,24 @@
 			<xs:attribute name="driver" type="xs:string" use="required" />
 			<xs:attribute name="url" type="xs:string" use="required" />
 			<xs:attribute name="validationQuery" type="xs:string" use="optional" />
+		</xs:complexType>
+		</xs:element>
+	</xs:sequence>
+	</xs:complexType>
+	</xs:element>
+	
+	<xs:element name="cursors">
+	<xs:complexType>
+	<xs:sequence>
+		<xs:element name="cursor" minOccurs="1" maxOccurs="unbounded">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="name" type="xs:string" minOccurs="1" maxOccurs="1" />
+				<xs:element name="datasource" type="xs:string" minOccurs="1" maxOccurs="1" />
+				<xs:element name="implementation" type="xs:string" minOccurs="1" maxOccurs="1" />
+				<xs:element name="sleepBeetwenRun" type="xs:int" minOccurs="1" maxOccurs="1" />
+				<xs:element name="maxMemoryRecords" type="xs:int" minOccurs="1" maxOccurs="1" />
+			</xs:sequence>
 		</xs:complexType>
 		</xs:element>
 	</xs:sequence>
