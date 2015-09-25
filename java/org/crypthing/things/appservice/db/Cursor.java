@@ -54,7 +54,8 @@ public class Cursor implements CursorMBean, InterruptEventListener {
 		{
 			InitialContext ctx = new InitialContext();
 			Object ds =  ctx.lookup("java:jdbc/" + config.getDatasource());
-			if(!(ds instanceof DataSource)) throw new ConfigException("Datasource lookup failure. Object bound is not an datasource. [java:jdbc/" + this.config.getDatasource() +"]"); 
+			if(!(ds instanceof DataSource)) throw new ConfigException("Datasource lookup failure. Object bound is not an datasource. [java:jdbc/" + this.config.getDatasource() +"]");
+			this.ds = (DataSource) ds;
 			cr = Class.forName(this.config.getImplementation()).asSubclass(CursorReader.class).newInstance();
 			getData();
 			
