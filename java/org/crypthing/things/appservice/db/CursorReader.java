@@ -35,11 +35,16 @@ public abstract class CursorReader {
 	private synchronized void fillColumns(ResultSetMetaData metaData) throws SQLException {
 		if(columns != null) return;
 		final int columncount = metaData.getColumnCount();
-		columns = new String[columncount +1];
-		for(int i = 1; i < columncount; i++)
+		String[]_columns = new String[columncount +1];
+		for(int i = 1; i <= columncount; i++)
 		{
-			columns[i] = metaData.getColumnName(i);
+			_columns[i] = metaData.getColumnLabel(i);
+			if(_columns[i] == null)
+			{
+				throw new SQLException("Column " + i + " name is null");
+			}
 		}
+		columns = _columns;
 	}
 	
 	public Object readLine(ResultSet rs) throws SQLException

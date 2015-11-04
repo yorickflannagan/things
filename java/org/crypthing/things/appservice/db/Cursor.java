@@ -34,7 +34,7 @@ public class Cursor implements CursorMBean, InterruptEventListener {
 	private boolean hasShutdown = false;
 	private long lastRecord = 0;
 	private DataSource ds;
-	private Object[] current;
+	private Object[] current = new Object[0];
 	private long stock = 0;
 	private int currentIndex = -1;
 	private List<Object[]> stack = new LinkedList<Object[]>();
