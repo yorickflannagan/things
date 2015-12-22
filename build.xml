@@ -8,7 +8,12 @@
 -->
 <project basedir = "." default = "build" name = "things">
 	<target name = "init">
-		<tstamp />
+
+		<tstamp>
+			<format property="NOW" pattern="HH:mm dd/MM/yyyy z"/>
+		</tstamp> 
+
+		<buildnumber/>
 
 		<property environment = "env"/>
 
@@ -21,9 +26,10 @@
 				<isset property="DEBUG" />
 			</and>
 		</condition>
-		<property name = "target.file" value = "things-${package.version}.jar" />
+		<property name = "target.file" value = "things.jar" />
 		<property name = "target" value = "1.7"/>
 		<property name = "source" value = "1.7"/>
+
 
 		<path id = "project.dependencies">
 			<pathelement path = "${env.JDIGESTER_JAR}" />
@@ -72,11 +78,8 @@
 			<manifest>
 				<attribute name = "Implementation-Title" value = "Things Utilities" />
 				<attribute name = "Implementation-Vendor" value = "The Crypthing Initiative" />
-				<attribute name = "Implementation-Version" value = "${package.version} ${TODAY}" />
+				<attribute name = "Implementation-Version" value = "${package.version}.${build.number} ${NOW}" />
 			</manifest>
 		</jar>
-		<exec executable="ln" os="Linux">
-			<arg line="-s ${target.file} ${dist.dir}/things.jar"/>
-		</exec>
 	</target>
 </project>
