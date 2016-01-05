@@ -42,7 +42,7 @@ public abstract class Sandbox extends Thread implements ShutdownEventDispatcher,
 	}
 
 	@Override public void setShutdownEventListener(final ShutdownEventListener listener) { this.shutdownListner = listener; }
-	@Override public final void shutdown() { running = false; }
+	@Override public final void shutdown() { running = false; if(this.getState() != State.RUNNABLE) this.interrupt(); }
 
 	@Override
 	final public void run()
