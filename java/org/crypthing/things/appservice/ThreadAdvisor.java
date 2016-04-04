@@ -94,6 +94,8 @@ public class ThreadAdvisor {
 			
 			if(accConsume <= (current.average*accRatio)*0.1)
 			{
+				// Consume is too low compared to average consume. 
+				// Lowering threads, don't remember why, but there's a reason, so don't touch that if you are not sure.
 				if(log.isLoggable(Level.FINE)) 
 				{
 					log.fine("Advisor: Will return -1 because of below statistics:");

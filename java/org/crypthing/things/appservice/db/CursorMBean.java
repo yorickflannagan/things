@@ -5,5 +5,6 @@ public interface CursorMBean {
 	long getStock();
 	String getSQLStatement();
 	long getLastRecord();
+	void reset();
 	
 }

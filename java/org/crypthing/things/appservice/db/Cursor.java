@@ -40,6 +40,7 @@ public class Cursor implements CursorMBean, InterruptEventListener {
 	private List<Object[]> stack = new LinkedList<Object[]>();
 	private final ReentrantLock currentIndiceMutex = new ReentrantLock();
 	private final ReentrantLock swapMutex = new ReentrantLock();
+	private ReentrantLock getDataMutex = new ReentrantLock();
 	ProcessingEventListener trap;
 	public static final String MBEAN_PATTERN = "org.crypthing.things.appservice:type=Cursor,name=";
 	
@@ -158,52 +159,46 @@ public class Cursor implements CursorMBean, InterruptEventListener {
 	private int getData() throws SQLException
 	{
 		ReentrantLock _swapMutex = swapMutex;
-		String sql = cr.getSQL();
+		ReentrantLock _getDataMutex = getDataMutex;
 		int lenData = 0;
-		List<Object> ret;
-		Connection conn = ds.getConnection();
-		try
-		{
-			PreparedStatement stm = conn.prepareStatement(sql, ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
+		_getDataMutex.lock();
+		try {
+			String sql = cr.getSQL();
+			List<Object> ret;
+			Connection conn = ds.getConnection();
 			try
 			{
-				stm.setLong(1, lastRecord); 
-				ResultSet rs = stm.executeQuery();
+				PreparedStatement stm = conn.prepareStatement(sql, ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
 				try
 				{
-					ret = new ArrayList<Object>(cr.fetchSize());
-					long tmp = cr.fill(rs, ret);
-					if(tmp != 0) lastRecord = tmp;
-					if(!ret.isEmpty())
+					stm.setLong(1, lastRecord); 
+					ResultSet rs = stm.executeQuery();
+					try
 					{
-						_swapMutex.lock();
-						try
+						ret = new ArrayList<Object>(cr.fetchSize());
+						long tmp = cr.fill(rs, ret);
+						if(tmp != 0) lastRecord = tmp;
+						if(!ret.isEmpty())
 						{
-							final Object[] oa = ret.toArray();
-							lenData = oa.length;
-							stock+= lenData;
-							stack.add(oa);
-						}
-						finally
-						{
-							_swapMutex.unlock();
+							_swapMutex.lock();
+							try
+							{
+								final Object[] oa = ret.toArray();
+								lenData = oa.length;
+								stock+= lenData;
+								stack.add(oa);
+							}
+							finally { _swapMutex.unlock(); }
 						}
 					}
+					finally { rs.close(); }
 				}
-				finally
-				{
-					rs.close();
-				}
+				finally { stm.close(); }
 			}
-			finally
-			{
-				stm.close();
-			}
-		}
-		finally
-		{
-			conn.close();
-		}
+			finally { conn.close(); }
+		} 
+		finally  { _getDataMutex.unlock(); }
+		
 		return lenData;
 	}
 	
@@ -265,4 +260,26 @@ public class Cursor implements CursorMBean, InterruptEventListener {
 	public long getLastRecord() {
 		return lastRecord;
 	}
+
+	@Override
+	public void reset() {
+		ReentrantLock _swapMutex = swapMutex;
+		ReentrantLock _getDataMutex = getDataMutex;
+		_getDataMutex.lock();
+		try { 
+			_swapMutex.lock();
+			try {
+				this.lastRecord = lastRecord;
+				stock = 0;
+				currentIndex = -1;
+				stack.clear();
+			}
+			finally
+			{
+				_swapMutex.unlock();
+			}
+		}
+		finally { _getDataMutex.unlock(); }
+	}
+	
 }
