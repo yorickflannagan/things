@@ -269,7 +269,7 @@ public class Cursor implements CursorMBean, InterruptEventListener {
 		try { 
 			_swapMutex.lock();
 			try {
-				this.lastRecord = lastRecord;
+				this.lastRecord = 0;
 				stock = 0;
 				currentIndex = -1;
 				stack.clear();
