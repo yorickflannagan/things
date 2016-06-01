@@ -250,6 +250,11 @@ public class Cursor implements CursorMBean, InterruptEventListener {
 	public long getStock() {
 		return stock;
 	}
+	
+	@Override
+	public long getRemainder() {
+		return stock - Math.max(currentIndex, 0);
+	}
 
 	@Override
 	public String getSQLStatement() {
