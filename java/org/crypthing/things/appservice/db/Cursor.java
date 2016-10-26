@@ -58,6 +58,9 @@ public class Cursor implements CursorMBean, InterruptEventListener {
 			if(!(ds instanceof DataSource)) throw new ConfigException("Datasource lookup failure. Object bound is not an datasource. [java:jdbc/" + this.config.getDatasource() +"]");
 			this.ds = (DataSource) ds;
 			cr = Class.forName(this.config.getImplementation()).asSubclass(CursorReader.class).newInstance();
+			
+			if(cr instanceof Resetable) { lastRecord =((Resetable)cr).getStartRecord(this.ds); }
+			
 			getData();
 			
 			ManagementFactory.getPlatformMBeanServer().registerMBean
@@ -274,7 +277,8 @@ public class Cursor implements CursorMBean, InterruptEventListener {
 		try { 
 			_swapMutex.lock();
 			try {
-				this.lastRecord = 0;
+				if(cr instanceof Resetable) { lastRecord =((Resetable)cr).getStartRecord(this.ds); } 
+				else lastRecord=0; 
 				stock = 0;
 				currentIndex = -1;
 				stack.clear();
