@@ -9,10 +9,10 @@ public class ConvertToShort implements Converter<Short>
 {
 	private final short def;
 	public ConvertToShort(final short def) { this.def = def; }
-	@Override public Short convert(final String value) throws ClassCastException
+	@Override public Short convert(final Object value) throws ClassCastException
 	{
 		if (value == null) return def;
-		try { return Short.parseShort(value); }
+		try { return Short.parseShort((String) value); }
 		catch (final NumberFormatException e) { throw new ClassCastException(e.getMessage()); }
 	}
 }

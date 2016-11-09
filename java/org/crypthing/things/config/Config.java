@@ -10,6 +10,8 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.Serializable;
 import java.nio.CharBuffer;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -19,9 +21,13 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.SchemaFactory;
 import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
 import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 import org.xml.sax.ErrorHandler;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -140,11 +146,10 @@ public class Config implements Serializable
 		}
 		catch (final Throwable e) { throw new ConfigException(CONFIG_NOT_LOADED, e); }
 	}
-
 	/**
 	 * Gets specified entry
 	 * @param path: XPath expression.
-	 * @return the entry value or null.
+	 * @return the entry value or null if path is an invalid XPath expression.
 	 */
 	public String getValue(final String path)
 	{
@@ -159,16 +164,90 @@ public class Config implements Serializable
 		catch (final Throwable swallowed) { ret = null; } 
 		return ret;
 	}
-
 	/**
-	 * Gets entry as specified type. 
+	 * Gets entry as specified type from DOM node. 
 	 * @param path: XPath expression.
 	 * @param conv: result conversion utility.
-	 * @return: converted entry value.
+	 * @return: converted entry value or null if path is an invalid XPath expression.
 	 */
 	public <T> T getValue(final String path, final Converter<T> conv)
 	{
 		if (conv == null) throw new NullPointerException(INVALID_ARG);
-		return conv.convert(getValue(path));
+		final String value = getValue(path);
+		if (value == null) return null;
+		return conv.convert(value);
 	}
+	/**
+	 * Gets entry as specified type. 
+	 * @param path: XPath expression.
+	 * @param node: search start node.
+	 * @param conv: result conversion utility.
+	 * @return entry value or null if path is an invalid XPath expression.
+	 */
+	public <T> T getValue(final String path, final Node node, final Converter<T> conv)
+	{
+		if (conv == null) throw new NullPointerException(INVALID_ARG);
+		final String value = getValue(path, node);
+		if (value == null) return null;
+		return conv.convert(value);
+	}
+	/**
+	 * Gets entry value from DOM node.
+	 * @param path: XPath expression.
+	 * @param node: search start node.
+	 * @return entry value or null if path is an invalid XPath expression.
+	 */
+	public String getValue(final String path, final Node node)
+	{
+		final XPath xPath = xFactory.newXPath();
+		try { return xPath.compile(path).evaluate(node); }
+		catch (final XPathExpressionException e) { return null; }
+	}
+	/**
+	 * Gets entry value as a DOM node.
+	 * @param path: XPath expression.
+	 * @return entry value or null if path is an invalid XPath expression.
+	 */
+	public Node getNodeValue(final String path)
+	{
+		final XPath xPath = xFactory.newXPath();
+		try { return (Node) xPath.compile(path).evaluate(doc, XPathConstants.NODE); }
+		catch (final XPathExpressionException e) { return null; }
+	}
+	private <T> Collection<T> getObjectValue(final String path, final Object domNode, final Converter<T> conv)
+	{
+		if (path == null || conv == null) throw new NullPointerException(INVALID_ARG);
+		final ArrayList<T> ret = new ArrayList<T>();
+		final XPath xPath = xFactory.newXPath();
+		try
+		{
+			final NodeList nodes = (NodeList) xPath.compile(path).evaluate(domNode, XPathConstants.NODESET);
+			for (int i = 0; i < nodes.getLength(); i++)
+			{
+				final Node item = nodes.item(i);
+				if (item.getNodeType() == Node.ELEMENT_NODE)
+				{
+					final T value = conv.convert(item);
+					if (value != null) ret.add(value);
+				}
+			}
+			return ret;
+		}
+		catch (final ClassCastException | XPathExpressionException swallowed) { return null; }
+	}
+	/**
+	 * Gets entry as a collection of specified type.
+	 * @param path: XPath expression.
+	 * @param node: DOM node where search should start.
+	 * @param conv: result conversion utility. convert() method argument must be of type org.w3c.dom.Node
+	 * @return a (possibly empty) collection or null if path is an invalid XPath expression.
+	 */
+	public <T> Collection<T> getValueCollection(final String path, final Node node, final Converter<T> conv) { return getObjectValue(path, node, conv); }
+	/**
+	 * Gets entry as a collection of specified type.
+	 * @param path: XPath expression.
+	 * @param conv: result conversion utility. convert() method argument must be of type org.w3c.dom.Node
+	 * @return a (possibly empty) collection or null if path is an invalid XPath expression.
+	 */
+	public <T> Collection<T> getValueCollection(final String path, final Converter<T> conv) { return getObjectValue(path, doc, conv); }
 }

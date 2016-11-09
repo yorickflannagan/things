@@ -9,15 +9,7 @@ public abstract class AbstractSimpleWorkerFactory implements WorkerFactory {
 	protected CountDownLatch doneSignal;
 	protected int times;
 	protected Properties prop;
-
-	public AbstractSimpleWorkerFactory() {
-		// TODO Auto-generated constructor stub
-	}
-
-	public Worker getWorker() {
-		// TODO Auto-generated method stub
-		return null;
-	}
+	public abstract Worker getWorker();
 
 	public void init(CountDownLatch startSignal, CountDownLatch doneSignal,
 			int times, Properties p) {

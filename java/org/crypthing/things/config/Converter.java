@@ -7,5 +7,11 @@ package org.crypthing.things.config;
  */
 public interface Converter<T>
 {
-	T convert(String value) throws ClassCastException;
+	/**
+	 * Converts entry value to type T.
+	 * @param value: entry value.
+	 * @return the converted type.
+	 * @throws ClassCastException
+	 */
+	T convert(Object value) throws ClassCastException;
 }

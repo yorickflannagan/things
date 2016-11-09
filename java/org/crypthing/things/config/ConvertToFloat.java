@@ -9,10 +9,10 @@ public final class ConvertToFloat implements Converter<Float>
 {
 	private final float def;
 	public ConvertToFloat(final float def) { this.def = def; }
-	@Override public Float convert(final String value) throws ClassCastException
+	@Override public Float convert(final Object value) throws ClassCastException
 	{
 		if (value == null) return def;
-		try { return Float.parseFloat(value); }
+		try { return Float.parseFloat((String) value); }
 		catch (final NumberFormatException e) { throw new ClassCastException(e.getMessage()); }
 	}
 }

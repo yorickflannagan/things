@@ -142,7 +142,6 @@ public class Cursor implements CursorMBean, InterruptEventListener {
 				}
 				else
 				{
-					//TODO: testar consistência.
 					currentIndex = -1;
 				}
 			} finally {

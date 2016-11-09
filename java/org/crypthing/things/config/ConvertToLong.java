@@ -9,10 +9,10 @@ public class ConvertToLong implements Converter<Long>
 {
 	private final long def;
 	public ConvertToLong(final long def) { this.def = def; }
-	@Override public Long convert(final String value) throws ClassCastException
+	@Override public Long convert(final Object value) throws ClassCastException
 	{
 		if (value == null) return def;
-		try { return Long.parseLong(value); }
+		try { return Long.parseLong((String) value); }
 		catch (final NumberFormatException e) { throw new ClassCastException(e.getMessage()); }
 	}
 }

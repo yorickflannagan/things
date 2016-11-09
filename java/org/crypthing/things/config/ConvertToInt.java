@@ -9,10 +9,10 @@ public final class ConvertToInt implements Converter<Integer>
 {
 	private final int def;
 	public ConvertToInt(final int defaultValue) { def = defaultValue; }
-	@Override public Integer convert(String value) throws ClassCastException
+	@Override public Integer convert(Object value) throws ClassCastException
 	{
 		if (value == null) return def;
-		try { return Integer.parseInt(value); }
+		try { return Integer.parseInt((String) value); }
 		catch (final NumberFormatException e) { throw new ClassCastException(e.getMessage()); }
 	}
 }
