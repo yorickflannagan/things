@@ -200,18 +200,25 @@ public class Config implements Serializable
 	public String getValue(final String path, final Node node)
 	{
 		final XPath xPath = xFactory.newXPath();
-		try { return xPath.compile(path).evaluate(node); }
-		catch (final XPathExpressionException e) { return null; }
+		String ret;
+		try
+		{
+			ret = xPath.compile(path).evaluate(node);
+			if (ret != null && ret.length() == 0) ret = null;
+		}
+		catch (final XPathExpressionException e) { ret = null; }
+		return ret;
 	}
 	/**
 	 * Gets entry value as a DOM node.
 	 * @param path: XPath expression.
 	 * @return entry value or null if path is an invalid XPath expression.
 	 */
-	public Node getNodeValue(final String path)
+	public Node getNodeValue(final String path) { return getNodeValue(path, doc); }
+	public Node getNodeValue(final String path, final Node node)
 	{
 		final XPath xPath = xFactory.newXPath();
-		try { return (Node) xPath.compile(path).evaluate(doc, XPathConstants.NODE); }
+		try { return (Node) xPath.compile(path).evaluate(node, XPathConstants.NODE); }
 		catch (final XPathExpressionException e) { return null; }
 	}
 	private <T> Collection<T> getObjectValue(final String path, final Object domNode, final Converter<T> conv)
