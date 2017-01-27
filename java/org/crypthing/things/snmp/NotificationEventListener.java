@@ -4,5 +4,5 @@ import java.util.EventListener;
 
 public interface NotificationEventListener extends EventListener
 {
-	void notify(NotificationEvent e);
+	void notify(Event e);
 }

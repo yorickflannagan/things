@@ -22,13 +22,13 @@ public class ProcessingEvent extends Event
 		switch(type)
 		{
 		case info:
-			oid = "3.1";
+			oid = ".3.1";
 			break;
 		case warning:
-			oid = "3.2";
+			oid = ".3.2";
 			break;
 		default:
-			oid = "3.3";
+			oid = ".3.3";
 		}
 		setThroable(e).setRelativeOID(oid);
 	}

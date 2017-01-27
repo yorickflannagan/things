@@ -12,13 +12,13 @@ public class LifecycleEvent extends Event
 		switch(type)
 		{
 		case start:
-			oid = "2.1";
+			oid = ".2.1";
 			break;
 		case work:
-			oid = "2.2";
+			oid = ".2.2";
 			break;
 		default:
-			oid = "2.3";
+			oid = ".2.3";
 		}
 		setRelativeOID(oid).setData(data);
 	}

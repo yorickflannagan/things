@@ -26,14 +26,18 @@ public class Trap implements Serializable
 		private static final String ENTERPRISE_RELATIVE_OID = ".0";
 		private static final String TIMER_RELATIVE_OID = ".1.1";
 		private static final String JVM_NAME_RELATIVE_OID = ".1.2";
+		private static final String JBOSS_RELATIVE_OID = ".1.3";
+		private static final String JBOSS_SERVER = "jboss.server.name";
 		private final OID timer;
 		private final VariableBinding enterprise;
 		private final VariableBinding jvm;
+		private final VariableBinding jboss;
 		private Bindings(final String root)
 		{
 			timer = new OID(root + TIMER_RELATIVE_OID);
 			enterprise = new VariableBinding(SnmpConstants.sysObjectID, new OID(root + ENTERPRISE_RELATIVE_OID));
 			jvm = new VariableBinding(new OID(root + JVM_NAME_RELATIVE_OID), new OctetString(ManagementFactory.getRuntimeMXBean().getName()));
+			jboss = new VariableBinding(new OID(root + JBOSS_RELATIVE_OID), new OctetString(System.getProperty(JBOSS_SERVER, "")));
 		}
 	}
 	private static final long serialVersionUID = -5215304197662514761L;
@@ -84,6 +88,7 @@ public class Trap implements Serializable
 		pdu.add(new VariableBinding(SnmpConstants.sysUpTime, new TimeTicks((time - START_TIME)/10)));
 		pdu.add(defaults.enterprise);
 		pdu.add(defaults.jvm);
+		pdu.add(defaults.jboss);
 		return pdu;
 	}
 }

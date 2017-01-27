@@ -1,10 +1,12 @@
 <?xml version = "1.0" encoding = "UTF-8" standalone = "no"?>
 <!--
-	Requires gtx-env
-	for debug call DEBUG=1
-	Required environment:
-		JDIGESTER_JAR: JDigester
-		JSNMP_JAR: SNMP4J
+	Arguments (-D)
+		DEBUG: 1 for true
+		VERSION: version number
+		JDIGESTER_JAR: complete path to JDigester
+		JSNMP_JAR: complete path to SNMP4J
+		LOGGING: Logging profile
+		ant -buildfile build.xml -DVERSION=2.0.0 -DJDIGESTER_JAR=/home/magut/development/3rdparty/commons-digester3-3.2/commons-digester3-3.2-with-deps.jar -DJSNMP_JAR=/home/magut/development/3rdparty/snmp4j-2.3.3/dist/snmp4j-2.3.3.jar -DLOGGING=sicif-logger
 -->
 <project basedir = "." default = "build" name = "things">
 	<target name = "init">
@@ -17,7 +19,7 @@
 
 		<property environment = "env"/>
 
-		<property name = "package.version" value = "1.5.0" />
+		<property name = "package.version" value = "${VERSION}" />
 		<property name = "src.dir" value = "java" />
 		<property name = "bin.dir" value = "java-bin" />
 		<condition property = "dist.dir" value = "dist/debug" else = "dist/release">
@@ -32,11 +34,13 @@
 
 
 		<path id = "project.dependencies">
-			<pathelement path = "${env.JDIGESTER_JAR}" />
-			<pathelement path = "${env.JSNMP_JAR}" />
+			<pathelement location = "${JDIGESTER_JAR}" />
+			<pathelement location = "${JSNMP_JAR}" />
 		</path>
 		<property name = "project.classpath" refid = "project.dependencies" />
+		<!--
 		<property name = "project.resources" value = "${env.CRYPTHINGS}/docs/config.xsd" />
+		-->
 	</target>
 
 	<target name = "check" depends = "init, clean">
@@ -73,12 +77,15 @@
 	<target name = "build" depends = "compile">
 		<jar destfile = "${dist.dir}/${target.file}" level = "9" strict = "fail" >
 			<fileset dir = "${bin.dir}" />
+			<!--
 			<fileset file = "${project.resources}" />
+			-->
 			<fileset dir = "${src.dir}" />
 			<manifest>
 				<attribute name = "Implementation-Title" value = "Things Utilities" />
 				<attribute name = "Implementation-Vendor" value = "The Crypthing Initiative" />
 				<attribute name = "Implementation-Version" value = "${package.version}.${build.number} ${NOW}" />
+				<attribute name = "Logging-Profile" value = "${LOGGING}" />
 			</manifest>
 		</jar>
 	</target>

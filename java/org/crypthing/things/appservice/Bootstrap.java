@@ -176,6 +176,7 @@ public final class Bootstrap
 	static JVMConfig getJVMConfig(final File config, final File schema) throws ConfigException
 	{
 		JVMConfig ret;
+
 		final SchemaFactory fac = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
 		final DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 		try
