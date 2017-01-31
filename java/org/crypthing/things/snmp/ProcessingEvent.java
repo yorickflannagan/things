@@ -9,14 +9,25 @@ public class ProcessingEvent extends Event
 	public ProcessingEvent(final ProcessingEventType type, final String message) { this(type, message, null); }
 	public ProcessingEvent(final ProcessingEventType type, final String message, final Throwable e)
 	{
-		if (message != null)
+		final String out;
+		if (e != null && message != null)
 		{
-			setData(new Encodable()
-			{
-				@Override public String encode() { return message; }
-				@Override public void decode(final String data) {}
-			});
+			final StringBuilder builder = new StringBuilder(256);
+			if (e != null) builder.append(e.getClass().getName()).append(": ");
+			if (message != null) builder.append(message);
+			out = builder.toString();
 		}
+		else if (message != null) out = message;
+		else if (e != null) out = e.getClass().getName() + ": " + e.getMessage();
+		else out = "";
+		setData(new Encodable()
+		{
+			@Override public Object encode() { return out; }
+			@Override public void decode(final String data) {}
+			@Override public void decode(final byte[] data) throws EncodeException {}
+			@Override public void decode(final int data) throws EncodeException {}
+			@Override public Type getEncoding() { return Encodable.Type.STRING; }
+		});
 		this.type = type;
 		final String oid;
 		switch(type)

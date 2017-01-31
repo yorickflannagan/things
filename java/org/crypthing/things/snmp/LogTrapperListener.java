@@ -18,15 +18,24 @@ public class LogTrapperListener implements LifecycleEventListener, ProcessingEve
 	}
 	private void dispatch(final ProcessingEvent e, final Level level)
 	{
-		String msg = e.getData().encode();
+		if (e == null) throw new NullPointerException();
+		final Encodable encode = e.getData();
+		String msg;
+		if (encode != null && encode.getEncoding() == Encodable.Type.STRING) msg = (String) encode.encode();
+		else msg = "";
 		final Throwable ex = e.getThroable();
-		if (ex != null) msg = "Message ID: " + UUID.randomUUID().toString() + " - " + msg;
+		if (ex != null) msg = "Message ID: " + UUID.randomUUID().toString() + " [ " + ex.getClass().getName() + " ] - " + msg;
 		logger.log(level, msg, ex);
 		if (trapper != null) trapper.notify(e);
 	}
 	private void dispatch(final LifecycleEvent e)
 	{
-		logger.info(e.getData().encode());
+		if (e == null) throw new NullPointerException();
+		final Encodable encode = e.getData();
+		String msg;
+		if (encode != null && encode.getEncoding() == Encodable.Type.STRING) msg = (String) encode.encode();
+		else msg = "";
+		logger.info(msg);
 		if (trapper != null) trapper.notify(e);
 	}
 	@Override public void info(final ProcessingEvent e) { dispatch(e, Level.INFO); }

@@ -14,6 +14,30 @@ public class Monitor extends TicketClerk implements LifecycleEventListener, Proc
 {
 	private static final long serialVersionUID = -533126638825126981L;
 	private static final String SNMP_ERROR = "Could not create an SNMP dispatcher";
+	private static final LifecycleEvent MON_START = new LifecycleEvent
+	(
+		LifecycleEventType.start,
+		new Encodable()
+		{
+			@Override public Object encode() { return "Application monitor has started"; }
+			@Override public void decode(final String data) throws EncodeException {}
+			@Override public void decode(final byte[] data) throws EncodeException {}
+			@Override public void decode(int data) throws EncodeException {}
+			@Override public Type getEncoding() { return Encodable.Type.STRING; }
+		}
+	);
+	private static final LifecycleEvent MON_END = new LifecycleEvent
+	(
+		LifecycleEventType.stop,
+		new Encodable()
+		{
+			@Override public Object encode() { return "Application monitor has ended"; }
+			@Override public void decode(final String data) throws EncodeException {}
+			@Override public void decode(final byte[] data) throws EncodeException {}
+			@Override public void decode(int data) throws EncodeException {}
+			@Override public Type getEncoding() { return Encodable.Type.STRING; }
+		}
+	);
 	private static final TimeUnit UNIT = TimeUnit.MINUTES;
 	private class Dispenser extends Thread
 	{
@@ -43,7 +67,7 @@ public class Monitor extends TicketClerk implements LifecycleEventListener, Proc
 		final Dispenser dispenser = new Dispenser(this);
 		dispenser.setDaemon(true);
 		Executors.newSingleThreadScheduledExecutor().scheduleWithFixedDelay(dispenser, delay, delay, UNIT);
-		start(new LifecycleEvent(LifecycleEventType.start));
+		start(MON_START);
 	}
 	public void end()
 	{
@@ -54,13 +78,17 @@ public class Monitor extends TicketClerk implements LifecycleEventListener, Proc
 			trap.notify(new GatheredBillingEvent(tickets));
 		}
 		catch (final IOException e) { error(new ProcessingEvent(ProcessingEventType.error, SNMP_ERROR, e)); }
-		stop(new LifecycleEvent(LifecycleEventType.stop));
+		stop(MON_END);
 	}
 	private void dispatch(final ProcessingEvent e, final Level level)
 	{
-		String msg = e.getData().encode();
+		if (e == null) throw new NullPointerException();
+		final Encodable encode = e.getData();
+		String msg;
+		if (encode != null && encode.getEncoding() == Encodable.Type.STRING) msg = (String) encode.encode();
+		else msg = "";
 		final Throwable ex = e.getThroable();
-		if (ex != null) msg = "Message ID: " + UUID.randomUUID().toString() + " - " + msg;
+		if (ex != null) msg = "Message ID: " + UUID.randomUUID().toString() + " [ " + ex.getClass().getName() + " ] - " + msg;
 		logger.log(level, msg, ex);
 		try
 		{
@@ -71,7 +99,12 @@ public class Monitor extends TicketClerk implements LifecycleEventListener, Proc
 	}
 	private void dispatch(final LifecycleEvent e)
 	{
-		logger.info(e.getData().encode());
+		if (e == null) throw new NullPointerException();
+		final Encodable encode = e.getData();
+		String msg;
+		if (encode != null && encode.getEncoding() == Encodable.Type.STRING) msg = (String) encode.encode();
+		else msg = "";
+		logger.info(msg);
 		try
 		{
 			final SNMPBridge trap = new SNMPBridge(udpAddress, oidRoot);

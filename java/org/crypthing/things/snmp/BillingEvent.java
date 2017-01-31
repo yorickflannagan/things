@@ -5,16 +5,18 @@ public class BillingEvent extends NotificationEvent
 {
 	private static class Score implements Encodable
 	{
-		private String data;
-		private Score(final int count) { data = Integer.toString(count); }
+		private int data;
+		private Score(final int count) { data = count; }
+		@Override public Object encode() { return data; }
+		@Override public void decode(byte[] data) throws EncodeException { throw new EncodeException(); }
+		@Override public void decode(int data) throws EncodeException { this.data = data; }
 		@Override
 		public void decode(String data) throws EncodeException
 		{
-			try { Integer.parseInt(data); }
+			try { this.data = Integer.parseInt(data); }
 			catch (final NumberFormatException e) { throw new EncodeException(e); }
-			this.data = data;
 		}
-		@Override public String encode() { return data; }
+		@Override public Type getEncoding() { return Encodable.Type.INTEGER32; }
 	}
 	public BillingEvent(final int count)
 	{

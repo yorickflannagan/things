@@ -11,10 +11,12 @@ import org.snmp4j.PDU;
 import org.snmp4j.Snmp;
 import org.snmp4j.mp.SnmpConstants;
 import org.snmp4j.smi.Counter64;
+import org.snmp4j.smi.Integer32;
 import org.snmp4j.smi.OID;
 import org.snmp4j.smi.OctetString;
 import org.snmp4j.smi.TimeTicks;
 import org.snmp4j.smi.UdpAddress;
+import org.snmp4j.smi.Variable;
 import org.snmp4j.smi.VariableBinding;
 import org.snmp4j.transport.DefaultUdpTransportMapping;
 
@@ -76,7 +78,23 @@ public class Trap implements Serializable
 	{
 		if (evt == null) throw new NullPointerException();
 		final PDU pdu = getDefaultBindings();
-		pdu.add(new VariableBinding(new OID(rootOID + evt.getRelativeOID()), new OctetString(evt.getData().encode())));
+		final Encodable encode = evt.getData();
+		final Variable var;
+		if (encode != null)
+		{
+			switch (encode.getEncoding())
+			{
+			case STRING:
+				var = new OctetString((String) encode.encode());
+				break;
+			case INTEGER32:
+				var = new Integer32((int) encode.encode());
+				break;
+			default: var = new OctetString((byte[]) encode.encode());
+			}
+		}
+		else var = new OctetString();
+		pdu.add(new VariableBinding(new OID(rootOID + evt.getRelativeOID()), var));
 		send(pdu);
 	}
 	protected PDU getDefaultBindings()
