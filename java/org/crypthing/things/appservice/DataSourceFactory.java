@@ -30,9 +30,9 @@ import javax.sql.DataSource;
 
 import org.crypthing.things.appservice.config.ConfigException;
 import org.crypthing.things.appservice.config.JDBCConfig;
-import org.crypthing.things.events.ProcessingEvent;
-import org.crypthing.things.events.ProcessingEventListener;
-import org.crypthing.things.events.ProcessingEvent.ProcessingEventType;
+import org.crypthing.things.snmp.ProcessingEvent;
+import org.crypthing.things.snmp.ProcessingEventListener;
+import org.crypthing.things.snmp.ProcessingEvent.ProcessingEventType;
 
 public class DataSourceFactory extends Reference implements DataSource, ResourceProvider, ReleaseResourceListener
 {
@@ -68,7 +68,7 @@ public class DataSourceFactory extends Reference implements DataSource, Resource
 		if (conn != null)
 		{
 			try { conn.forceClose(); }
-			catch (SQLException e) { trap.error(new ProcessingEvent(this, ProcessingEventType.error, "Could not close JDBC connection", e)); }
+			catch (SQLException e) { trap.error(new ProcessingEvent(ProcessingEventType.error, "Could not close JDBC connection", e)); }
 			instances.remove(resource);
 		}
 	}

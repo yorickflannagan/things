@@ -16,6 +16,7 @@ public class Analise {
 		if(args != null && args.length < 1)
 		{
 			usage();
+			System.exit(-1);
 		}
 		
 		File f = new File(args[0]);
@@ -24,7 +25,12 @@ public class Analise {
 			public boolean accept(File dir, String name) {
 				return  name.toLowerCase().endsWith(".bin");
 			}
-		});		
+		});
+		if (binfiles == null)
+		{
+			usage();
+			System.exit(-2);
+		}
 		DataInputStream[] dim = new DataInputStream[binfiles.length];
 		long[] init = new long[binfiles.length];
 		int threads = 0;

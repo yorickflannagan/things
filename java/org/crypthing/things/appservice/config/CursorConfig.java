@@ -1,5 +1,8 @@
 package org.crypthing.things.appservice.config;
 
+import org.crypthing.things.config.Config;
+import org.w3c.dom.Node;
+
 public class CursorConfig {
 
 	private String name;
@@ -7,8 +10,13 @@ public class CursorConfig {
 	private String implementation;
 	private int maxMemoryRecords;
 	private long sleepBeetwenRun;
-	
-	
+
+	public CursorConfig() {}
+	public CursorConfig(final Config cfg, final Node node)
+	{
+		
+	}
+
 	public  String getName() {return name; }
 	public  void setName(String name) { this.name = name;}
 	public  String getDatasource() { return datasource;}

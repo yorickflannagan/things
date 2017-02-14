@@ -3,10 +3,9 @@
 	Arguments (-D)
 		DEBUG: 1 for true
 		VERSION: version number
-		JDIGESTER_JAR: complete path to JDigester
 		JSNMP_JAR: complete path to SNMP4J
 		LOGGING: Logging profile
-		ant -buildfile build.xml -DVERSION=2.0.0 -DJDIGESTER_JAR=/home/magut/development/3rdparty/commons-digester3-3.2/commons-digester3-3.2-with-deps.jar -DJSNMP_JAR=/home/magut/development/3rdparty/snmp4j-2.3.3/dist/snmp4j-2.3.3.jar -DLOGGING=sicif-logger
+		ant -buildfile build.xml -DVERSION=2.0.0 -DJSNMP_JAR=/home/magut/development/3rdparty/snmp4j-2.3.3/dist/snmp4j-2.3.3.jar -DLOGGING=sicif-logger
 -->
 <project basedir = "." default = "build" name = "things">
 	<target name = "init">
@@ -34,7 +33,6 @@
 
 
 		<path id = "project.dependencies">
-			<pathelement location = "${JDIGESTER_JAR}" />
 			<pathelement location = "${JSNMP_JAR}" />
 		</path>
 		<property name = "project.classpath" refid = "project.dependencies" />

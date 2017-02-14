@@ -1,7 +1,11 @@
 package org.crypthing.things.appservice.config;
 
 import java.util.Enumeration;
+import java.util.Iterator;
 import java.util.Properties;
+
+import org.crypthing.things.config.Config;
+import org.w3c.dom.Node;
 
 public class ConfigProperties extends Properties
 {
@@ -18,5 +22,11 @@ public class ConfigProperties extends Properties
 			builder.append(key).append("=").append(getProperty(key)).append("\n");
 		}
 		return builder.toString();
+	}
+	public ConfigProperties() {}
+	public ConfigProperties(final Config cfg, final Node node)
+	{
+		final Iterator<Property> props = cfg.getValueCollection("./property", new PropertyFactory(cfg)).iterator();
+		while (props.hasNext()) add(props.next());
 	}
 }

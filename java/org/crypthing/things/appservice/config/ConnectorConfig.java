@@ -3,13 +3,36 @@ package org.crypthing.things.appservice.config;
 import java.util.HashMap;
 import java.util.Iterator;
 
+import org.crypthing.things.config.Config;
+import org.crypthing.things.config.Converter;
+import org.w3c.dom.Node;
+
 public final class ConnectorConfig extends HashMap<String, QueueConfig>
 {
 	private static final long serialVersionUID = -1588464613738084352L;
 	private String name;
 	private String driver;
-	private ConfigProperties context = new ConfigProperties();
-	public ConnectorConfig(final String name, final String driver) { this.name = name; this.driver = driver; }
+	private ConfigProperties context;
+
+	public ConnectorConfig(final String name, final String driver)
+	{
+		super();
+		this.name = name;
+		this.driver = driver;
+		context = new ConfigProperties();
+	}
+	public ConnectorConfig(final Config cfg, final Node node)
+	{
+		name = cfg.getValue("./@name", node);
+		driver = cfg.getValue("./@driver", node);
+		context = new ConfigProperties(cfg, cfg.getNodeValue("./context", node));
+		final Iterator<QueueConfig> queues = cfg.getValueCollection("./queues/queue", node, new Converter<QueueConfig>()
+		{
+			@Override public QueueConfig convert(final Object value) throws ClassCastException { return new QueueConfig(cfg, (Node) value); }
+		}).iterator();
+		while (queues.hasNext()) add(queues.next());
+	}
+
 	public String getName() { return name; }
 	public void setName(final String name) { this.name = name; }
 	public String getDriver() { return driver; }

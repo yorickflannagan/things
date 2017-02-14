@@ -1,17 +1,31 @@
 package org.crypthing.things.appservice.config;
 
+import org.crypthing.things.config.Config;
+import org.w3c.dom.Node;
+
 
 public final class RunnerConfig
 {
-	private WorkerConfig worker;
 	private JNDIConfig jndi;
-	private ConfigProperties snmp;
+	private WorkerConfig worker;
 	private ConfigProperties sandbox;
+	private ConfigProperties snmp;
 	private DataSourcesConfig datasources;
-	private ConnectorsConfig connectors;
 	private CursorsConfig cursors;
-	
-	
+	private ConnectorsConfig connectors;
+
+	public RunnerConfig() {}
+	public RunnerConfig(final Config cfg, final Node node)
+	{
+		jndi = new JNDIConfig(cfg, cfg.getNodeValue("./jndi", node));
+		worker = new WorkerConfig(cfg, cfg.getNodeValue("./worker", node));
+		sandbox = new ConfigProperties(cfg, cfg.getNodeValue("./sandbox", node));
+		snmp = new ConfigProperties(cfg, cfg.getNodeValue("./snmp", node));
+		datasources = new DataSourcesConfig(cfg, cfg.getNodeValue("./datasources", node));
+		cursors = new CursorsConfig(cfg, cfg.getNodeValue("./cursors", node));
+		connectors = new ConnectorsConfig(cfg, cfg.getNodeValue("./mqxconnectors", node));
+	}
+
 	public WorkerConfig getWorker() { return worker; }
 	public void setWorker(WorkerConfig worker) { this.worker = worker; }
 	public JNDIConfig getJndi() { return jndi; }

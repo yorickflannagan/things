@@ -14,30 +14,8 @@ public class Monitor extends TicketClerk implements LifecycleEventListener, Proc
 {
 	private static final long serialVersionUID = -533126638825126981L;
 	private static final String SNMP_ERROR = "Could not create an SNMP dispatcher";
-	private static final LifecycleEvent MON_START = new LifecycleEvent
-	(
-		LifecycleEventType.start,
-		new Encodable()
-		{
-			@Override public Object encode() { return "Application monitor has started"; }
-			@Override public void decode(final String data) throws EncodeException {}
-			@Override public void decode(final byte[] data) throws EncodeException {}
-			@Override public void decode(int data) throws EncodeException {}
-			@Override public Type getEncoding() { return Encodable.Type.STRING; }
-		}
-	);
-	private static final LifecycleEvent MON_END = new LifecycleEvent
-	(
-		LifecycleEventType.stop,
-		new Encodable()
-		{
-			@Override public Object encode() { return "Application monitor has ended"; }
-			@Override public void decode(final String data) throws EncodeException {}
-			@Override public void decode(final byte[] data) throws EncodeException {}
-			@Override public void decode(int data) throws EncodeException {}
-			@Override public Type getEncoding() { return Encodable.Type.STRING; }
-		}
-	);
+	private static final LifecycleEvent MON_START = new LifecycleEvent(LifecycleEventType.start, new EncodableString("Application monitor has started"));
+	private static final LifecycleEvent MON_END = new LifecycleEvent(LifecycleEventType.stop, new EncodableString("Application monitor has ended"));
 	private static final TimeUnit UNIT = TimeUnit.MINUTES;
 	private class Dispenser extends Thread
 	{
