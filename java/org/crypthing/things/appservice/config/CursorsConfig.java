@@ -15,7 +15,7 @@ public class CursorsConfig extends HashMap<String, CursorConfig>
 	public CursorsConfig(final Config cfg, final Node node)
 	{
 		this();
-		final Iterator<CursorConfig> cursors = cfg.getValueCollection("./cursors", node, new Converter<CursorConfig>()
+		final Iterator<CursorConfig> cursors = cfg.getValueCollection("./cursor", node, new Converter<CursorConfig>()
 		{
 			@Override public CursorConfig convert(final Object value) throws ClassCastException { return new CursorConfig(cfg, (Node) value); }
 		}).iterator();
@@ -31,7 +31,7 @@ public class CursorsConfig extends HashMap<String, CursorConfig>
 		while (it.hasNext())
 		{
 			final String key = it.next();
-			builder.append(key).append("={").append(get(key).toString()).append("}");
+			builder.append("cursor={").append(get(key).toString()).append("}");
 		}
 		return builder.toString();
 	}	

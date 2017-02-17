@@ -14,7 +14,7 @@ public class JNDIConfig extends ConfigProperties
 	public JNDIConfig(final Config cfg, final Node node)
 	{
 		implementation = cfg.getValue("./@implementation", node);
-		final Iterator<Property> props = cfg.getValueCollection("./environment/property", new PropertyFactory(cfg)).iterator();
+		final Iterator<Property> props = cfg.getValueCollection("./environment/property", node, new PropertyFactory(cfg)).iterator();
 		while (props.hasNext()) add(props.next());
 	}
 

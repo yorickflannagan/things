@@ -1,6 +1,8 @@
 package org.crypthing.things.appservice.config;
 
 import org.crypthing.things.config.Config;
+import org.crypthing.things.config.ConvertToInt;
+import org.crypthing.things.config.ConvertToLong;
 import org.w3c.dom.Node;
 
 public class CursorConfig {
@@ -8,13 +10,17 @@ public class CursorConfig {
 	private String name;
 	private String datasource;
 	private String implementation;
-	private int maxMemoryRecords;
 	private long sleepBeetwenRun;
+	private int maxMemoryRecords;
 
 	public CursorConfig() {}
 	public CursorConfig(final Config cfg, final Node node)
 	{
-		
+		name = cfg.getValue("./name", node);
+		datasource = cfg.getValue("./datasource", node);
+		implementation = cfg.getValue("./implementation", node);
+		sleepBeetwenRun = cfg.getValue("./sleepBeetwenRun", new ConvertToLong(0));
+		maxMemoryRecords = cfg.getValue("./maxMemoryRecords", node, new ConvertToInt(0));
 	}
 
 	public  String getName() {return name; }

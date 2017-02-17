@@ -26,7 +26,7 @@ public class ConfigProperties extends Properties
 	public ConfigProperties() {}
 	public ConfigProperties(final Config cfg, final Node node)
 	{
-		final Iterator<Property> props = cfg.getValueCollection("./property", new PropertyFactory(cfg)).iterator();
+		final Iterator<Property> props = cfg.getValueCollection("./property", node, new PropertyFactory(cfg)).iterator();
 		while (props.hasNext()) add(props.next());
 	}
 }

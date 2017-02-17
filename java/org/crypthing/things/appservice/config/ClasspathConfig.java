@@ -15,12 +15,12 @@ public class ClasspathConfig
 	public ClasspathConfig() {}
 	public ClasspathConfig(final Config cfg, final Node node)
 	{
-		final Iterator<String> paths = cfg.getValueCollection("./path", new Converter<String>()
+		final Iterator<String> paths = cfg.getValueCollection("./path", node, new Converter<String>()
 		{
 			@Override
 			public String convert(final Object node) throws ClassCastException
 			{
-				return cfg.getValue("./", (Node) node);
+				return cfg.getValue(".", (Node) node);
 			}
 		}).iterator();
 		while (paths.hasNext()) add(paths.next());

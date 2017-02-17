@@ -19,14 +19,14 @@ public final class WorkerConfig
 	public WorkerConfig(String implementation) { impl = implementation; }
 	public WorkerConfig(final Config cfg, final Node node)
 	{
-		impl = cfg.getValue("./", node);
+		impl = cfg.getValue("./@implementation", node);
 		threads = cfg.getValue("./threads", node, new ConvertToInt(1));
 		restartable = Boolean.parseBoolean(cfg.getValue("./restartable", node));
-		sleep = cfg.getValue("./threads", node, new ConvertToLong(0));
-		heartbeat = cfg.getValue("./threads", node, new ConvertToLong(0));
-		goal = cfg.getValue("./threads", node, new ConvertToInt(0));
-		ramp = cfg.getValue("./threads", node, new ConvertToInt(10));
-		goalMeasure = cfg.getValue("./threads", node, new ConvertToInt(1000));
+		sleep = cfg.getValue("./sleep", node, new ConvertToLong(0));
+		heartbeat = cfg.getValue("./heartbeat", node, new ConvertToLong(0));
+		goal = cfg.getValue("./goal", node, new ConvertToInt(0));
+		ramp = cfg.getValue("./ramp", node, new ConvertToInt(10));
+		goalMeasure = cfg.getValue("./goalMeasure", node, new ConvertToInt(1000));
 	}
 
 	public String getImpl() { return impl; }

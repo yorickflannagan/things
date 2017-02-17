@@ -131,13 +131,13 @@ public final class Bootstrap
 	}
 
 	private static final String CONFIG_SCHEMA_PATH = "config.xsd";
-	static InputStream getSchema() throws ConfigException
+	public static InputStream getSchema() throws ConfigException
 	{
 		final InputStream ret;
 		if ((ret = Bootstrap.class.getResourceAsStream(CONFIG_SCHEMA_PATH)) == null) throw new ConfigException("Could not load configuration schema");
 		return ret;
 	}
-	static JVMConfig getJVMConfig(final File config, final InputStream schema) throws ConfigException
+	public static JVMConfig getJVMConfig(final File config, final InputStream schema) throws ConfigException
 	{
 		try
 		{

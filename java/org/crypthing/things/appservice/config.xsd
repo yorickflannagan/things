@@ -119,11 +119,11 @@
 		<xs:element name="cursor" minOccurs="1" maxOccurs="unbounded">
 		<xs:complexType>
 			<xs:sequence>
-				<xs:element name="name" type="xs:string" minOccurs="1" maxOccurs="1" />
-				<xs:element name="datasource" type="xs:string" minOccurs="1" maxOccurs="1" />
-				<xs:element name="implementation" type="xs:string" minOccurs="1" maxOccurs="1" />
-				<xs:element name="sleepBeetwenRun" type="xs:int" minOccurs="1" maxOccurs="1" />
-				<xs:element name="maxMemoryRecords" type="xs:int" minOccurs="1" maxOccurs="1" />
+				<xs:element name="name" type="xs:string" />
+				<xs:element name="datasource" type="xs:string" />
+				<xs:element name="implementation" type="xs:string" />
+				<xs:element name="sleepBeetwenRun" type="xs:int" />
+				<xs:element name="maxMemoryRecords" type="xs:int" />
 			</xs:sequence>
 		</xs:complexType>
 		</xs:element>

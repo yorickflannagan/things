@@ -51,7 +51,7 @@ public final class ConnectorConfig extends HashMap<String, QueueConfig>
 		while (it.hasNext())
 		{
 			final String key = it.next();
-			builder.append(key).append("= {").append(get(key).toString()).append("}");
+			builder.append("queue= {").append(get(key).toString()).append("}");
 		}
 		return builder.toString();
 	}

@@ -15,7 +15,7 @@ public final class QueueConfig extends ConfigProperties
 	public QueueConfig(final Config cfg, final Node node)
 	{
 		name = cfg.getValue("./@name", node);
-		final Iterator<Property> props = cfg.getValueCollection("./property", new PropertyFactory(cfg)).iterator();
+		final Iterator<Property> props = cfg.getValueCollection("./property", node, new PropertyFactory(cfg)).iterator();
 		while (props.hasNext()) add(props.next());
 	}
 

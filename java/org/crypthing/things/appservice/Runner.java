@@ -312,9 +312,9 @@ implements	RunnerMBean,
 	}
 
 
-	private static final String TRAP_ENTRY = "org.crypthing.things.SNMPTrap";
-	private static final String UDP_ADDRESS_ENTRY = "org.crypthing.things.batch.udpAddress";
-	private static final String ROOT_OID_ENTRY = "org.crypthing.things.batch.rootOID";
+	public static final String TRAP_ENTRY = "org.crypthing.things.SNMPTrap";
+	public static final String UDP_ADDRESS_ENTRY = "org.crypthing.things.batch.udpAddress";
+	public static final String ROOT_OID_ENTRY = "org.crypthing.things.batch.rootOID";
 	public static void main(String[] args)
 	{
     		if (args.length < 1) usage();

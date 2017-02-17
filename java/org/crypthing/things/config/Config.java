@@ -173,9 +173,7 @@ public class Config implements Serializable
 	public <T> T getValue(final String path, final Converter<T> conv)
 	{
 		if (conv == null) throw new NullPointerException(INVALID_ARG);
-		final String value = getValue(path);
-		if (value == null) return null;
-		return conv.convert(value);
+		return conv.convert(getValue(path));
 	}
 	/**
 	 * Gets entry as specified type. 
@@ -187,9 +185,7 @@ public class Config implements Serializable
 	public <T> T getValue(final String path, final Node node, final Converter<T> conv)
 	{
 		if (conv == null) throw new NullPointerException(INVALID_ARG);
-		final String value = getValue(path, node);
-		if (value == null) return null;
-		return conv.convert(value);
+		return conv.convert(getValue(path, node));
 	}
 	/**
 	 * Gets entry value from DOM node.

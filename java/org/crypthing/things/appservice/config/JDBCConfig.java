@@ -20,7 +20,7 @@ public final class JDBCConfig extends ConfigProperties
 		driver = cfg.getValue("./@driver", node);
 		url = cfg.getValue("./@url", node);
 		validationQuery = cfg.getValue("./@validationQuery", node);
-		final Iterator<Property> props = cfg.getValueCollection("./property", new PropertyFactory(cfg)).iterator();
+		final Iterator<Property> props = cfg.getValueCollection("./property", node, new PropertyFactory(cfg)).iterator();
 		while (props.hasNext()) add(props.next());
 	}
 
@@ -38,6 +38,7 @@ public final class JDBCConfig extends ConfigProperties
 		if (name != null) builder.append("name=").append(name);
 		if (driver != null) builder.append(", driver=").append(driver);
 		if (url != null) builder.append(", url=").append(url);
+		if (validationQuery != null) builder.append(", validationQuery=").append(validationQuery);
 		builder.append(", {").append(super.toString()).append("}").toString();
 		return builder.toString();
 	}

@@ -30,7 +30,7 @@ public final class ConnectorsConfig extends HashMap<String, ConnectorConfig>
 		while (it.hasNext())
 		{
 			final String key = it.next();
-			builder.append(key).append("= {").append(get(key).toString()).append("}");
+			builder.append("mqxconnector= {").append(get(key).toString()).append("}");
 		}
 		return builder.toString();
 	}

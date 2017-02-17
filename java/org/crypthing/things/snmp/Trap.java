@@ -77,7 +77,7 @@ public class Trap implements Serializable
 	public void send(final Event evt)
 	{
 		if (evt == null) throw new NullPointerException();
-		final PDU pdu = getDefaultBindings();
+		final PDU pdu = addEventBindings(getDefaultBindings(), evt);
 		final Encodable encode = evt.getData();
 		final Variable var;
 		if (encode != null)
@@ -109,4 +109,5 @@ public class Trap implements Serializable
 		pdu.add(defaults.jboss);
 		return pdu;
 	}
+	protected PDU addEventBindings(final PDU pdu, final Event evt) { return pdu; }
 }
