@@ -1,9 +1,7 @@
 package org.crypthing.things.appservice;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.lang.management.ManagementFactory;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -20,19 +18,29 @@ import javax.naming.Binding;
 import javax.naming.InitialContext;
 import javax.naming.NamingEnumeration;
 
+import org.apache.commons.digester3.Digester;
+import org.crypthing.things.SNMPTrap;
 import org.crypthing.things.appservice.config.ConfigException;
+import org.crypthing.things.appservice.config.ConfigProperties;
+import org.crypthing.things.appservice.config.ConfigReader;
+import org.crypthing.things.appservice.config.ConnectorsConfig;
+import org.crypthing.things.appservice.config.CursorConfig;
+import org.crypthing.things.appservice.config.CursorsConfig;
+import org.crypthing.things.appservice.config.DataSourcesConfig;
+import org.crypthing.things.appservice.config.JDBCConfigFactory;
 import org.crypthing.things.appservice.config.JNDIConfig;
+import org.crypthing.things.appservice.config.Property;
 import org.crypthing.things.appservice.config.RunnerConfig;
-import org.crypthing.things.config.Config;
-import org.crypthing.things.snmp.EncodableString;
-import org.crypthing.things.snmp.LifecycleEvent;
-import org.crypthing.things.snmp.LifecycleEvent.LifecycleEventType;
-import org.crypthing.things.snmp.LifecycleEventDispatcher;
-import org.crypthing.things.snmp.LogTrapperListener;
-import org.crypthing.things.snmp.ProcessingEvent;
-import org.crypthing.things.snmp.ProcessingEvent.ProcessingEventType;
-import org.crypthing.things.snmp.ProcessingEventDispatcher;
-import org.crypthing.things.snmp.SNMPBridge;
+import org.crypthing.things.appservice.config.SNMPConfig;
+import org.crypthing.things.appservice.config.WorkerConfigFactory;
+import org.crypthing.things.events.LifecycleEvent;
+import org.crypthing.things.events.LifecycleEvent.LifecycleEventType;
+import org.crypthing.things.events.LifecycleEventDispatcher;
+import org.crypthing.things.events.LogTrapperListener;
+import org.crypthing.things.events.ProcessingEvent;
+import org.crypthing.things.events.ProcessingEvent.ProcessingEventType;
+import org.crypthing.things.events.ProcessingEventDispatcher;
+import org.xml.sax.SAXException;
 
 
 public final class Runner
@@ -63,28 +71,16 @@ implements	RunnerMBean,
 
 	public Runner(final RunnerConfig cfg) throws ConfigException
 	{
-		try
-		{
-			Class.forName(cfg.getWorker().getImpl()).newInstance();
-			config = cfg;
-			lcDispatcher = new LifecycleEventDispatcher();
-			pDispatcher = new ProcessingEventDispatcher();
-			LogTrapperListener traps = new LogTrapperListener
-			(
-				Logger.getLogger(Runner.class.getName()),
-				SNMPBridge.newInstance
-				(
-					cfg.getSnmp().getProperty(TRAP_ENTRY),
-					cfg.getSnmp().getProperty(UDP_ADDRESS_ENTRY),
-					cfg.getSnmp().getProperty(ROOT_OID_ENTRY)
-				)
-			);
-			lcDispatcher.addListener(traps);
-			pDispatcher.addListener(traps);
-			resourceListeners = new HashSet<ReleaseResourceListener>();
-			interruptListeners = new HashSet<InterruptEventListener>();
-		}
+		try { Class.forName(cfg.getWorker().getImpl()).newInstance(); }
 		catch (final Throwable e) { throw new ConfigException(e); }
+		config = cfg;
+		lcDispatcher = new LifecycleEventDispatcher();
+		pDispatcher = new ProcessingEventDispatcher();
+		final LogTrapperListener traps = new LogTrapperListener(SNMPTrap.createTrap(config.getSnmp()));
+		lcDispatcher.addListener(traps);
+		pDispatcher.addListener(traps);
+		resourceListeners = new HashSet<ReleaseResourceListener>();
+		interruptListeners = new HashSet<InterruptEventListener>();
 	}
 
 	private void start()
@@ -92,7 +88,7 @@ implements	RunnerMBean,
 		try
 		{
 			for (int i = 0, threads = config.getWorker().getThreads(); i < threads; i++) workers.put(maxWorker++, newWorker());
-			lcDispatcher.fire(new LifecycleEvent(LifecycleEventType.start, new EncodableString("Runner initialization succeeded")));
+			lcDispatcher.fire(new LifecycleEvent(this, LifecycleEventType.start, "Runner initialization succeeded"));
 			ready = true;
 			int goal = config.getWorker().getGoal();
 			if(goal >0)
@@ -125,7 +121,7 @@ implements	RunnerMBean,
 		}
 		catch (final Throwable e)
 		{
-			pDispatcher.fire(new ProcessingEvent(ProcessingEventType.error, "Could not launch new worker", e));
+			pDispatcher.fire(new ProcessingEvent(this, ProcessingEventType.error, "Could not launch new worker", e));
 			shutdown();
 		}
 	}
@@ -216,7 +212,7 @@ implements	RunnerMBean,
 	{
 		
 		ready = false;
-		lcDispatcher.fire(new LifecycleEvent(LifecycleEventType.stop, new EncodableString("Runner shutdown signal received")));
+		lcDispatcher.fire(new LifecycleEvent(this, LifecycleEventType.stop, "Runner shutdown signal received"));
 		final Iterator<InterruptEventListener> it = interruptListeners.iterator();
 		while (it.hasNext()) it.next().shutdown();
 		try
@@ -229,7 +225,7 @@ implements	RunnerMBean,
 			while (itNames.hasNext()) ctx.unbind(itNames.next());
 			if (mbName != null) ManagementFactory.getPlatformMBeanServer().unregisterMBean(mbName);
 		}
-		catch (final Throwable e) { pDispatcher.fire(new ProcessingEvent(ProcessingEventType.warning, "Error during shutdown", e)); }
+		catch (final Throwable e) { pDispatcher.fire(new ProcessingEvent(this, ProcessingEventType.warning, "Error during shutdown", e)); }
 		hasShutdown = true;
 	}
 
@@ -312,9 +308,6 @@ implements	RunnerMBean,
 	}
 
 
-	public static final String TRAP_ENTRY = "org.crypthing.things.SNMPTrap";
-	public static final String UDP_ADDRESS_ENTRY = "org.crypthing.things.batch.udpAddress";
-	public static final String ROOT_OID_ENTRY = "org.crypthing.things.batch.rootOID";
 	public static void main(String[] args)
 	{
     		if (args.length < 1) usage();
@@ -328,27 +321,7 @@ implements	RunnerMBean,
 			String jndiImpl;
 			if (jndi == null || (jndiImpl = jndi.getImplementation()) == null) throw new ConfigException("Config entry required: /config/jndi/implementation");
 			if (jndi.size() > 0) System.getProperties().putAll(jndi);
-			cfg.getSnmp().getProperty(TRAP_ENTRY);
-			cfg.getSnmp().getProperty(UDP_ADDRESS_ENTRY);
-			cfg.getSnmp().getProperty(ROOT_OID_ENTRY);
-			((BindServices) Class
-				.forName(jndiImpl)
-				.newInstance())
-				.bind
-				(
-					cfg,
-					instance,
-					new LogTrapperListener
-					(
-						Logger.getLogger(Runner.class.getName()),
-						SNMPBridge.newInstance
-						(
-							cfg.getSnmp().getProperty(TRAP_ENTRY),
-							cfg.getSnmp().getProperty(UDP_ADDRESS_ENTRY),
-							cfg.getSnmp().getProperty(ROOT_OID_ENTRY)
-						)
-					)
-				);
+			((BindServices) Class.forName(jndiImpl).newInstance()).bind ( cfg, instance, new LogTrapperListener(SNMPTrap.createTrap(cfg.getSnmp())));
 			Runtime.getRuntime().addShutdownHook(new Thread(instance.new ShutdownHook()));
 			ManagementFactory.getPlatformMBeanServer().registerMBean
 			(
@@ -383,17 +356,63 @@ implements	RunnerMBean,
 	
 	public static RunnerConfig getConfig(final File config) throws ConfigException
 	{
+		RunnerConfig ret;
 		try
 		{
-			final InputStream cfg = new FileInputStream(config);
-			try
-			{
-				final Config xml = new Config(cfg, Bootstrap.getSchema());
-				return new RunnerConfig(xml, xml.getNodeValue("/config"));
-			}
-			finally { cfg.close(); }
+			final Digester digester = new Digester();
+			digester.setValidating(false);
+			digester.addObjectCreate("config", RunnerConfig.class);
+			digester.addFactoryCreate("config/worker", WorkerConfigFactory.class);
+			digester.addBeanPropertySetter("config/worker/threads", "threads");
+			digester.addBeanPropertySetter("config/worker/goal", "goal");
+			digester.addBeanPropertySetter("config/worker/goalMeasure", "goalMeasure");
+			digester.addBeanPropertySetter("config/worker/ramp", "ramp");
+			digester.addBeanPropertySetter("config/worker/delay", "delay");
+			digester.addBeanPropertySetter("config/worker/restartable", "restartable");
+			digester.addBeanPropertySetter("config/worker/sleep", "sleep");
+			digester.addBeanPropertySetter("config/worker/heartbeat", "heartbeat");
+			digester.addSetNext("config/worker", "setWorker");
+
+			JNDIConfig.setConfig(digester, "config", "setJndi");
+
+			digester.addObjectCreate("config/sandbox", ConfigProperties.class);
+			digester.addObjectCreate("config/sandbox/property", Property.class);
+			digester.addSetProperties("config/sandbox/property");
+			digester.addSetNext("config/sandbox/property", "add");
+			digester.addSetNext("config/sandbox", "setSandbox");
+			
+			SNMPConfig.setConfig(digester, "config", "setSnmp");
+			
+			digester.addObjectCreate("config/datasources", DataSourcesConfig.class);
+			digester.addFactoryCreate("config/datasources/jdbc", JDBCConfigFactory.class);
+			digester.addObjectCreate ("config/datasources/jdbc/property", Property.class);
+			digester.addSetProperties("config/datasources/jdbc/property");
+			digester.addSetNext("config/datasources/jdbc/property", "add");
+			digester.addSetNext("config/datasources/jdbc", "addJDBC");
+			digester.addSetNext("config/datasources", "setDatasources");
+			
+			
+			
+			digester.addObjectCreate("config/cursors", CursorsConfig.class);
+			digester.addObjectCreate("config/cursors/cursor", CursorConfig.class);
+			digester.addBeanPropertySetter("config/cursors/cursor/name", "name");
+			digester.addBeanPropertySetter("config/cursors/cursor/datasource", "datasource");
+			digester.addBeanPropertySetter("config/cursors/cursor/implementation", "implementation");
+			digester.addBeanPropertySetter("config/cursors/cursor/maxMemoryRecords", "maxMemoryRecords");
+			digester.addBeanPropertySetter("config/cursors/cursor/sleepBeetwenRun", "sleepBeetwenRun");
+			digester.addSetNext("config/cursors/cursor", "addCursor");						
+			digester.addSetNext("config/cursors", "setCursors");						
+			
+
+			ConnectorsConfig.setConfig(digester, "config", "setConnectors");
+
+			if ((ret = digester.parse(new ConfigReader(config))) == null) throw new ConfigException("Unexpected error: could not set configuration map");
+			return ret;
 		}
-		catch (final IOException | org.crypthing.things.config.ConfigException e) { throw new ConfigException("Invalid XML configuration file", e); }
+		catch (SAXException | IOException e)
+		{
+			throw new ConfigException("Invalid XML configuration file", e);
+		}
 	}
 
 	@Override

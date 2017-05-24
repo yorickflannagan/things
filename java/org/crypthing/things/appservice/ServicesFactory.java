@@ -9,7 +9,7 @@ import javax.naming.NamingException;
 import org.crypthing.things.appservice.config.ConfigException;
 import org.crypthing.things.appservice.config.RunnerConfig;
 import org.crypthing.things.appservice.db.CursorFactory;
-import org.crypthing.things.snmp.ProcessingEventListener;
+import org.crypthing.things.events.ProcessingEventListener;
 
 public class ServicesFactory implements BindServices
 {

@@ -21,6 +21,7 @@ public final class Shutdown
 	public static void main(String[] args) throws ConfigException
 	{
 		if (args.length < 1) usage();
+		final File schema = Bootstrap.getSchema();
 		for (int i = 0; i < args.length; i++)
 		{
 			System.out.print("Shutting down service specified in " + args[i] + "... ");
@@ -28,7 +29,7 @@ public final class Shutdown
 			{
 				final File config = new File(args[i]);
 				if (!config.exists()) throw new ConfigException("Could not find configuration file " + args[i], new FileNotFoundException());
-				final JVMConfig cfg = Bootstrap.getJVMConfig(config, Bootstrap.getSchema());
+				final JVMConfig cfg = Bootstrap.getJVMConfig(config, schema);
 				if (cfg.getJmx() == null) throw new ConfigException("Configuration must have a JMX entry");
 				shutdown(cfg.getJmx().getHost(), cfg.getJmx().getPort());
 				System.out.println("Done!");

@@ -20,12 +20,13 @@ public class CursorReset {
 	public static void main(String[] args) throws ConfigException
 	{
 		if (args.length != 2) usage();
+		final File schema = Bootstrap.getSchema();
 		System.out.print("Reseting  cursor " + args[1] + "specified in " + args[0] + "... ");
 		try
 		{
 			final File config = new File(args[0]);
 			if (!config.exists()) throw new ConfigException("Could not find configuration file " + args[0], new FileNotFoundException());
-			final JVMConfig cfg = Bootstrap.getJVMConfig(config, Bootstrap.getSchema());
+			final JVMConfig cfg = Bootstrap.getJVMConfig(config, schema);
 			if (cfg.getJmx() == null) throw new ConfigException("Configuration must have a JMX entry");
 			reset(cfg.getJmx().getHost(), cfg.getJmx().getPort(), args[1]);
 			System.out.println("Done!");

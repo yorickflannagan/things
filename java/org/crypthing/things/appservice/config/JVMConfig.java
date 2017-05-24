@@ -1,9 +1,5 @@
 package org.crypthing.things.appservice.config;
 
-import org.crypthing.things.config.Config;
-import org.crypthing.things.config.ConvertToInt;
-import org.w3c.dom.Node;
-
 public class JVMConfig
 {
 	private int minMemory;
@@ -39,16 +35,5 @@ public class JVMConfig
 		if (classpath != null) builder.append("classpath=").append(classpath.getClasspath()).append(", ");
 		if (properties != null) builder.append("properties={\n").append(properties).append("}");
 		return builder.toString();
-	}
-
-	public JVMConfig() {}
-	public JVMConfig(final Config cfg, final Node node)
-	{
-		minMemory = cfg.getValue("./minMemory", node,  new ConvertToInt(0));
-		maxMemory = cfg.getValue("./maxMemory", node,  new ConvertToInt(0));
-		vmflags = cfg.getValue("./vmflags", node);
-		jmx = new JMXConfig(cfg, cfg.getNodeValue("./jmx", node));
-		classpath = new ClasspathConfig(cfg, cfg.getNodeValue("./classpath", node));
-		properties = new ConfigProperties(cfg, cfg.getNodeValue("./properties", node));
 	}
 }

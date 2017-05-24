@@ -1,31 +1,17 @@
 package org.crypthing.things.appservice.config;
 
-import org.crypthing.things.config.Config;
-import org.w3c.dom.Node;
-
 
 public final class RunnerConfig
 {
-	private JNDIConfig jndi;
 	private WorkerConfig worker;
-	private ConfigProperties sandbox;
+	private JNDIConfig jndi;
 	private ConfigProperties snmp;
+	private ConfigProperties sandbox;
 	private DataSourcesConfig datasources;
-	private CursorsConfig cursors;
 	private ConnectorsConfig connectors;
-
-	public RunnerConfig() {}
-	public RunnerConfig(final Config cfg, final Node node)
-	{
-		jndi = new JNDIConfig(cfg, cfg.getNodeValue("./jndi", node));
-		worker = new WorkerConfig(cfg, cfg.getNodeValue("./worker", node));
-		sandbox = new ConfigProperties(cfg, cfg.getNodeValue("./sandbox", node));
-		snmp = new ConfigProperties(cfg, cfg.getNodeValue("./snmp", node));
-		datasources = new DataSourcesConfig(cfg, cfg.getNodeValue("./datasources", node));
-		cursors = new CursorsConfig(cfg, cfg.getNodeValue("./cursors", node));
-		connectors = new ConnectorsConfig(cfg, cfg.getNodeValue("./mqxconnectors", node));
-	}
-
+	private CursorsConfig cursors;
+	
+	
 	public WorkerConfig getWorker() { return worker; }
 	public void setWorker(WorkerConfig worker) { this.worker = worker; }
 	public JNDIConfig getJndi() { return jndi; }
@@ -43,13 +29,12 @@ public final class RunnerConfig
 	@Override public String toString()
 	{
 		final StringBuilder builder = new StringBuilder();
-		if (jndi != null) builder.append("jndi={").append(jndi.toString()).append("}");
-		if (worker != null) builder.append(", worker=").append(worker.toString());
-		if (sandbox != null) builder.append(", sandbox={").append(sandbox.toString()).append("}");
+		if (worker != null) builder.append("worker={").append(worker.toString()).append("}, jndi={").append(jndi.toString()).append("}");
 		if (snmp != null) builder.append(", snmp={").append(snmp.toString()).append("}");
+		if (sandbox != null) builder.append(", sandbox={").append(sandbox.toString()).append("}");
 		if (datasources != null) builder.append(", datasources={").append(datasources.toString()).append("}");
-		if (cursors != null) builder.append(", cursors={").append(cursors.toString()).append("}");
 		if (connectors != null) builder.append(", connectors={").append(connectors.toString()).append("}");
+		if (cursors != null) builder.append(", cursors={").append(cursors.toString()).append("}");
 		return builder.toString();
 	}
 }

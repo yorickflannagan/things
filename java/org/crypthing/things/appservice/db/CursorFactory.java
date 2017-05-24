@@ -6,7 +6,7 @@ import org.crypthing.things.appservice.ReleaseResourceEventDispatcher;
 import org.crypthing.things.appservice.ResourceProvider;
 import org.crypthing.things.appservice.config.ConfigException;
 import org.crypthing.things.appservice.config.CursorConfig;
-import org.crypthing.things.snmp.ProcessingEventListener;
+import org.crypthing.things.events.ProcessingEventListener;
 
 public class CursorFactory  extends Reference implements ResourceProvider {
 	private static final long serialVersionUID = -1093196193015654010L;

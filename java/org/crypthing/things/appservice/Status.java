@@ -23,9 +23,10 @@ public final class Status
 		if (args.length < 1) usage();
 		try
 		{
+			final File schema = Bootstrap.getSchema();
 			final File config = new File(args[0]);
 			if (!config.exists()) throw new ConfigException("Could not find configuration file " + args[0], new FileNotFoundException());
-			final JVMConfig cfg = Bootstrap.getJVMConfig(config, Bootstrap.getSchema());
+			final JVMConfig cfg = Bootstrap.getJVMConfig(config, schema);
 			if (cfg.getJmx() == null) throw new ConfigException("Configuration must have a JMX entry");
 			viewStatus
 			(
