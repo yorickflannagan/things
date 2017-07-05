@@ -21,11 +21,11 @@ import javax.sql.DataSource;
 
 import org.crypthing.things.appservice.InterruptEventListener;
 import org.crypthing.things.appservice.Runner;
-import org.crypthing.things.appservice.config.ConfigException;
+import org.crypthing.things.config.ConfigException;
 import org.crypthing.things.appservice.config.CursorConfig;
-import org.crypthing.things.events.ProcessingEvent;
-import org.crypthing.things.events.ProcessingEvent.ProcessingEventType;
-import org.crypthing.things.events.ProcessingEventListener;
+import org.crypthing.things.snmp.ProcessingEvent;
+import org.crypthing.things.snmp.ProcessingEvent.ProcessingEventType;
+import org.crypthing.things.snmp.ProcessingEventListener;
 
 
 public class Cursor implements CursorMBean, InterruptEventListener {
@@ -77,13 +77,13 @@ public class Cursor implements CursorMBean, InterruptEventListener {
 		}
 		catch(NamingException e)
 		{
-			trap.error(new ProcessingEvent(this, ProcessingEventType.error, "Could not initialize Cursor. Datasource not Found", e));			
+			trap.error(new ProcessingEvent(ProcessingEventType.error, "Could not initialize Cursor. Datasource not Found", e));			
 			throw new ConfigException("Could not initialize Cursor. Datasource not Found", e);
 		} catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
-			trap.error(new ProcessingEvent(this, ProcessingEventType.error, "Could not initialize Cursor. Problem with CursorReader class.", e));			
+			trap.error(new ProcessingEvent(ProcessingEventType.error, "Could not initialize Cursor. Problem with CursorReader class.", e));			
 			throw new ConfigException("Could not initialize Cursor. Problem with CursorReader class.", e);
 		} catch (SQLException e) {
-			trap.error(new ProcessingEvent(this, ProcessingEventType.error, "Could not initialize Cursor. Problems fetching data.", e));			
+			trap.error(new ProcessingEvent(ProcessingEventType.error, "Could not initialize Cursor. Problems fetching data.", e));			
 			throw new ConfigException("Could not initialize Cursor. Problems fetching data.", e);
 		} catch (InstanceAlreadyExistsException
 				| MBeanRegistrationException | NotCompliantMBeanException
@@ -94,7 +94,7 @@ public class Cursor implements CursorMBean, InterruptEventListener {
 		minion = new SQLMinion();
 		minion.start();
 		Runner.getInstance().addInterruptEventListener(this);
-		trap.info(new ProcessingEvent(this, ProcessingEventType.info, "Cursor "+ config.getName()  + " initialized."));
+		trap.info(new ProcessingEvent(ProcessingEventType.info, "Cursor "+ config.getName()  + " initialized."));
 	}
 	
 	public Object next()
@@ -220,7 +220,7 @@ public class Cursor implements CursorMBean, InterruptEventListener {
 				}
 				catch(Throwable t)	
 				{
-					trap.error(new ProcessingEvent(this, ProcessingEventType.error, "Problems fetching data.", t));			
+					trap.error(new ProcessingEvent(ProcessingEventType.error, "Problems fetching data.", t));			
 				}
 			}
 			

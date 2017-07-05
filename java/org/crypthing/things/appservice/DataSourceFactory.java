@@ -28,11 +28,11 @@ import javax.naming.Reference;
 import javax.naming.StringRefAddr;
 import javax.sql.DataSource;
 
-import org.crypthing.things.appservice.config.ConfigException;
+import org.crypthing.things.config.ConfigException;
 import org.crypthing.things.appservice.config.JDBCConfig;
-import org.crypthing.things.events.ProcessingEvent;
-import org.crypthing.things.events.ProcessingEventListener;
-import org.crypthing.things.events.ProcessingEvent.ProcessingEventType;
+import org.crypthing.things.snmp.ProcessingEvent;
+import org.crypthing.things.snmp.ProcessingEventListener;
+import org.crypthing.things.snmp.ProcessingEvent.ProcessingEventType;
 
 public class DataSourceFactory extends Reference implements DataSource, ResourceProvider, ReleaseResourceListener
 {
@@ -41,9 +41,7 @@ public class DataSourceFactory extends Reference implements DataSource, Resource
 	private JDBCConfig config;
 	private PrintWriter logWriter = new PrintWriter(System.out);
 	private ProcessingEventListener trap;
-
 	public DataSourceFactory(final String name) { super(DataSourceFactory.class.getName(), new StringRefAddr("java:jdbc", name)); }
-
 	@Override
 	public void init(final Object config, final ReleaseResourceEventDispatcher subscriber, final ProcessingEventListener trap) throws ConfigException
 	{
@@ -60,7 +58,6 @@ public class DataSourceFactory extends Reference implements DataSource, Resource
 		catch (final Throwable e) { throw new ConfigException("Could not load JDBC driver", e); }
 		subscriber.addReleaseResourceListener(this);
 	}
-
 	@Override
 	public void release(final long resource)
 	{
@@ -68,11 +65,10 @@ public class DataSourceFactory extends Reference implements DataSource, Resource
 		if (conn != null)
 		{
 			try { conn.forceClose(); }
-			catch (SQLException e) { trap.error(new ProcessingEvent(this, ProcessingEventType.error, "Could not close JDBC connection", e)); }
+			catch (SQLException e) { trap.error(new ProcessingEvent(ProcessingEventType.error, "Could not close JDBC connection", e)); }
 			instances.remove(resource);
 		}
 	}
-
 	@Override 
 	public Connection getConnection() throws SQLException
 	{

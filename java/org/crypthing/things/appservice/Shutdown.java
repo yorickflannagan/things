@@ -1,7 +1,6 @@
 package org.crypthing.things.appservice;
 
-import java.io.File;
-import java.io.FileNotFoundException;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Iterator;
 
@@ -12,8 +11,8 @@ import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
 
-import org.crypthing.things.appservice.config.ConfigException;
 import org.crypthing.things.appservice.config.JVMConfig;
+import org.crypthing.things.config.ConfigException;
 
 public final class Shutdown
 {
@@ -21,15 +20,12 @@ public final class Shutdown
 	public static void main(String[] args) throws ConfigException
 	{
 		if (args.length < 1) usage();
-		final File schema = Bootstrap.getSchema();
 		for (int i = 0; i < args.length; i++)
 		{
 			System.out.print("Shutting down service specified in " + args[i] + "... ");
 			try
 			{
-				final File config = new File(args[i]);
-				if (!config.exists()) throw new ConfigException("Could not find configuration file " + args[i], new FileNotFoundException());
-				final JVMConfig cfg = Bootstrap.getJVMConfig(config, schema);
+				final JVMConfig cfg = Bootstrap.getJVMConfig(new FileInputStream(args[i]), Bootstrap.getSchema());
 				if (cfg.getJmx() == null) throw new ConfigException("Configuration must have a JMX entry");
 				shutdown(cfg.getJmx().getHost(), cfg.getJmx().getPort());
 				System.out.println("Done!");

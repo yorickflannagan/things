@@ -1,7 +1,6 @@
 package org.crypthing.things.appservice;
 
-import java.io.File;
-import java.io.FileNotFoundException;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Iterator;
 
@@ -12,21 +11,17 @@ import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
 
-import org.crypthing.things.appservice.config.ConfigException;
 import org.crypthing.things.appservice.config.JVMConfig;
+import org.crypthing.things.config.ConfigException;
 
 public final class Status
 {
-
 	public static void main(String[] args)
 	{
 		if (args.length < 1) usage();
 		try
 		{
-			final File schema = Bootstrap.getSchema();
-			final File config = new File(args[0]);
-			if (!config.exists()) throw new ConfigException("Could not find configuration file " + args[0], new FileNotFoundException());
-			final JVMConfig cfg = Bootstrap.getJVMConfig(config, schema);
+			final JVMConfig cfg = Bootstrap.getJVMConfig(new FileInputStream(args[0]), Bootstrap.getSchema());
 			if (cfg.getJmx() == null) throw new ConfigException("Configuration must have a JMX entry");
 			viewStatus
 			(
@@ -78,11 +73,11 @@ public final class Status
 				long currentStamp = System.currentTimeMillis();
 				StringBuilder builder = new StringBuilder(128);
 				builder.append(currentMeasure).append("\t");
-				builder.append(getValue(mbean, obName, "ErrorCount")).append("\t");
+				builder.append(getValue(mbean, obName, "ErrorCount").toString()).append("\t");
 				long hit = (currentStamp - lastStamp) / 1000;
 				if (hit > 0) builder.append((currentMeasure - lastMeasure) / hit).append("/s");
 				else builder.append("?");
-				builder.append("\t\t").append(getValue(mbean, obName, "WorkerCount")).append("\t");
+				builder.append("\t\t").append(getValue(mbean, obName, "WorkerCount").toString()).append("\t");
 				lastMeasure = currentMeasure;
 				lastStamp = currentStamp;
 				System.out.println(builder.toString());

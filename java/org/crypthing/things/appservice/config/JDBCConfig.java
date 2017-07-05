@@ -1,21 +1,28 @@
 package org.crypthing.things.appservice.config;
 
+import org.crypthing.things.config.Config;
+import org.crypthing.things.config.ConfigException;
+import org.w3c.dom.Node;
+
 public final class JDBCConfig extends ConfigProperties
 {
 	private static final long serialVersionUID = 158330280175117539L;
-	private String name;
-	private String driver;
-	private String url;
-	private String validationQuery;
-	public JDBCConfig(final String name, final String driver, final String url, final String query) { this.name = name; this.driver = driver; this.url = url; validationQuery = query; }
+	private final String name;
+	private final String driver;
+	private final String url;
+	private final String validationQuery;
+	public JDBCConfig(final Config xml, final Node root) throws ConfigException
+	{
+		super(xml, root);
+		name = xml.getValue("./@name", root);
+		driver = xml.getValue("./@driver", root);
+		url = xml.getValue("./@url", root);
+		validationQuery = xml.getValue("./@validationQuery", root);
+	}
 	public String getName() { return name; }
-	public void setName(String name) { this.name = name; }
 	public String getDriver() { return driver; }
-	public void setDriver(String driver) { this.driver = driver; }
 	public String getUrl() { return url; }
-	public void setUrl(String url) { this.url = url;}
 	public String getValidationQuery() { return validationQuery; }
-	public void setValidationQuery(String validationQuery) { this.validationQuery = validationQuery; }
 	@Override public String toString()
 	{
 		final StringBuilder builder = new StringBuilder(256);

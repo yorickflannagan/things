@@ -8,12 +8,12 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.naming.Reference;
 import javax.naming.StringRefAddr;
 
-import org.crypthing.things.appservice.config.ConfigException;
+import org.crypthing.things.config.ConfigException;
 import org.crypthing.things.appservice.config.ConnectorConfig;
 import org.crypthing.things.appservice.config.QueueConfig;
-import org.crypthing.things.events.ProcessingEvent;
-import org.crypthing.things.events.ProcessingEventListener;
-import org.crypthing.things.events.ProcessingEvent.ProcessingEventType;
+import org.crypthing.things.snmp.ProcessingEvent;
+import org.crypthing.things.snmp.ProcessingEventListener;
+import org.crypthing.things.snmp.ProcessingEvent.ProcessingEventType;
 import org.crypthing.things.messaging.MQXConnection;
 import org.crypthing.things.messaging.MQXConnectionException;
 import org.crypthing.things.messaging.MQXIllegalArgumentException;
@@ -61,7 +61,7 @@ public class MQXFactory extends Reference implements ResourceProvider, ReleaseRe
 		if (mq != null)
 		{
 			try { mq.forceClose(); }
-			catch (final Throwable e) { trap.error(new ProcessingEvent(this, ProcessingEventType.error, "Could not close MQX connection", e)); }
+			catch (final Throwable e) { trap.error(new ProcessingEvent(ProcessingEventType.error, "Could not close MQX connection", e)); }
 			instances.remove(resource);
 		}
 	}

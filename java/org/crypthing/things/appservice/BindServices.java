@@ -2,9 +2,9 @@ package org.crypthing.things.appservice;
 
 import javax.naming.NamingException;
 
-import org.crypthing.things.appservice.config.ConfigException;
+import org.crypthing.things.config.ConfigException;
 import org.crypthing.things.appservice.config.RunnerConfig;
-import org.crypthing.things.events.ProcessingEventListener;
+import org.crypthing.things.snmp.ProcessingEventListener;
 
 public interface BindServices
 {

@@ -3,15 +3,12 @@
 	<jvm>
 		<jmx host="10.0.2.15" port="5052" />
 		<classpath>
-			<path>${ENV.HOME}/development/sefipx/facilities/eclipse/things/bin</path>
-			<path>${ENV.HOME}/development/sefipx/facilities/eclipse/mqx/bin</path>
-			<path>${ENV.HOME}/development/sefipx/facilities/eclipse/mqx-test/bin</path>
-			<path>${ENV.JDIGESTER_JAR}</path>
-			<path>${ENV.ORACLE_JDBC}</path>
-			<path>${ENV.JSNMP_JAR}</path>
+			<path>/home/magut/development/sefipx/facilities/eclipse/things/bin</path>
+			<path>/home/magut/development/sefipx/facilities/eclipse/mqx/bin</path>
+			<path>/home/magut/development/sefipx/facilities/eclipse/mqx-test/bin</path>
 		</classpath>
 		<properties>
-			<property name="java.util.logging.config.file" value="${ENV.CONFIG_LOCATION}/logging-basic.properties" />
+			<property name="java.util.logging.config.file" value="logging-basic.properties" />
 		</properties>
 	</jvm>
 

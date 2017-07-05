@@ -1,7 +1,6 @@
 package org.crypthing.things.appservice;
 
-import java.io.File;
-import java.io.FileNotFoundException;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Iterator;
 
@@ -12,21 +11,18 @@ import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
 
-import org.crypthing.things.appservice.config.ConfigException;
 import org.crypthing.things.appservice.config.JVMConfig;
 import org.crypthing.things.appservice.db.Cursor;
+import org.crypthing.things.config.ConfigException;
 
 public class CursorReset {
 	public static void main(String[] args) throws ConfigException
 	{
 		if (args.length != 2) usage();
-		final File schema = Bootstrap.getSchema();
 		System.out.print("Reseting  cursor " + args[1] + "specified in " + args[0] + "... ");
 		try
 		{
-			final File config = new File(args[0]);
-			if (!config.exists()) throw new ConfigException("Could not find configuration file " + args[0], new FileNotFoundException());
-			final JVMConfig cfg = Bootstrap.getJVMConfig(config, schema);
+			final JVMConfig cfg = Bootstrap.getJVMConfig(new FileInputStream(args[0]), Bootstrap.getSchema());
 			if (cfg.getJmx() == null) throw new ConfigException("Configuration must have a JMX entry");
 			reset(cfg.getJmx().getHost(), cfg.getJmx().getPort(), args[1]);
 			System.out.println("Done!");

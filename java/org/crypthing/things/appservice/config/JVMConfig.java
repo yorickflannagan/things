@@ -1,25 +1,39 @@
 package org.crypthing.things.appservice.config;
 
+import org.crypthing.things.config.Config;
+import org.crypthing.things.config.ConfigException;
+import org.crypthing.things.config.ConvertToInt;
+import org.w3c.dom.Node;
+
 public class JVMConfig
 {
-	private int minMemory;
-	private int maxMemory;
-	private String vmflags;
-	private JMXConfig jmx;
-	private ClasspathConfig classpath;
-	private ConfigProperties properties;
+	private final int minMemory;
+	private final int maxMemory;
+	private final String vmflags;
+	private final JMXConfig jmx;
+	private final ClasspathConfig classpath;
+	private final ConfigProperties properties;
+	public JVMConfig(final Config xml, final Node root) throws ConfigException
+	{
+		try
+		{
+			final ConvertToInt converter = new ConvertToInt(0);
+			minMemory = xml.getValue("./minMemory", root, converter);
+			maxMemory = xml.getValue("./maxMemory", root, converter);
+			vmflags = xml.getValue("./vmflags", root);
+			jmx = new JMXConfig(xml, xml.getNodeValue("./jmx", root));
+			classpath = new ClasspathConfig(xml, xml.getNodeValue("./classpath", root));
+			properties = new ConfigProperties(xml, xml.getNodeValue("./properties", root));
+		}
+		catch (final Throwable e) { throw new ConfigException(e); }
+	}
+	
 	public int getMinMemory() { return minMemory; }
-	public void setMinMemory(int minMemory) { this.minMemory = minMemory; }
 	public int getMaxMemory() { return maxMemory; }
-	public void setMaxMemory(int maxMemory) { this.maxMemory = maxMemory; }
 	public String getVmflags() { return vmflags; }
-	public void setVmflags(String vmflags) { this.vmflags = vmflags; }
 	public JMXConfig getJmx() { return jmx; }
-	public void setJmx(JMXConfig jmx) { this.jmx = jmx; }
 	public ClasspathConfig getClasspath() { return classpath; }
-	public void setClasspath(ClasspathConfig classpath) { this.classpath = classpath; }
 	public ConfigProperties getProperties() { return properties; }
-	public void setProperties(ConfigProperties properties) { this.properties = properties; }
 	@Override
 	public String toString()
 	{

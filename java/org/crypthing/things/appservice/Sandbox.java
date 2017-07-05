@@ -4,14 +4,15 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Properties;
 
-import org.crypthing.things.appservice.config.ConfigException;
+import org.crypthing.things.config.ConfigException;
 import org.crypthing.things.appservice.config.WorkerConfig;
-import org.crypthing.things.events.LifecycleEvent;
-import org.crypthing.things.events.LifecycleEvent.LifecycleEventType;
-import org.crypthing.things.events.LifecycleEventDispatcher;
-import org.crypthing.things.events.ProcessingEvent;
-import org.crypthing.things.events.ProcessingEvent.ProcessingEventType;
-import org.crypthing.things.events.ProcessingEventDispatcher;
+import org.crypthing.things.snmp.EncodableString;
+import org.crypthing.things.snmp.LifecycleEvent;
+import org.crypthing.things.snmp.LifecycleEvent.LifecycleEventType;
+import org.crypthing.things.snmp.LifecycleEventDispatcher;
+import org.crypthing.things.snmp.ProcessingEvent;
+import org.crypthing.things.snmp.ProcessingEvent.ProcessingEventType;
+import org.crypthing.things.snmp.ProcessingEventDispatcher;
 
 public abstract class Sandbox extends Thread implements ShutdownEventDispatcher, InterruptEventListener
 {
@@ -47,7 +48,7 @@ public abstract class Sandbox extends Thread implements ShutdownEventDispatcher,
 	@Override
 	final public void run()
 	{
-		lcDispatcher.fire(new LifecycleEvent(this, LifecycleEventType.start, "Sandbox thread " + getId() + "has started"));
+		lcDispatcher.fire(new LifecycleEvent(LifecycleEventType.start, new EncodableString("Sandbox thread " + getId() + "has started")));
 		try
 		{
 			startup(props);
@@ -58,12 +59,12 @@ public abstract class Sandbox extends Thread implements ShutdownEventDispatcher,
 				try { onceMore = execute(); }
 				catch (final IOException | SQLException e)
 				{
-					pDispatcher.fire(new ProcessingEvent(this, ProcessingEventType.warning, "Unhandled IO or SQLException", e));
+					pDispatcher.fire(new ProcessingEvent(ProcessingEventType.warning, "Unhandled IO or SQLException", e));
 					if (!isRestartable) throw e;
 				}
 				if (heartbeat > 0 && System.currentTimeMillis() - lastSignal > heartbeat)
 				{
-					lcDispatcher.fire(new LifecycleEvent(this, LifecycleEventType.work, "Sandbox thread " + getId() + "is alive and running"));
+					lcDispatcher.fire(new LifecycleEvent(LifecycleEventType.work, new EncodableString("Sandbox thread " + getId() + "is alive and running")));
 					lastSignal = System.currentTimeMillis();
 				}
 				if (running && onceMore && sleeptime > 0) try { Thread.sleep(sleeptime);} catch(InterruptedException e) {}
@@ -75,11 +76,11 @@ public abstract class Sandbox extends Thread implements ShutdownEventDispatcher,
 		}
 		catch (final Throwable e)
 		{
-			pDispatcher.fire(new ProcessingEvent(this, ProcessingEventType.error, "Unhandled exception received", e));
+			pDispatcher.fire(new ProcessingEvent(ProcessingEventType.error, "Unhandled exception received", e));
 			iFailure++;
 			shutdownListner.abort(this);
 		}
-		lcDispatcher.fire(new LifecycleEvent(this, LifecycleEventType.stop,  "Sandbox thread " + getId() + "has ended"));
+		lcDispatcher.fire(new LifecycleEvent(LifecycleEventType.stop, new EncodableString("Sandbox thread " + getId() + "has ended")));
 		interrupt();
 	}
 

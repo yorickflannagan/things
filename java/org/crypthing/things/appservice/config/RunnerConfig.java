@@ -1,31 +1,35 @@
 package org.crypthing.things.appservice.config;
 
+import org.crypthing.things.config.Config;
+import org.crypthing.things.config.ConfigException;
 
 public final class RunnerConfig
 {
-	private WorkerConfig worker;
-	private JNDIConfig jndi;
-	private ConfigProperties snmp;
-	private ConfigProperties sandbox;
-	private DataSourcesConfig datasources;
-	private ConnectorsConfig connectors;
-	private CursorsConfig cursors;
+	private final JNDIConfig jndi;
+	private final WorkerConfig worker;
+	private final ConfigProperties sandbox;
+	private final ConfigProperties snmp;
+	private final DataSourcesConfig datasources;
+	private final CursorsConfig cursors;
+	private final ConnectorsConfig connectors;
 	
-	
+	public RunnerConfig(final Config xml) throws ConfigException
+	{
+		jndi = new JNDIConfig(xml, xml.getNodeValue("/config/jndi"));
+		worker = new WorkerConfig(xml, xml.getNodeValue("/config/worker"));
+		sandbox = new ConfigProperties(xml, xml.getNodeValue("/config/sandbox"));
+		snmp = new ConfigProperties(xml, xml.getNodeValue("/config/snmp"));
+		datasources = new DataSourcesConfig(xml, xml.getNodeValue("/config/datasources"));
+		cursors = new CursorsConfig(xml, xml.getNodeValue("/config/cursors"));
+		connectors = new ConnectorsConfig(xml, xml.getNodeValue("/config/mqxconnectors"));
+	}
 	public WorkerConfig getWorker() { return worker; }
-	public void setWorker(WorkerConfig worker) { this.worker = worker; }
 	public JNDIConfig getJndi() { return jndi; }
-	public void setJndi(JNDIConfig jndi) { this.jndi = jndi; }
 	public ConfigProperties getSnmp() { return snmp; }
 	public ConfigProperties getSandbox() { return sandbox; }
-	public void setSandbox(ConfigProperties sandbox) { this.sandbox = sandbox; }
-	public void setSnmp(ConfigProperties snmp) { this.snmp = snmp; }
 	public DataSourcesConfig getDatasources() { return datasources; }
-	public void setDatasources(DataSourcesConfig datasources) { this.datasources = datasources; }
 	public ConnectorsConfig getConnectors() { return connectors; }
-	public void setConnectors(ConnectorsConfig connectors) { this.connectors = connectors; }
 	public CursorsConfig getCursors() {return cursors;}
-	public void setCursors(CursorsConfig cursors) {this.cursors = cursors;}
 	@Override public String toString()
 	{
 		final StringBuilder builder = new StringBuilder();

@@ -2,16 +2,23 @@ package org.crypthing.things.appservice.config;
 
 import java.util.Enumeration;
 
+import org.crypthing.things.config.Config;
+import org.crypthing.things.config.ConfigException;
+import org.w3c.dom.Node;
+
 public class JMXConfig extends ConfigProperties
 {
 	private static final long serialVersionUID = 3230906824839606641L;
-	private String host;
-	private String port;
-	public JMXConfig(String host, String port) { this.host = host; this.port = port; }
+	private final String host;
+	private final String port;
+	public JMXConfig(final Config xml, final Node root) throws ConfigException
+	{
+		super(xml, root);
+		host = xml.getValue("./@host", root);
+		port = xml.getValue("./@port", root);
+	}
 	public String getHost() { return host; }
-	public void setHost(String host) { this.host = host; }
 	public String getPort() { return port; }
-	public void setPort(String port) { this.port = port; }
 	@Override
 	public void add(final Property prop)
 	{

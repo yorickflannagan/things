@@ -5,8 +5,8 @@
 		Ver http://docs.oracle.com/javase/7/docs/technotes/tools/windows/java.html
 	-->
 	<jvm>
-		<minMemory>[valor]</minMemory>	<!-- Valor do parâmetro -Xms (em megabytes). Opcional. -->
-		<maxMemory>[valor]</maxMemory>	<!-- Valor do parâmetro -Xmx (em megabytes). Opcional. -->
+		<minMemory>1</minMemory>		<!-- Valor do parâmetro -Xms (em megabytes). Opcional. -->
+		<maxMemory>1</maxMemory>		<!-- Valor do parâmetro -Xmx (em megabytes). Opcional. -->
 		<vmflags>[parâmetros]</vmflags>	<!-- Parâmetros de JVM adicionais (-server -Xbatch já são usados internamente). Opcional -->
 
 		<!--
@@ -19,7 +19,7 @@
 			<property name="com.sun.management.jmxremote.ssl" value="false" />
 			<property name="com.sun.management.jmxremote.authenticate" value="false" />
 		-->
-		<jmx host="[IP/hostname]" port="[porta]" />
+		<jmx host="[IP/hostname]" port="8000" />
 
 		<!--
 			java.class.path requerido pelo serviço. Obrigatório.
@@ -79,10 +79,10 @@
 		Todos os elementos são obrigatórios.
 	-->
 	<worker implementation="[nome qualificado da classe]">
-		<threads>[valor]</threads>				<!-- Quantidade de threads de trabalho -->
-		<restartable>[boolean]</restartable>	<!-- true se a aplicação deve rodar como um daemon -->
-		<sleep>[valor]</sleep>					<!-- Tempo em milissegundos de aguardo entre duas execuções de cada thread -->
-		<heartbeat>60000</heartbeat>			<!-- Intervalo em milissegundos entre dois sinais de heartbeat -->
+		<threads>1</threads>				<!-- Quantidade de threads de trabalho -->
+		<restartable>false</restartable>	<!-- true se a aplicação deve rodar como um daemon -->
+		<sleep>1</sleep>					<!-- Tempo em milissegundos de aguardo entre duas execuções de cada thread -->
+		<heartbeat>1</heartbeat>			<!-- Intervalo em milissegundos entre dois sinais de heartbeat -->
 	</worker>
 
 	<!--

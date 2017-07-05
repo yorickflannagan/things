@@ -1,7 +1,7 @@
 package org.crypthing.things.appservice;
 
-import org.crypthing.things.appservice.config.ConfigException;
-import org.crypthing.things.events.ProcessingEventListener;
+import org.crypthing.things.config.ConfigException;
+import org.crypthing.things.snmp.ProcessingEventListener;
 
 public interface ResourceProvider
 {
