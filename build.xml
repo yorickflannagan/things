@@ -1,84 +1,72 @@
 <?xml version = "1.0" encoding = "UTF-8" standalone = "no"?>
 <!--
-	Requires gtx-env
-	for debug call DEBUG=1
-	Required environment:
-		JDIGESTER_JAR: JDigester
-		JSNMP_JAR: SNMP4J
+	ARGUMENTS (-D)
+	VERSION: library version
+	JSNMP_JAR: SNMP4J library location
+	RT_JAR: JDK 1.7 runtime library location
 -->
 <project basedir = "." default = "build" name = "things">
 	<target name = "init">
-
-		<tstamp>
-			<format property="NOW" pattern="HH:mm dd/MM/yyyy z"/>
-		</tstamp> 
-
-		<buildnumber/>
-
-		<property environment = "env"/>
-
-		<property name = "package.version" value = "1.5.0" />
 		<property name = "src.dir" value = "java" />
 		<property name = "bin.dir" value = "java-bin" />
-		<condition property = "dist.dir" value = "dist/debug" else = "dist/release">
-			<and>
-				<equals arg1="${DEBUG}" arg2="1" />
-				<isset property="DEBUG" />
-			</and>
-		</condition>
 		<property name = "target.file" value = "things.jar" />
 		<property name = "target" value = "1.7"/>
 		<property name = "source" value = "1.7"/>
-
-
+		<property name = "bootstrap" value = "${RT_JAR}"/>
 		<path id = "project.dependencies">
-			<pathelement path = "${env.JDIGESTER_JAR}" />
-			<pathelement path = "${env.JSNMP_JAR}" />
+			<pathelement path = "${JSNMP_JAR}" />
 		</path>
 		<property name = "project.classpath" refid = "project.dependencies" />
-		<property name = "project.resources" value = "${env.CRYPTHINGS}/docs/config.xsd" />
+		<mkdir dir = "${bin.dir}" />
 	</target>
 
-	<target name = "check" depends = "init, clean">
+	<target name = "ver" depends = "init">
+		<tstamp>
+			<format property="NOW" pattern="HH:mm dd/MM/yyyy z"/>
+		</tstamp> 
+		<buildnumber/>
+		<condition property = "package.version" value = "${VERSION}" else = "1.0.0">
+			<isset property="VERSION" />
+		</condition>
+		<property name = "version" value = "${package.version}.${build.number}" />
+	</target>
+
+	<target name = "check" depends = "ver, clean">
 		<echo message = "package.version"> ${package.version} </echo>
 		<echo message = "src.dir"> ${src.dir} </echo>
 		<echo message = "bin.dir"> ${bin.dir} </echo>
-		<echo message = "dist.dir"> ${dist.dir} </echo>
 		<echo message = "target.file"> ${target.file} </echo>
 		<echo message = "target"> ${target} </echo>
 		<echo message = "source"> ${source} </echo>
 		<echo message = "project.classpath"> ${project.classpath} </echo>
-		<echo message = "project.resources"> ${project.resources} </echo>
-
-		<mkdir dir = "${bin.dir}" />
+		<echo message = "bootstrap"> ${bootstrap} </echo>
 	</target>
 
 	<target name = "clean" depends = "init">
-		<delete dir = "${bin.dir}" />
-		<delete file = "${dist.dir}/${target.file}" />
-		<delete file = "${dist.dir}/things.jar" />
+		<delete dir  = "${bin.dir}" />
+		<delete file = "${target.file}" />
 	</target>
 
-	<target name = "compile" depends = "check">
+	<target name = "compile" depends = "ver">
 		<javac	debug = "true"
 				debuglevel = "source,lines,vars"
 				srcdir = "${src.dir}"
 				destdir = "${bin.dir}"
 				classpath = "${project.classpath}"
 				source = "${source}"
+				bootclasspath = "${bootstrap}"
 				target = "${target}"
 				includeantruntime = "false" />
 	</target>
 
 	<target name = "build" depends = "compile">
-		<jar destfile = "${dist.dir}/${target.file}" level = "9" strict = "fail" >
+		<jar destfile = "${target.file}" level = "9" strict = "fail" >
 			<fileset dir = "${bin.dir}" />
-			<fileset file = "${project.resources}" />
 			<fileset dir = "${src.dir}" />
 			<manifest>
 				<attribute name = "Implementation-Title" value = "Things Utilities" />
 				<attribute name = "Implementation-Vendor" value = "The Crypthing Initiative" />
-				<attribute name = "Implementation-Version" value = "${package.version}.${build.number} ${NOW}" />
+				<attribute name = "Implementation-Version" value = "${version} ${NOW}" />
 			</manifest>
 		</jar>
 	</target>
