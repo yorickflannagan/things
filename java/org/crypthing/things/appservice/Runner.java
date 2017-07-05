@@ -300,7 +300,7 @@ implements	RunnerMBean,
 					log,
 					SNMPBridge.newInstance
 					(
-						cfg.getSnmp().getProperty("org.crypthing.things.SNMPTrap"),
+						cfg.getSnmp().getProperty("org.crypthing.things.snmp.SNMPBridge"),
 						cfg.getSnmp().getProperty("org.crypthing.things.batch.udpAddress"),
 						cfg.getSnmp().getProperty("org.crypthing.things.batch.rootOID")
 					)
