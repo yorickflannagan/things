@@ -5,8 +5,11 @@ import java.util.Iterator;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
+import javax.naming.spi.ObjectFactory;
 
 import org.crypthing.things.config.ConfigException;
+import org.crypthing.things.appservice.config.JNDIConfig;
+import org.crypthing.things.appservice.config.JNDIConfig.JDNIObject;
 import org.crypthing.things.appservice.config.RunnerConfig;
 import org.crypthing.things.appservice.db.CursorFactory;
 import org.crypthing.things.snmp.ProcessingEventListener;
@@ -40,7 +43,7 @@ public class ServicesFactory implements BindServices
 				context.bind("java:mqx/" + key, connector);
 			}
 		}
-		if(cfg.getCursors() !=null)
+		if (cfg.getCursors() != null )
 		{
 			final Iterator<String> it = cfg.getCursors().keySet().iterator();
 			while (it.hasNext())
@@ -51,6 +54,13 @@ public class ServicesFactory implements BindServices
 				context.bind("java:cursor/" + key, cursorf);
 			}
 		}
-		
+		final JNDIConfig jndi = cfg.getJndi();
+		final Iterator<JDNIObject> it = jndi.getObjects().iterator();
+		while (it.hasNext())
+		{
+			final JDNIObject ob = it.next();
+			try { context.bind(ob.getName(), Class.forName(ob.getFactory()).asSubclass(ObjectFactory.class).newInstance().getObjectInstance(ob.getName(), null, null, ob)); }
+			catch (final Exception e) { throw new ConfigException(e); }
+		}
 	}
 }

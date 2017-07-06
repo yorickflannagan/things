@@ -59,6 +59,21 @@
 			</xs:sequence>
 			</xs:complexType>
 			</xs:element>
+			<xs:element name="object" minOccurs="0" maxOccurs="unbounded">
+			<xs:complexType>
+			<xs:sequence>
+				<xs:element name="environment" minOccurs="0" maxOccurs="1">
+				<xs:complexType>
+				<xs:sequence>
+					<xs:element name="property" type="property" minOccurs="1" maxOccurs="unbounded" />
+				</xs:sequence>
+				</xs:complexType>
+				</xs:element>
+			</xs:sequence>
+			<xs:attribute name="name" type="xs:string" use="required" />
+			<xs:attribute name="factory" type="xs:string" use="required" />
+			</xs:complexType>
+			</xs:element>
 		</xs:sequence>
 		<xs:attribute name="implementation" type="xs:string" use="required" />
 	</xs:complexType>

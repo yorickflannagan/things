@@ -71,7 +71,13 @@
 		Por exemplo, a implementação da Sun requer pelo menos uma entrada
 		<property name="java.naming.factory.initial" value="com.sun.jndi.ldap.LdapCtxFactory" />
 	-->
-	<jndi implementation="org.crypthing.things.appservice.ServicesFactory" />
+	<jndi implementation="org.crypthing.things.appservice.ServicesFactory">
+		<object name = "java:sms/receiver" factory = "org.crypthings.titiriwe.services.SMSMonitor">
+			<environment>
+				<property name = "dir" value = "/var/sms/incoming" />
+			</environment>
+		</object>
+	</jndi>
 
 	<!--
 		Configuração das threads de trabalho do aplicativo.
