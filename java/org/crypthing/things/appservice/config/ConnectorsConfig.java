@@ -12,17 +12,20 @@ public final class ConnectorsConfig extends HashMap<String, ConnectorConfig>
 {
 	public ConnectorsConfig(final Config xml, final Node root) throws ConfigException
 	{
-		final Iterator<ConnectorConfig> it = xml.getValueCollection("./mqxconnector", root, new Converter<ConnectorConfig>()
+		if (root != null)
 		{
-			@Override
-			public ConnectorConfig convert(Object value) throws ClassCastException
+			final Iterator<ConnectorConfig> it = xml.getValueCollection("./mqxconnector", root, new Converter<ConnectorConfig>()
 			{
-				try { return new ConnectorConfig(xml, (Node) value); }
-				catch (final ConfigException e) { throw (ClassCastException)(new ClassCastException(e.getMessage())).initCause(e); }
-			}
-			
-		}).iterator();
-		while (it.hasNext()) add(it.next());
+				@Override
+				public ConnectorConfig convert(Object value) throws ClassCastException
+				{
+					try { return new ConnectorConfig(xml, (Node) value); }
+					catch (final ConfigException e) { throw (ClassCastException)(new ClassCastException(e.getMessage())).initCause(e); }
+				}
+				
+			}).iterator();
+			while (it.hasNext()) add(it.next());
+		}
 	}
 	private static final long serialVersionUID = 6184597492041490665L;
 	public ConnectorConfig add(final ConnectorConfig qfg) { return put(qfg.getName(), qfg); }
