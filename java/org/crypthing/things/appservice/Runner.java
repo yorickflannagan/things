@@ -66,20 +66,19 @@ implements	RunnerMBean,
 		config = cfg;
 		lcDispatcher = new LifecycleEventDispatcher();
 		pDispatcher = new ProcessingEventDispatcher();
-		final LogTrapperListener traps;
+		SNMPBridge bridge = null;
 		try
 		{
-			traps = new LogTrapperListener
+			bridge = SNMPBridge.newInstance
 			(
-				log,
-				SNMPBridge.newInstance
-				(
-					config.getSnmp().getProperty("org.crypthing.things.SNMPTrap"),
-					config.getSnmp().getProperty("org.crypthing.things.batch.udpAddress"),
-					config.getSnmp().getProperty("org.crypthing.things.batch.rootOID")
-				)
+				config.getSnmp().getProperty("org.crypthing.things.SNMPTrap"),
+				config.getSnmp().getProperty("org.crypthing.things.batch.udpAddress"),
+				config.getSnmp().getProperty("org.crypthing.things.batch.rootOID")
 			);
 		}
+		catch (final Exception swallowed) { bridge = null; }
+		final LogTrapperListener traps;
+		try { traps = new LogTrapperListener(log, bridge); }
 		catch (final Throwable e) { throw new ConfigException("Invalid SNMP config properties"); }
 		lcDispatcher.addListener(traps);
 		pDispatcher.addListener(traps);
@@ -291,20 +290,18 @@ implements	RunnerMBean,
 			String jndiImpl;
 			if (jndi == null || (jndiImpl = jndi.getImplementation()) == null) throw new ConfigException("Config entry required: /config/jndi/implementation");
 			if (jndi.size() > 0) System.getProperties().putAll(jndi);
-			((BindServices) Class.forName(jndiImpl).newInstance()).bind
-			(
-				cfg,
-				instance,
-				new LogTrapperListener
+			SNMPBridge bridge = null;
+			try
+			{
+				bridge = SNMPBridge.newInstance
 				(
-					log,
-					SNMPBridge.newInstance
-					(
-						cfg.getSnmp().getProperty("org.crypthing.things.snmp.SNMPBridge"),
-						cfg.getSnmp().getProperty("org.crypthing.things.batch.udpAddress"),
-						cfg.getSnmp().getProperty("org.crypthing.things.batch.rootOID")
-					)
-			));
+					cfg.getSnmp().getProperty("org.crypthing.things.SNMPTrap"),
+					cfg.getSnmp().getProperty("org.crypthing.things.batch.udpAddress"),
+					cfg.getSnmp().getProperty("org.crypthing.things.batch.rootOID")
+				);
+			}
+			catch (final Exception swallowed) { bridge = null; }
+			((BindServices) Class.forName(jndiImpl).newInstance()).bind(cfg, instance, new LogTrapperListener(log, bridge));
 			Runtime.getRuntime().addShutdownHook(new Thread(instance.new ShutdownHook()));
 			ManagementFactory.getPlatformMBeanServer().registerMBean
 			(
