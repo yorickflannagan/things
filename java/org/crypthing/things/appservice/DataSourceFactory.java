@@ -37,7 +37,7 @@ import org.crypthing.things.snmp.ProcessingEvent.ProcessingEventType;
 public class DataSourceFactory extends Reference implements DataSource, ResourceProvider, ReleaseResourceListener
 {
 	private static final long serialVersionUID = 8191301701768048738L;
-	private static Map<Long, ConnectionWraper> instances = new ConcurrentHashMap<Long, ConnectionWraper>();
+	private Map<Long, ConnectionWraper> instances = new ConcurrentHashMap<Long, ConnectionWraper>();
 	private JDBCConfig config;
 	private PrintWriter logWriter = new PrintWriter(System.out);
 	private ProcessingEventListener trap;
