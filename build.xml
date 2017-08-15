@@ -31,7 +31,7 @@
 		<property name = "version" value = "${package.version}.${build.number}" />
 	</target>
 
-	<target name = "check" depends = "ver, clean">
+	<target name = "check" depends = "ver">
 		<echo message = "package.version"> ${package.version} </echo>
 		<echo message = "src.dir"> ${src.dir} </echo>
 		<echo message = "bin.dir"> ${bin.dir} </echo>
