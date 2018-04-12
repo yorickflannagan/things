@@ -11,6 +11,7 @@ public class JVMConfig
 	private final int maxMemory;
 	private final String vmflags;
 	private final JMXConfig jmx;
+	private final String name;
 	private final ClasspathConfig classpath;
 	private final ConfigProperties properties;
 	public JVMConfig(final Config xml, final Node root) throws ConfigException
@@ -20,6 +21,7 @@ public class JVMConfig
 			final ConvertToInt converter = new ConvertToInt(0);
 			minMemory = xml.getValue("./minMemory", root, converter);
 			maxMemory = xml.getValue("./maxMemory", root, converter);
+			name= xml.getValue("./name", root);
 			vmflags = xml.getValue("./vmflags", root);
 			jmx = new JMXConfig(xml, xml.getNodeValue("./jmx", root));
 			classpath = new ClasspathConfig(xml, xml.getNodeValue("./classpath", root));
@@ -31,6 +33,7 @@ public class JVMConfig
 	public int getMinMemory() { return minMemory; }
 	public int getMaxMemory() { return maxMemory; }
 	public String getVmflags() { return vmflags; }
+	public String getName() { return name; }
 	public JMXConfig getJmx() { return jmx; }
 	public ClasspathConfig getClasspath() { return classpath; }
 	public ConfigProperties getProperties() { return properties; }

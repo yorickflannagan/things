@@ -12,9 +12,11 @@ public final class RunnerConfig
 	private final DataSourcesConfig datasources;
 	private final CursorsConfig cursors;
 	private final ConnectorsConfig connectors;
+	private final JVMConfig jvm;
 	
 	public RunnerConfig(final Config xml) throws ConfigException
 	{
+		jvm =  new JVMConfig(xml, xml.getNodeValue("/config/jvm"));
 		jndi = new JNDIConfig(xml, xml.getNodeValue("/config/jndi"));
 		worker = new WorkerConfig(xml, xml.getNodeValue("/config/worker"));
 		sandbox = new ConfigProperties(xml, xml.getNodeValue("/config/sandbox"));
@@ -25,6 +27,7 @@ public final class RunnerConfig
 	}
 	public WorkerConfig getWorker() { return worker; }
 	public JNDIConfig getJndi() { return jndi; }
+	public JVMConfig getJVM() { return jvm; }
 	public ConfigProperties getSnmp() { return snmp; }
 	public ConfigProperties getSandbox() { return sandbox; }
 	public DataSourcesConfig getDatasources() { return datasources; }
@@ -33,6 +36,7 @@ public final class RunnerConfig
 	@Override public String toString()
 	{
 		final StringBuilder builder = new StringBuilder();
+		if (jvm != null) builder.append("jvm={").append(worker.toString());
 		if (worker != null) builder.append("worker={").append(worker.toString()).append("}, jndi={").append(jndi.toString()).append("}");
 		if (snmp != null) builder.append(", snmp={").append(snmp.toString()).append("}");
 		if (sandbox != null) builder.append(", sandbox={").append(sandbox.toString()).append("}");

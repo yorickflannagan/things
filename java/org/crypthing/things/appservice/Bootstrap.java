@@ -88,6 +88,7 @@ public final class Bootstrap
 		final JMXConfig jmx = config.getJmx();
 		builder.append(" -Djava.rmi.server.hostname=").append(jmx.getHost());
 		builder.append(" -Dcom.sun.management.jmxremote.port=").append(jmx.getPort());
+		if(config.getName() !=null) builder.append(" -Dthing.server.name=").append(config.getName());
 		if (jmx.getProperty("com.sun.management.jmxremote.ssl") == null) builder.append(" -Dcom.sun.management.jmxremote.ssl=false");
 		if (jmx.getProperty("com.sun.management.jmxremote.authenticate") == null) builder.append(" -Dcom.sun.management.jmxremote.authenticate=false");
 		addProperties(jmx.stringPropertyNames().iterator(), jmx, builder);

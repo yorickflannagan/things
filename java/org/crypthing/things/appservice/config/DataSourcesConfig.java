@@ -13,17 +13,20 @@ public final class DataSourcesConfig extends HashMap<String, JDBCConfig>
 	private static final long serialVersionUID = -3495959150998336098L;
 	public DataSourcesConfig(final Config xml, final Node root) throws ConfigException
 	{
-		final Iterator<JDBCConfig> it = xml.getValueCollection("./jdbc", root, new Converter<JDBCConfig>()
+		if(root != null)
 		{
-			@Override
-			public JDBCConfig convert(Object value) throws ClassCastException
+			final Iterator<JDBCConfig> it = xml.getValueCollection("./jdbc", root, new Converter<JDBCConfig>()
 			{
-				try { return new JDBCConfig(xml, (Node) value); }
-				catch (final ConfigException e) { throw (ClassCastException)(new ClassCastException(e.getMessage())).initCause(e); }
-			}
-			
-		}).iterator();
-		while (it.hasNext()) addJDBC(it.next());
+				@Override
+				public JDBCConfig convert(Object value) throws ClassCastException
+				{
+					try { return new JDBCConfig(xml, (Node) value); }
+					catch (final ConfigException e) { throw (ClassCastException)(new ClassCastException(e.getMessage())).initCause(e); }
+				}
+				
+			}).iterator();
+			while (it.hasNext()) addJDBC(it.next());
+		}
 	}
 	public JDBCConfig addJDBC(final JDBCConfig cfg) { return put(cfg.getName(), cfg); }
 	@Override
