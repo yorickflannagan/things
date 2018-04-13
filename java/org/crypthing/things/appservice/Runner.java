@@ -59,11 +59,18 @@ implements	RunnerMBean,
 	private long acumulatedSucess;
 	private long acumulatedFailure;
 
+	private final long heartbeat;
+	private final String jmxaddr;
+	private final String jmxport; 
+
 	public Runner(final RunnerConfig cfg) throws ConfigException
 	{
 		try { Class.forName(cfg.getWorker().getImpl()).newInstance(); }
 		catch (final Throwable e) { throw new ConfigException(e); }
 		config = cfg;
+		jmxaddr = config.getJVM().getJmx().getHost();
+		jmxport = config.getJVM().getJmx().getPort();
+		heartbeat = config.getJVM().getHeartbeat();
 		lcDispatcher = new LifecycleEventDispatcher();
 		pDispatcher = new ProcessingEventDispatcher();
 		SNMPBridge bridge = null;
@@ -93,6 +100,9 @@ implements	RunnerMBean,
 			for (int i = 0, threads = config.getWorker().getThreads(); i < threads; i++) workers.put(maxWorker++, newWorker());
 			lcDispatcher.fire(new LifecycleEvent(LifecycleEventType.start, new EncodableString("Runner initialization succeeded")));
 			ready = true;
+			Thread t = new Thread(new Heart());
+			t.start();
+			
 			int goal = config.getWorker().getGoal();
 			if(goal >0)
 			{
@@ -286,6 +296,7 @@ implements	RunnerMBean,
 		{
 			final RunnerConfig cfg = getConfig(new FileInputStream(args[0]), Bootstrap.getSchema());
 			instance = new Runner(cfg);
+			instance.configfile = args[0];
 			final JNDIConfig jndi = cfg.getJndi();
 			String jndiImpl;
 			if (jndi == null || (jndiImpl = jndi.getImplementation()) == null) throw new ConfigException("Config entry required: /config/jndi/implementation");
@@ -333,4 +344,42 @@ implements	RunnerMBean,
 	{
 		return new RunnerConfig(new Config(config, schema));
 	}
+
+	private String[] env; 
+	@Override
+	public String[] getEnvironment() {
+		if(env ==null)
+		{
+			env = Bootstrap.getEnv();
+		}
+		return env;
+	}
+
+	private String configfile;
+	@Override
+	public String getConfigFile() {
+		return configfile;
+	}
+	
+	private class Heart implements Runnable
+	{
+
+		@Override
+		public void run() {
+			while(!hasShutdown && heartbeat > 0)
+			{
+				final String msg = new StringBuilder().append("{\"jmx\":{\"address\":\"").append(jmxaddr).append("\",\"port\":")
+									.append(jmxport).append("},\"success\":").append(getSuccessCount())
+									.append(",\"failures\":").append(getErrorCount()).append(",\"workers\":")
+									.append(getWorkerCount()).append("}").toString();
+				lcDispatcher.fire(new LifecycleEvent(LifecycleEventType.heart, new EncodableString(msg)));
+				try{Thread.sleep(heartbeat);}catch(InterruptedException e){}
+				
+			}
+		}
+		
+	}
+	
+	
+	
 }

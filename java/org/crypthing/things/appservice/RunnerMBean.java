@@ -6,4 +6,6 @@ public interface RunnerMBean
 	long getSuccessCount();
 	long getErrorCount();
 	int getWorkerCount();
+	String[] getEnvironment();
+	String getConfigFile();
 }

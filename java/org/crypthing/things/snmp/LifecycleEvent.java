@@ -2,7 +2,7 @@ package org.crypthing.things.snmp;
 
 public class LifecycleEvent extends Event
 {
-	public enum LifecycleEventType { start, work, stop }
+	public enum LifecycleEventType { start, work, stop, heart }
 	private final LifecycleEventType type;
 	public LifecycleEvent(final LifecycleEventType type) { this(type, null); }
 	public LifecycleEvent(final LifecycleEventType type, final Encodable data)
@@ -17,8 +17,15 @@ public class LifecycleEvent extends Event
 		case work:
 			oid = ".2.2";
 			break;
-		default:
+		case stop:
 			oid = ".2.3";
+			break;
+		case heart:
+			oid = ".2.4";
+			break;
+		default:
+			throw new IllegalArgumentException("Unknow eventtype:" + type);
+			// Não deve acontecer...
 		}
 		setRelativeOID(oid).setData(data);
 	}

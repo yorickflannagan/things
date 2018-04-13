@@ -44,4 +44,5 @@ public class LogTrapperListener implements LifecycleEventListener, ProcessingEve
 	@Override public void start(final LifecycleEvent e) { dispatch(e); }
 	@Override public void work(final LifecycleEvent e) { dispatch(e); }
 	@Override public void stop(final LifecycleEvent e) { dispatch(e); }
+	@Override public void heart(final LifecycleEvent e) { dispatch(e); }
 }

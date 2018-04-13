@@ -105,7 +105,7 @@ public final class Bootstrap
 			builder.append(" -D").append(key).append("=").append(source.getProperty(key));
 		}
 	}
-	private static String[] getEnv()
+	public static String[] getEnv()
 	{
 		final int size = System.getenv().size();
 		final ArrayList<String> env = new ArrayList<String>(size);

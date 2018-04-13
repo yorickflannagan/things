@@ -22,12 +22,12 @@ import org.snmp4j.transport.DefaultUdpTransportMapping;
 
 public class Trap implements Serializable
 {
+	public static final String JVM_NAME_RELATIVE_OID = ".1.2";
+	public static final String JBOSS_RELATIVE_OID = ".1.3";
+	public static final String TIMER_RELATIVE_OID = ".1.1";
 	private class Bindings implements Serializable
 	{
 		private static final long serialVersionUID = -4032969166607803162L;
-		public static final String TIMER_RELATIVE_OID = ".1.1";
-		public static final String JVM_NAME_RELATIVE_OID = ".1.2";
-		public static final String JBOSS_RELATIVE_OID = ".1.3";
 		private static final String JBOSS_SERVER = "jboss.server.name";
 		private static final String THING_SERVER = "thing.server.name";
 		private final OID timer;

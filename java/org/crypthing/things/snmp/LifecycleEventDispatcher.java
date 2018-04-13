@@ -24,6 +24,9 @@ public final class LifecycleEventDispatcher extends EventDispatcher<LifecycleEve
 			case stop:
 				while (it.hasNext()) it.next().stop(event);
 				break;
+			case heart:
+				while (it.hasNext()) it.next().stop(event);
+				break;
 			}
 		}
 		finally { mutex.unlock(); }

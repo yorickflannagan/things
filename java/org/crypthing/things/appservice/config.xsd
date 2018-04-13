@@ -23,6 +23,7 @@
 		<xs:element name="maxMemory" type="positive" minOccurs="0" />
 		<xs:element name="vmflags" type="nonempty" minOccurs="0" />
 		<xs:element name="name" type="nonempty" minOccurs="0" />
+		<xs:element name="heartbeat" type="xs:int" minOccurs="0" />
 		<xs:element name="jmx">
 		<xs:complexType>
 		<xs:sequence>
