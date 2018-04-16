@@ -5,7 +5,11 @@
     <version>1.0.1</version>
     <name>Things</name>
     <description>The Crypthing Initiative</description>
-
+    <scm>
+        <connection>scm:git:https://bitbucket.org/yakoana/things.git</connection>
+        <tag>HEAD</tag>
+        <url>https://bitbucket.org/yakoana/things/src</url>
+    </scm>
     <properties>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
@@ -22,10 +26,40 @@
     </dependencies>
 
     <build>
+        <plugins>
+        <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>buildnumber-maven-plugin</artifactId>
+            <version>1.4</version>
+            <executions>
+            <execution>
+                <id>buildnumber</id>
+                <phase>validate</phase>
+                <goals>
+                <goal>create</goal>
+                </goals>
+            </execution>
+            </executions>
+            <configuration>
+            <format>{0,number}</format>
+            <items>
+                <item>buildNumber</item>
+            </items>                    
+            <doCheck>false</doCheck>
+            <doUpdate>false</doUpdate>
+            <revisionOnScmFailure>unknownbuild</revisionOnScmFailure>   
+            </configuration>
+        </plugin>    
+        </plugins>
+
+        <finalName>${project.artifactId}-${project.version}.${buildNumber}</finalName>
         <directory>${project.basedir}/target</directory>
         <outputDirectory>${project.build.directory}/java-bin</outputDirectory>
-        <finalName>${project.artifactId}</finalName>
         <sourceDirectory>${project.basedir}/java</sourceDirectory>
+
+
+
+
     </build>
 
 </project>
