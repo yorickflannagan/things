@@ -33,7 +33,7 @@ import org.crypthing.things.snmp.ProcessingEventDispatcher;
 import org.crypthing.things.snmp.SNMPBridge;
 
 
-public final class Runner
+public class Runner
 implements	RunnerMBean,
 		ShutdownEventListener,
 		ReleaseResourceEventDispatcher,
