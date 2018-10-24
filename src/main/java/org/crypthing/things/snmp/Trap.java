@@ -3,6 +3,7 @@ package org.crypthing.things.snmp;
 import java.io.IOException;
 import java.io.Serializable;
 import java.lang.management.ManagementFactory;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -85,7 +86,7 @@ public class Trap implements Serializable
 			switch (encode.getEncoding())
 			{
 			case STRING:
-				var = new OctetString((String) encode.encode());
+				var = new OctetString(encode.encode().toString().getBytes(StandardCharsets.UTF_8));
 				break;
 			case INTEGER32:
 				var = new Integer32((int) encode.encode());

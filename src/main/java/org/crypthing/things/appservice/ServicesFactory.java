@@ -21,6 +21,7 @@ public class ServicesFactory implements BindServices
 	{
 		System.getProperties().setProperty(Context.INITIAL_CONTEXT_FACTORY, "org.crypthing.things.jndi.InitialContextFactory");
 		final InitialContext context = new InitialContext();
+		context.bind("java:logger" , trap);
 		if (cfg.getDatasources() != null)
 		{
 			final Iterator<String> it = cfg.getDatasources().keySet().iterator();
