@@ -19,6 +19,7 @@ public class SNMPBridge implements NotificationEventListener
 		catch (final Throwable e) { return new SNMPBridge(udpAddress, oidRoot); }
 	}
 	private final Trap trap;
+	public Trap getTrap() {return trap;}
 	public SNMPBridge(final String udpAddress, final String oidRoot) throws IOException { trap = new Trap(udpAddress, oidRoot); }
 	@Override public void notify(final Event e) { trap.send(e); }
 }
