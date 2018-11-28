@@ -2,3 +2,8 @@
 java-bin
 /bin/
 *.jar
+target
+tmp
+.settings
+.classpath
+.project
