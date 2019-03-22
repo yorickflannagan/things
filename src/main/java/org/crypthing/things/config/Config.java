@@ -10,6 +10,7 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.Serializable;
 import java.nio.CharBuffer;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.regex.Matcher;
@@ -57,7 +58,7 @@ public class Config implements Serializable
 			while ((read = reader.read(buffer)) != -1) writer.write(buffer, 0, read);
 			value = expand(writer.toCharArray(), writer.size());
 		}
-		ConfigReader(final InputStream input) throws IOException, ConfigException { this(new InputStreamReader(input)); }
+		ConfigReader(final InputStream input) throws IOException, ConfigException { this(new InputStreamReader(input, StandardCharsets.UTF_8)); }
 		private String expand(final char[] input, final int len) throws IOException
 		{
 			final CharBuffer wraper = CharBuffer.wrap(input, 0, len);

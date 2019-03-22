@@ -4,6 +4,3 @@ java-bin
 *.jar
 target
 tmp
-.settings
-.classpath
-.project
