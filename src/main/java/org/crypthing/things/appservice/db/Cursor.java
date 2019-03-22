@@ -166,39 +166,48 @@ public class Cursor implements CursorMBean, InterruptEventListener {
 		int lenData = 0;
 		_getDataMutex.lock();
 		try {
-			String sql = cr.getSQL();
 			List<Object> ret;
 			Connection conn = ds.getConnection();
-			try
+			if(cr instanceof CursorReaderAutoData)
 			{
-				PreparedStatement stm = conn.prepareStatement(sql, ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
+				ret = new ArrayList<Object>(cr.fetchSize());
+				long tmp = ((CursorReaderAutoData)cr).fill(conn, ret,lastRecord);
+				if(tmp != 0) lastRecord = tmp;
+			}
+			else{
 				try
 				{
-					stm.setLong(1, lastRecord); 
-					ResultSet rs = stm.executeQuery();
+					String sql = cr.getSQL();
+					PreparedStatement stm = conn.prepareStatement(sql, ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
 					try
 					{
-						ret = new ArrayList<Object>(cr.fetchSize());
-						long tmp = cr.fill(rs, ret);
-						if(tmp != 0) lastRecord = tmp;
-						if(!ret.isEmpty())
+						stm.setLong(1, lastRecord); 
+						ResultSet rs = stm.executeQuery();
+						try
 						{
-							_swapMutex.lock();
-							try
-							{
-								final Object[] oa = ret.toArray();
-								lenData = oa.length;
-								stock+= lenData;
-								stack.add(oa);
-							}
-							finally { _swapMutex.unlock(); }
+							ret = new ArrayList<Object>(cr.fetchSize());
+							long tmp = cr.fill(rs, ret);
+							if(tmp != 0) lastRecord = tmp;
 						}
+						finally { rs.close(); }
 					}
-					finally { rs.close(); }
+					finally { stm.close(); }
 				}
-				finally { stm.close(); }
+				finally { conn.close(); }
 			}
-			finally { conn.close(); }
+			if(ret != null && !ret.isEmpty())
+			{
+				_swapMutex.lock();
+				try
+				{
+					final Object[] oa = ret.toArray();
+					lenData = oa.length;
+					stock+= lenData;
+					stack.add(oa);
+				}
+				finally { _swapMutex.unlock(); }
+			}
+
 		} 
 		finally  { _getDataMutex.unlock(); }
 		

@@ -7,6 +7,7 @@ import java.util.List;
 
 
 public abstract class CursorReader {
+	protected boolean lastRecordTrack=true;
 	protected String[] columns;
 	public abstract String getSQL();
 	public abstract int fetchSize();
@@ -25,12 +26,12 @@ public abstract class CursorReader {
 		long lastRecord = 0;
 		while(rs.next())
 		{
-			lastRecord = rs.getLong(1);
+			if(lastRecordTrack) lastRecord = rs.getLong(1);
 			list.add(readLine(rs));
 		}
 		return lastRecord;
 	}
-	
+
 	
 	private synchronized void fillColumns(ResultSetMetaData metaData) throws SQLException {
 		if(columns != null) return;
