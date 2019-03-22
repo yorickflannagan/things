@@ -6,8 +6,10 @@ import java.lang.management.ManagementFactory;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
@@ -258,6 +260,29 @@ implements	RunnerMBean,
 			if(worker != null) { failure += worker.getFailure(); }
 		}
 		return failure;
+	}
+	@Override
+	public String getInputArguments()
+	{
+		final StringBuilder builder = new StringBuilder(1024);
+		final ListIterator<String> list = ManagementFactory.getRuntimeMXBean().getInputArguments().listIterator();
+		while (list.hasNext()) builder.append(list.next()).append(" ");
+		return builder.toString();
+	}
+	@Override
+	public String[] getSystemProperties()
+	{
+		final Set<Entry<String, String>> map = ManagementFactory.getRuntimeMXBean().getSystemProperties().entrySet();
+		final int size = map.size();
+		final ArrayList<String> env = new ArrayList<String>(size);
+		final Iterator<Entry<String, String>> it = map.iterator();
+		while (it.hasNext())
+		{
+			final Entry<String, String> entry = it.next();
+			env.add(entry.getKey() + "=" + entry.getValue());
+		}
+		final String[] ret = new String[size];
+		return env.toArray(ret);
 	}
 
 	/*

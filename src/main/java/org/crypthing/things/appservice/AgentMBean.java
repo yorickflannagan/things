@@ -1,0 +1,7 @@
+package org.crypthing.things.appservice;
+
+public interface AgentMBean
+{
+    void shutdown();
+    int execute(String arguments, String[] env);
+}

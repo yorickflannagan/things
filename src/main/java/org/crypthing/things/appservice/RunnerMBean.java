@@ -8,4 +8,7 @@ public interface RunnerMBean
 	int getWorkerCount();
 	String[] getEnvironment();
 	String getConfigFile();
+
+	String getInputArguments();		// RuntimeMXBean.getInputArguments
+	String[] getSystemProperties();	// RuntimeMXBean.getSystemProperties
 }
