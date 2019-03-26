@@ -2,6 +2,7 @@ package org.crypthing.things.appservice;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.lang.ProcessBuilder.Redirect;
 import java.lang.management.ManagementFactory;
@@ -16,22 +17,39 @@ import org.crypthing.things.appservice.config.JMXConfig;
 import org.crypthing.things.appservice.config.JVMConfig;
 import org.crypthing.things.config.Config;
 import org.crypthing.things.config.ConfigException;
-
+import org.crypthing.things.snmp.EncodableString;
+import org.crypthing.things.snmp.LifecycleEvent;
+import org.crypthing.things.snmp.LifecycleEventDispatcher;
+import org.crypthing.things.snmp.LifecycleEventListener;
+import org.crypthing.things.snmp.SNMPBridge;
+import org.crypthing.things.snmp.LifecycleEvent.LifecycleEventType;
 
 public final class Bootstrap implements BootstrapMBean
 {
+	private static final class Trapper implements LifecycleEventListener
+	{
+		private final SNMPBridge trapper;
+		public Trapper(final String udpAddress) throws IOException { trapper = new SNMPBridge(udpAddress, "0.1.4320"); }
+		@Override public void start(final LifecycleEvent e)	{ trapper.notify(e); }
+		@Override public void work(final LifecycleEvent e) 	{ trapper.notify(e); }
+		@Override public void stop(final LifecycleEvent e)	{ trapper.notify(e); }
+		@Override public void heart(LifecycleEvent e)		{ trapper.notify(e); }
+	}
     public static final String MBEAN_PATTERN = "org.crypthing.things.appservice:type=Agent,name=";
 	private static final String CONFIG_SCHEMA_PATH = "/org/crypthing/things/appservice/config.xsd";
     private static ObjectName mbName;
 	public static void main(String[] args) throws Exception
 	{
-		final Bootstrap instance = new Bootstrap();
+		if (args.length < 1 || System.getProperty("java.rmi.server.hostname") == null || System.getProperty("com.sun.management.jmxremote.port") == null) usage();
+		final LifecycleEventDispatcher dispatcher = new LifecycleEventDispatcher();
+		dispatcher.addListener(new Trapper(args[0]));
+		final Bootstrap instance = new Bootstrap(dispatcher);
 		ManagementFactory.getPlatformMBeanServer().registerMBean
 		(
 			instance,
 			mbName = new ObjectName((new StringBuilder(256)).append(MBEAN_PATTERN).append(ManagementFactory.getRuntimeMXBean().getName()).toString())
 		);
-		for (int i = 0; i < args.length; i++) instance.launch(args[i]);
+		for (int i = 1; i < args.length; i++) instance.launch(args[i]);
 		instance.run();
 	}
 	public static InputStream getSchema() throws ConfigException 
@@ -56,33 +74,45 @@ public final class Bootstrap implements BootstrapMBean
 		final String[] ret = new String[size];
 		return env.toArray(ret);
 	}
+	private static void usage()
+	{
+		System.err.println("Usage: org.crypthing.things.appservice.Bootstrap [udpAddress] [cfgFileList...], where");
+		System.err.println("\tudpAddress: IP/port for SNMP traps");
+		System.err.println("\tcfgFileList...: an optional list of configuration files to launch");
+		System.err.println("\tRequired system properties:");
+		System.err.println("\tjava.rmi.server.hostname: JMX host");
+		System.err.println("\tcom.sun.management.jmxremote.port: JMX port");
+		System.exit(1);
+	}
 
 
 	private boolean isRunning = true;
+	private final LifecycleEventDispatcher evt;
+	private final LifecycleEvent heart;
+	public Bootstrap(final LifecycleEventDispatcher evt)
+	{
+		this.evt = evt;
+		heart = new LifecycleEvent(LifecycleEventType.heart, new EncodableString("java.rmi.server.hostname=" + System.getProperty("java.rmi.server.hostname") + "\ncom.sun.management.jmxremote.port=" + System.getProperty("com.sun.management.jmxremote.port")));
+	}
 	public void run()
 	{
-        synchronized (this)
-        {
-            while (isRunning)
-            {
-                try { wait(); }
-                catch (InterruptedException e) { e.printStackTrace(); }
-            }
-        }
+		evt.fire(new LifecycleEvent(LifecycleEventType.start, new EncodableString("Bootstrap has begun")));
+		while (isRunning)
+		{
+			try { Thread.sleep(10000); evt.fire(heart); }
+			catch (InterruptedException e) { e.printStackTrace(); }
+		}
+		evt.fire(new LifecycleEvent(LifecycleEventType.stop, new EncodableString("Bootstrap has endend")));
 	}
 	@Override
 	public void shutdown()
 	{
-        synchronized (this)
-        {
-            if (mbName != null)
-            {
-                try { ManagementFactory.getPlatformMBeanServer().unregisterMBean(mbName); }
-                catch (Exception e) { e.printStackTrace(); }
-            }
-            isRunning = false;
-            notifyAll();
-        }
+		if (mbName != null)
+		{
+			try { ManagementFactory.getPlatformMBeanServer().unregisterMBean(mbName); }
+			catch (Exception e) { e.printStackTrace(); }
+		}
+		isRunning = false;
 	}
 	@Override
 	public int launch(final String cfgFile)
@@ -104,6 +134,7 @@ public final class Bootstrap implements BootstrapMBean
 				builder.start();
 				ret = 0;
 				System.out.println(cfgFile + " configuration launched!");
+				evt.fire(new LifecycleEvent(LifecycleEventType.work, new EncodableString(cfgFile + " configuration launched!")));
 			}
 			finally { config.close(); }
 		}

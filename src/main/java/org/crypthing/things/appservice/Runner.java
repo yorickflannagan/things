@@ -262,29 +262,6 @@ implements	RunnerMBean,
 		}
 		return failure;
 	}
-	@Override
-	public String getInputArguments()
-	{
-		final StringBuilder builder = new StringBuilder(1024);
-		final ListIterator<String> list = ManagementFactory.getRuntimeMXBean().getInputArguments().listIterator();
-		while (list.hasNext()) builder.append(list.next()).append(" ");
-		return builder.toString();
-	}
-	@Override
-	public String[] getSystemProperties()
-	{
-		final Set<Entry<String, String>> map = ManagementFactory.getRuntimeMXBean().getSystemProperties().entrySet();
-		final int size = map.size();
-		final ArrayList<String> env = new ArrayList<String>(size);
-		final Iterator<Entry<String, String>> it = map.iterator();
-		while (it.hasNext())
-		{
-			final Entry<String, String> entry = it.next();
-			env.add(entry.getKey() + "=" + entry.getValue());
-		}
-		final String[] ret = new String[size];
-		return env.toArray(ret);
-	}
 
 	/*
 	 * ReleaseResourceEventDispatcher
@@ -317,7 +294,7 @@ implements	RunnerMBean,
 
 	public static void main(String[] args)
 	{
-    		if (args.length < 1) usage();
+    	if (args.length < 1) usage();
 		try
 		{
 			final RunnerConfig cfg = getConfig(new FileInputStream(args[0]), Bootstrap.getSchema());
@@ -352,6 +329,7 @@ implements	RunnerMBean,
 				)
 			);
 			instance.start();
+			System.out.println(instance.configfile + " has been launched!");
 		}
 		catch (final Throwable e)
 		{
