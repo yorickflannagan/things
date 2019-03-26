@@ -100,7 +100,7 @@ implements	RunnerMBean,
 		try
 		{
 			for (int i = 0, threads = config.getWorker().getThreads(); i < threads; i++) workers.put(maxWorker++, newWorker());
-			lcDispatcher.fire(new LifecycleEvent(LifecycleEventType.start, new EncodableString("Runner initialization succeeded")));
+			lcDispatcher.fire(new LifecycleEvent(LifecycleEventType.start, new EncodableString("Runner initialization succeeded.")));
 			ready = true;
 			Thread t = new Thread(new Heart());
 			t.start();
@@ -126,6 +126,7 @@ implements	RunnerMBean,
 					}
 					try{Thread.sleep(adjustDelay);}catch(InterruptedException e){}
 				} 
+				lcDispatcher.fire(new LifecycleEvent(LifecycleEventType.stop, new EncodableString("Runner ending.")));
 			}
 		}
 		catch (final Throwable e)
