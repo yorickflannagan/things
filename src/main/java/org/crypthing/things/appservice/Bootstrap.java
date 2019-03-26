@@ -18,7 +18,7 @@ import org.crypthing.things.config.Config;
 import org.crypthing.things.config.ConfigException;
 
 
-public final class Bootstrap implements AgentMBean
+public final class Bootstrap implements BootstrapMBean
 {
     public static final String MBEAN_PATTERN = "org.crypthing.things.appservice:type=Agent,name=";
 	private static final String CONFIG_SCHEMA_PATH = "/org/crypthing/things/appservice/config.xsd";

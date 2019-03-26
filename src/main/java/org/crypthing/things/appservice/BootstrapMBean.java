@@ -1,6 +1,6 @@
 package org.crypthing.things.appservice;
 
-public interface AgentMBean
+public interface BootstrapMBean
 {
     void shutdown();
     int launch(String config);
