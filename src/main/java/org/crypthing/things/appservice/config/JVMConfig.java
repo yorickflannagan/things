@@ -8,6 +8,7 @@ import org.w3c.dom.Node;
 
 public class JVMConfig
 {
+	private final String redirectTo;
 	private final int minMemory;
 	private final int maxMemory;
 	private final String vmflags;
@@ -22,6 +23,7 @@ public class JVMConfig
 		{
 			final ConvertToInt converter = new ConvertToInt(0);
 			final ConvertToLong longConv = new ConvertToLong(0);
+			redirectTo = xml.getValue("./redirectTo");
 			minMemory = xml.getValue("./minMemory", root, converter);
 			maxMemory = xml.getValue("./maxMemory", root, converter);
 			name= xml.getValue("./name", root);
@@ -33,7 +35,8 @@ public class JVMConfig
 		}
 		catch (final Throwable e) { throw new ConfigException(e); }
 	}
-	
+
+	public String getRedirectTo() { return redirectTo; }
 	public int getMinMemory() { return minMemory; }
 	public int getMaxMemory() { return maxMemory; }
 	public String getVmflags() { return vmflags; }
@@ -46,6 +49,7 @@ public class JVMConfig
 	public String toString()
 	{
 		final StringBuilder builder = new StringBuilder();
+		if (redirectTo != null) builder.append("redirectTo=").append(redirectTo).append(", ");
 		if (minMemory > 0) builder.append("minMemory=").append(minMemory).append(", ");
 		if (maxMemory > 0) builder.append("maxMemory=").append(maxMemory).append(", ");
 		if (vmflags != null) builder.append("vmflags=").append(vmflags).append(", ");

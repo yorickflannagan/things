@@ -19,6 +19,7 @@
 	<xs:element name="jvm">
 	<xs:complexType>
 	<xs:sequence>
+		<xs:element name="redirectTo" type="xs:string" minOccurs="0"/>
 		<xs:element name="minMemory" type="positive" minOccurs="0" />
 		<xs:element name="maxMemory" type="positive" minOccurs="0" />
 		<xs:element name="vmflags" type="nonempty" minOccurs="0" />

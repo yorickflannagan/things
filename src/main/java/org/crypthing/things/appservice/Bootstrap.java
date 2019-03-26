@@ -1,109 +1,47 @@
 package org.crypthing.things.appservice;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.lang.ProcessBuilder.Redirect;
+import java.lang.management.ManagementFactory;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Properties;
+
+import javax.management.ObjectName;
 
 import org.crypthing.things.appservice.config.JMXConfig;
 import org.crypthing.things.appservice.config.JVMConfig;
 import org.crypthing.things.config.Config;
 import org.crypthing.things.config.ConfigException;
 
-public final class Bootstrap
+
+public final class Bootstrap implements AgentMBean
 {
-	public static void main(String[] args) throws ConfigException
+    public static final String MBEAN_PATTERN = "org.crypthing.things.appservice:type=Agent,name=";
+	private static final String CONFIG_SCHEMA_PATH = "/org/crypthing/things/appservice/config.xsd";
+    private static ObjectName mbName;
+	public static void main(String[] args) throws Exception
 	{
-		if (args.length < 1) usage();
-		final String[] env = getEnv();
-		for (int i = 0; i < args.length; i++)
-		{
-			System.out.println("Loading Runner for " + args[i] + "... ");
-			try
-			{
-				final FileInputStream config = new FileInputStream(args[i]);
-				try
-				{
-					final JVMConfig cfg = getJVMConfig(config, getSchema());
-					final String cmd = getCmdLine(cfg, args[i]);
-					System.out.print("***************\nwith command line: [");
-					System.out.print(cmd);
-					System.out.println("]");
-
-					final Process pid = Runtime.getRuntime().exec(cmd, env);
-					int exitCode = waitForProcess(pid);
-
-					String out = readFully(pid.getErrorStream());
-					System.out.println("***************\nError output:");
-					System.out.println(out);
-					out = readFully(pid.getInputStream());
-					System.out.println("***************\nDefault output:");
-					System.out.println(out);
-					if (exitCode == 0) System.out.println("***************\nDone!\n");
-					else System.out.println("***************\nFailed with exit code " + exitCode + "\n");
-				}
-				finally { config.close(); }
-			}
-			catch (final Throwable e)
-			{
-				System.out.println("Failed!");
-				System.err.println("-------------------------------\n");
-				e.printStackTrace();
-				System.err.println("\n-------------------------------\n\n");
-				usage();
-			}
-		}
+		final Bootstrap instance = new Bootstrap();
+		ManagementFactory.getPlatformMBeanServer().registerMBean
+		(
+			instance,
+			mbName = new ObjectName((new StringBuilder(256)).append(MBEAN_PATTERN).append(ManagementFactory.getRuntimeMXBean().getName()).toString())
+		);
+		for (int i = 0; i < args.length; i++) instance.launch(args[i]);
+		instance.run();
 	}
-	private static String readFully(final InputStream stream)
+	public static InputStream getSchema() throws ConfigException 
 	{
-		final char[] buffer = new char[128];
-		final InputStreamReader reader = new InputStreamReader(stream);
-		final StringBuilder builder = new StringBuilder(512);
-		int i;
-		try { while (stream.available() > 0 && (i = reader.read(buffer)) > 0) builder.append(buffer, 0, i); }
-		catch (final Exception e) {}
-		return builder.toString();
+		return Bootstrap.class.getClass().getResourceAsStream(CONFIG_SCHEMA_PATH);
 	}
-	private static void usage()
+	public static JVMConfig getJVMConfig(final InputStream cfgFile, final InputStream cfgSchema) throws ConfigException
 	{
-		System.err.println("Usage: Bootstrap <config-xml-list>, where");
-		System.err.println("\t<config-xml-list>... is a list of at least one service launching configuration XML file.");
-		System.exit(1);
-	}
-	private static String getCmdLine(final JVMConfig config, final String arg)
-	{
-		/*
-		 * see http://docs.oracle.com/cd/E26576_01/doc.312/e24936/tuning-java.htm#GSPTG00069
-		 */
-		final String filesep = System.getProperty("file.separator", "/");
-		final StringBuilder builder = new StringBuilder(256);
-		builder.append(System.getProperty("java.home")).append(filesep).append("bin").append(filesep);
-		builder.append(System.getProperty("os.name", "").toLowerCase().indexOf("win") >= 0 ? "java.exe" : "java");
-		builder.append(" -server -Xbatch");
-		if (config.getMinMemory() > 0) builder.append(" -Xms").append(config.getMinMemory()).append("m");
-		if (config.getMaxMemory() > 0) builder.append(" -Xmx").append(config.getMaxMemory()).append("m");
-		if (config.getVmflags() != null) builder.append(" ").append(config.getVmflags());
-		final JMXConfig jmx = config.getJmx();
-		builder.append(" -Djava.rmi.server.hostname=").append(jmx.getHost());
-		builder.append(" -Dcom.sun.management.jmxremote.port=").append(jmx.getPort());
-		if(config.getName() !=null) builder.append(" -Dthing.server.name=").append(config.getName());
-		if (jmx.getProperty("com.sun.management.jmxremote.ssl") == null) builder.append(" -Dcom.sun.management.jmxremote.ssl=false");
-		if (jmx.getProperty("com.sun.management.jmxremote.authenticate") == null) builder.append(" -Dcom.sun.management.jmxremote.authenticate=false");
-		addProperties(jmx.stringPropertyNames().iterator(), jmx, builder);
-		builder.append(" -cp ").append(config.getClasspath().getClasspath());
-		if (config.getProperties() != null) addProperties(config.getProperties().stringPropertyNames().iterator(), config.getProperties(), builder);
-		builder.append(" ").append(Runner.class.getName()).append(" ").append(arg);
-		return builder.toString();
-	}
-	private static void addProperties(final Iterator<String> keys, final Properties source, final StringBuilder builder)
-	{
-		while (keys.hasNext())
-		{
-			final String key = keys.next();
-			builder.append(" -D").append(key).append("=").append(source.getProperty(key));
-		}
+		final Config config = new Config(cfgFile, cfgSchema);
+		return new JVMConfig(config, config.getNodeValue("/config/jvm"));
 	}
 	public static String[] getEnv()
 	{
@@ -118,26 +56,102 @@ public final class Bootstrap
 		final String[] ret = new String[size];
 		return env.toArray(ret);
 	}
-	private static int waitForProcess(final Process p)
+
+
+	private boolean isRunning = true;
+	public void run()
+	{
+        synchronized (this)
+        {
+            while (isRunning)
+            {
+                try { wait(); }
+                catch (InterruptedException e) { e.printStackTrace(); }
+            }
+        }
+	}
+	@Override
+	public void shutdown()
+	{
+        synchronized (this)
+        {
+            if (mbName != null)
+            {
+                try { ManagementFactory.getPlatformMBeanServer().unregisterMBean(mbName); }
+                catch (Exception e) { e.printStackTrace(); }
+            }
+            isRunning = false;
+            notifyAll();
+        }
+	}
+	@Override
+	public int launch(final String cfgFile)
 	{
 		int ret;
 		try
 		{
-			Thread.sleep(3000);
-			ret = p.exitValue();
+			final FileInputStream config = new FileInputStream(cfgFile);
+			try
+			{
+				final JVMConfig cfg = getJVMConfig(config, getSchema());
+				final List<String> cmds = getCommands(cfg, cfgFile);
+				final ProcessBuilder builder = new ProcessBuilder(cmds);
+				if (cfg.getRedirectTo() != null)
+				{
+					builder.redirectErrorStream(true);
+					builder.redirectOutput(Redirect.appendTo(new File(cfg.getRedirectTo())));
+				}
+				builder.start();
+				ret = 0;
+				System.out.println(cfgFile + " configuration launched!");
+			}
+			finally { config.close(); }
 		}
-		catch (final Throwable e) { ret = 0; }
+		catch (final Exception e)
+		{
+			ret = 1;
+			System.out.println("Launch failed!");
+			System.err.println("-------------------------------\n");
+			e.printStackTrace();
+			System.err.println("\n-------------------------------\n\n");
+		}
 		return ret;
 	}
+	/*
+	 * see http://docs.oracle.com/cd/E26576_01/doc.312/e24936/tuning-java.htm#GSPTG00069
+	 */
+	private List<String> getCommands(final JVMConfig config, final String arg)
+	{
+		final ArrayList<String> ret = new ArrayList<String>(128);
+		final String filesep = System.getProperty("file.separator", "/");
+		ret.add((new StringBuilder(256)).append(System.getProperty("java.home")).append(filesep).append("bin").append(filesep).append(System.getProperty("os.name", "").toLowerCase().indexOf("win") >= 0 ? "java.exe" : "java").toString());
+		ret.add("-server");
+		ret.add("-Xbatch");
+		if (config.getMinMemory() > 0) ret.add((new StringBuilder(256)).append("-Xms").append(config.getMinMemory()).append("m").toString());
+		if (config.getMaxMemory() > 0) ret.add((new StringBuilder(256)).append("-Xmx").append(config.getMaxMemory()).append("m").toString());
+		if (config.getVmflags() != null) ret.add(config.getVmflags());
 
-	private static final String CONFIG_SCHEMA_PATH = "/org/crypthing/things/appservice/config.xsd";
-	public static InputStream getSchema() throws ConfigException 
-	{
-		return Bootstrap.class.getClass().getResourceAsStream(CONFIG_SCHEMA_PATH);
+		final JMXConfig jmx = config.getJmx();
+		ret.add((new StringBuilder(256)).append("-Djava.rmi.server.hostname=").append(jmx.getHost()).toString());
+		ret.add((new StringBuilder(256)).append("-Dcom.sun.management.jmxremote.port=").append(jmx.getPort()).toString());
+		if(config.getName() != null) ret.add((new StringBuilder(256)).append("-Dthing.server.name=").append(config.getName()).toString());
+		if (jmx.getProperty("com.sun.management.jmxremote.ssl") == null) ret.add("-Dcom.sun.management.jmxremote.ssl=false");
+		if (jmx.getProperty("com.sun.management.jmxremote.authenticate") == null) ret.add("-Dcom.sun.management.jmxremote.authenticate=false");
+		addProperties(jmx.stringPropertyNames().iterator(), jmx, ret);
+		if (config.getProperties() != null) addProperties(config.getProperties().stringPropertyNames().iterator(), config.getProperties(), ret);
+
+		ret.add("-cp");
+		ret.add(config.getClasspath().getClasspath());
+		ret.add(Runner.class.getName());
+		ret.add(arg);
+		return ret;
 	}
-	public static JVMConfig getJVMConfig(final InputStream cfgFile, final InputStream cfgSchema) throws ConfigException
+	private void addProperties(final Iterator<String> keys, final Properties source, final List<String> cmd)
 	{
-		final Config config = new Config(cfgFile, cfgSchema);
-		return new JVMConfig(config, config.getNodeValue("/config/jvm"));
+		while (keys.hasNext())
+		{
+			final String key = keys.next();
+			cmd.add((new StringBuilder(256)).append("-D").append(key).append("=").append(source.getProperty(key)).toString());
+		}
 	}
 }
