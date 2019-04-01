@@ -328,8 +328,8 @@ implements	RunnerMBean,
 					.toString()
 				)
 			);
-			instance.start();
 			System.out.println(instance.configfile + " has been launched!");
+			instance.start();
 		}
 		catch (final Throwable e)
 		{
@@ -378,8 +378,8 @@ implements	RunnerMBean,
 									.append(getWorkerCount()).append("}").toString();
 				lcDispatcher.fire(new LifecycleEvent(LifecycleEventType.heart, new EncodableString(msg)));
 				try{Thread.sleep(heartbeat);}catch(InterruptedException e){}
-				
 			}
+			if(heartbeat <= 0) log.warning("Sorry, but I have no heart.");
 		}
 		
 	}
