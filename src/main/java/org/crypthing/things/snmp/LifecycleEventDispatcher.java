@@ -25,7 +25,7 @@ public final class LifecycleEventDispatcher extends EventDispatcher<LifecycleEve
 				while (it.hasNext()) it.next().stop(event);
 				break;
 			case heart:
-				while (it.hasNext()) it.next().stop(event);
+				while (it.hasNext()) it.next().heart(event);
 				break;
 			}
 		}

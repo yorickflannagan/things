@@ -39,13 +39,13 @@ public class Trap implements Serializable
 		{
 			timer = new OID(root + TIMER_RELATIVE_OID);
 			enterprise = new VariableBinding(SnmpConstants.sysObjectID, new OID(root));
-			jvm = new VariableBinding(new OID(root + JVM_NAME_RELATIVE_OID), new OctetString(System.getProperty(THING_SERVER, ManagementFactory.getRuntimeMXBean().getName())));
-			jboss = new VariableBinding(new OID(root + JBOSS_RELATIVE_OID), new OctetString(System.getProperty(JBOSS_SERVER, "")));
+			jvm = new VariableBinding(new OID(root + JVM_NAME_RELATIVE_OID), new OctetString(System.getProperty(THING_SERVER, ManagementFactory.getRuntimeMXBean().getName()).getBytes(StandardCharsets.UTF_8)));
+			jboss = new VariableBinding(new OID(root + JBOSS_RELATIVE_OID), new OctetString(System.getProperty(JBOSS_SERVER, "").getBytes(StandardCharsets.UTF_8)));
 		}
 	}
 	private static final long serialVersionUID = -5215304197662514761L;
 	private static final long START_TIME = ManagementFactory.getRuntimeMXBean().getStartTime();
-	private static final OctetString PUBLIC_TARGET = new OctetString("public");
+	private static final OctetString PUBLIC_TARGET = new OctetString("public".getBytes(StandardCharsets.UTF_8));
 	private static final Map<String, CommunityTarget> TARGETS = new HashMap<String, CommunityTarget>();
 	private static final Map<String, Bindings> DEFAULTS = new HashMap<String, Trap.Bindings>();
 	private Bindings defaults;
