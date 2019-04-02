@@ -5,4 +5,10 @@ Autenticação da comunicação entre o monitor e o agente
 https://docs.oracle.com/cd/E19717-01/819-7758/gchjy/index.html
 https://db.apache.org/derby/docs/10.9/adminguide/radminjmxenablepwd.html
 
+Configuração das portas para evitar o sorteio da 2a porta do RMI:
+        com.sun.management.jmxremote.rmi.port=xxxx
+    onde xxxx pode ser inclusive, e preferencialmente, 
+    o mesmo valor de:
+        com.sun.management.jmxremote.port
+
 
