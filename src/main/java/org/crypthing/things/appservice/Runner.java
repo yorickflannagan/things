@@ -217,17 +217,6 @@ implements	RunnerMBean,
 		lcDispatcher.fire(new LifecycleEvent(LifecycleEventType.stop, new EncodableString("Runner shutdown signal received")));
 		final Iterator<InterruptEventListener> it = interruptListeners.iterator();
 		while (it.hasNext()) it.next().shutdown();
-		try
-		{
-			final ArrayList<String> names = new ArrayList<String>();
-			final InitialContext ctx = new InitialContext();
-			final NamingEnumeration<Binding> bindings = ctx.listBindings("java");
-			while (bindings.hasMore()) names.add(bindings.next().getName());
-			final Iterator<String> itNames = names.iterator();
-			while (itNames.hasNext()) ctx.unbind(itNames.next());
-			if (mbName != null) ManagementFactory.getPlatformMBeanServer().unregisterMBean(mbName);
-		}
-		catch (final Throwable e) { pDispatcher.fire(new ProcessingEvent(ProcessingEventType.warning, "Error during shutdown", e)); }
 		hasShutdown = true;
 	}
 	@Override
