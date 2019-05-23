@@ -92,7 +92,16 @@ public final class Bootstrap implements BootstrapMBean
 	public Bootstrap(final LifecycleEventDispatcher evt)
 	{
 		this.evt = evt;
-		heart = new LifecycleEvent(LifecycleEventType.heart, new EncodableString("java.rmi.server.hostname=" + System.getProperty("java.rmi.server.hostname") + "\ncom.sun.management.jmxremote.port=" + System.getProperty("com.sun.management.jmxremote.port")));
+		heart = new LifecycleEvent(LifecycleEventType.heart, 
+			new EncodableString
+			(
+				"{\"jmx\":{\"address\":\"" + 
+				System.getProperty("java.rmi.server.hostname") + 
+				"\",\"port\":" + 
+				System.getProperty("com.sun.management.jmxremote.port") +
+				"},\"type\":\"AGENT\"}"
+			)
+		);
 	}
 	public void run()
 	{
