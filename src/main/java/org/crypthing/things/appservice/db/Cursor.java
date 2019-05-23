@@ -30,11 +30,12 @@ import org.crypthing.things.snmp.ProcessingEventListener;
 
 public class Cursor implements CursorMBean, InterruptEventListener {
 	
+	private static final Object[] EMPTY = new Object[0];
 	private SQLMinion minion;
 	private boolean hasShutdown = false;
 	private long lastRecord = 0;
 	private DataSource ds;
-	private Object[] current = new Object[0];
+	private Object[] current = EMPTY;
 	private long stock = 0;
 	private int currentIndex = -1;
 	private List<Object[]> stack = new LinkedList<Object[]>();
@@ -133,16 +134,16 @@ public class Cursor implements CursorMBean, InterruptEventListener {
 		try {
 			_currentIndiceMutex.lock();
 			try {
+				stock -= current.length;
 				if(stack.size()>0)
 				{
-					stock -= current.length;
 					current = stack.get(0);
 					currentIndex = 0;
 					stack.remove(0);
 				}
 				else
 				{
-					//TODO: testar consistência.
+					current = EMPTY;
 					currentIndex = -1;
 				}
 			} finally {
@@ -168,33 +169,33 @@ public class Cursor implements CursorMBean, InterruptEventListener {
 		try {
 			List<Object> ret;
 			Connection conn = ds.getConnection();
-			if(cr instanceof CursorReaderAutoData)
+			try
 			{
-				ret = new ArrayList<Object>(cr.fetchSize());
-				long tmp = ((CursorReaderAutoData)cr).fill(conn, ret,lastRecord);
-				if(tmp != 0) lastRecord = tmp;
-			}
-			else{
-				try
+				if(cr instanceof CursorReaderAutoData)
 				{
-					String sql = cr.getSQL();
-					PreparedStatement stm = conn.prepareStatement(sql, ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
-					try
-					{
-						stm.setLong(1, lastRecord); 
-						ResultSet rs = stm.executeQuery();
+					ret = new ArrayList<Object>(cr.fetchSize());
+					long tmp = ((CursorReaderAutoData)cr).fill(conn, ret,lastRecord);
+					if(tmp != 0) lastRecord = tmp;
+				}
+				else{
+						String sql = cr.getSQL();
+						PreparedStatement stm = conn.prepareStatement(sql, ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
 						try
 						{
-							ret = new ArrayList<Object>(cr.fetchSize());
-							long tmp = cr.fill(rs, ret);
-							if(tmp != 0) lastRecord = tmp;
+							stm.setLong(1, lastRecord); 
+							ResultSet rs = stm.executeQuery();
+							try
+							{
+								ret = new ArrayList<Object>(cr.fetchSize());
+								long tmp = cr.fill(rs, ret);
+								if(tmp != 0) lastRecord = tmp;
+							}
+							finally { rs.close(); }
 						}
-						finally { rs.close(); }
+						finally { stm.close(); }
 					}
-					finally { stm.close(); }
 				}
-				finally { conn.close(); }
-			}
+			finally { conn.close(); }
 			if(ret != null && !ret.isEmpty())
 			{
 				_swapMutex.lock();
