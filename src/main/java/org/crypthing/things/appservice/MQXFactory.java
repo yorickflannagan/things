@@ -108,7 +108,7 @@ public class MQXFactory extends Reference implements ResourceProvider, ReleaseRe
 		public MQXQueue openQueue(final String name) throws MQXIllegalStateException, MQXIllegalArgumentException, MQXConnectionException
 		{
 			final QueueConfig qCfg = config.get(name);
-			if (qCfg == null) throw new MQXIllegalArgumentException("Queue name not found");
+			if (qCfg == null) throw new MQXIllegalArgumentException("Queue name [" + name + "] not found.");
 			return conn.openQueue(qCfg);
 		}
 		@Override public MQXMessage call(final String putQueue, final String getQueue, final MQXMessage msg) throws MQXIllegalStateException, MQXIllegalArgumentException, MQXConnectionException

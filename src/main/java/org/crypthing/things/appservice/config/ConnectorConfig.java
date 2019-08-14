@@ -19,7 +19,7 @@ public final class ConnectorConfig extends HashMap<String, QueueConfig>
 		context = new ConfigProperties(xml, xml.getNodeValue("./context", root));
 		name = xml.getValue("./@name", root);
 		driver = xml.getValue("./@driver", root);
-		final Iterator<QueueConfig> it = xml.getValueCollection("./queue", root, new Converter<QueueConfig>()
+		final Iterator<QueueConfig> it = xml.getValueCollection("./queues/queue", root, new Converter<QueueConfig>()
 		{
 			@Override
 			public QueueConfig convert(Object value) throws ClassCastException
