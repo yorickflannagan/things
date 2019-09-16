@@ -135,6 +135,7 @@ public final class Bootstrap implements BootstrapMBean
 				final JVMConfig cfg = getJVMConfig(config, getSchema());
 				final List<String> cmds = getCommands(cfg, cfgFile);
 				final ProcessBuilder builder = new ProcessBuilder(cmds);
+				builder.environment().putAll(System.getenv());
 				final StringBuilder sb = new StringBuilder();
 				for(String c : cmds)
 				{
