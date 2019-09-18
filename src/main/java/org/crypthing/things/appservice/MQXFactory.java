@@ -27,12 +27,15 @@ public class MQXFactory extends Reference implements ResourceProvider, ReleaseRe
 	private static final Map<Long, MQXConnectionWrapper> instances = new ConcurrentHashMap<Long, MQXConnectionWrapper>();
 	private ConnectorConfig config;
 	private ProcessingEventListener trap;
+	private boolean inited = false;
 	private Class<? extends MQXConnection> driverClass;
 	public MQXFactory(final String name) { super(MQXFactory.class.getName(), new StringRefAddr("java:mqx", name)); }
 	
 	@Override
 	public void init(final Object config, final ReleaseResourceEventDispatcher subscriber, final ProcessingEventListener trap) throws ConfigException
 	{
+		if(inited)throw new ConfigException("Already started");
+		inited = true;
 		if (!(config instanceof ConnectorConfig)) throw new ConfigException(new IllegalArgumentException());
 		this.config = (ConnectorConfig) config;
 		this.trap = trap;
