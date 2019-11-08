@@ -28,7 +28,7 @@ import org.crypthing.things.snmp.ProcessingEvent.ProcessingEventType;
 import org.crypthing.things.snmp.ProcessingEventListener;
 
 
-public class Cursor implements CursorMBean, InterruptEventListener {
+public class Cursor implements CursorMBean, CursorData, InterruptEventListener {
 	
 	private static final Object[] EMPTY = new Object[0];
 	private SQLMinion minion;
