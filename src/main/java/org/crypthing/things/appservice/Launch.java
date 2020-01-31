@@ -18,7 +18,7 @@ public final class Launch
 		{
 			if (args.length == 0) throw new IndexOutOfBoundsException("Invalid arguments");
 			int i = 0;
-			String host = null, port = null, cfgFile = null;
+			String host = null, port = null, cfgFile = null, home = null;
 				while (i < args.length)
 				{
 					final String cmd = args[i++];
@@ -28,15 +28,20 @@ public final class Launch
 						host = args[i++];
 						port = args[i++];
 					}
+					else if (cmd.compareToIgnoreCase("--home") == 0)
+					{
+						if (i + 1 > args.length) throw new IndexOutOfBoundsException("Invalid arguments");
+						home = args[i++];
+					}
 					else if (cmd.compareToIgnoreCase("--runner") == 0)
 					{
 						if (i + 1 > args.length) throw new IndexOutOfBoundsException("Invalid arguments");
 						cfgFile = args[i++];
 					}
 					else cfgFile = cmd;
-					if (host != null && port != null && cfgFile != null) launch(host, port, cfgFile);
+					if (host != null && port != null && cfgFile != null && home != null ) launch(host, port, cfgFile, home);
 				}
-		}
+			}
 		catch (final Throwable e)
 		{
 			System.out.println("Failed!");
@@ -51,13 +56,14 @@ public final class Launch
 	{
 		System.err.println("Usage: Launch --agent java.rmi.server.hostname=<server> com.sun.management.jmxremote.port=<port> --runner <config-xml-list>, where");
 		System.err.println("\t--agent  asks for launch through agent running at java.rmi.server.hostname and com.sun.management.jmxremote.port. Required.");
+		System.err.println("\t--home  working directory  to launch from Required.");
 		System.err.println("\t--runner <config-xml-list>... is a list of at least one service launching configuration XML file. Required.");
 		System.err.println("\tBoth options should be specified in that order");
 		System.exit(1);
 	}
-	private static void launch(final String host, final String port, final String arg)  throws IOException, JMException
+	private static void launch(final String host, final String port, final String arg, final String home)  throws IOException, JMException
 	{
-		System.out.print("Launching service " + arg + " through host " + host + " and port " + port);
+		System.out.print("Launching service " + arg + " through host " + host + " and port " + port + " with home " + home);
 		final JMXConnector jmxc = JMXConnectorFactory.connect(new JMXServiceURL("service:jmx:rmi:///jndi/rmi://" + host + ":" + port + "/jmxrmi"));
 		try
 		{
@@ -65,7 +71,7 @@ public final class Launch
 			final Iterator<ObjectName> it = mbean.queryNames(new ObjectName(Bootstrap.MBEAN_PATTERN + "*"), null).iterator(); 
 			while (it.hasNext())
 			{
-				int ret = (Integer) mbean.invoke(it.next(), "launch", new Object[] { arg }, new String[] { String.class.getName() });
+				int ret = (Integer) mbean.invoke(it.next(), "launch", new Object[] { arg, home, Bootstrap.getEnv() }, new String[] { String.class.getName(), String.class.getName(), String[].class.getName() });
 				if (ret == 0) System.out.println("... lauched!");
 				else System.err.println("... failed!");
 			}

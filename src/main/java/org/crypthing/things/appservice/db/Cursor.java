@@ -48,6 +48,11 @@ public class Cursor implements CursorMBean, CursorData, InterruptEventListener {
 	private CursorReader cr;
 	private CursorConfig config;
 
+	public Cursor()
+	{
+		// Empty cursor for subclassing.
+	}
+	
 	public Cursor(CursorConfig config, ProcessingEventListener trap) throws  ConfigException
 	{
 		this.trap = trap;

@@ -7,8 +7,10 @@ import java.io.InputStream;
 import java.lang.ProcessBuilder.Redirect;
 import java.lang.management.ManagementFactory;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
 import javax.management.ObjectName;
@@ -37,6 +39,7 @@ public final class Bootstrap implements BootstrapMBean
 	}
     public static final String MBEAN_PATTERN = "org.crypthing.things.appservice:type=Agent,name=";
 	private static final String CONFIG_SCHEMA_PATH = "/org/crypthing/things/appservice/config.xsd";
+	private static final String OVERRIDE = "things.override.";
     private static ObjectName mbName;
 	public static void main(String[] args) throws Exception
 	{
@@ -74,6 +77,23 @@ public final class Bootstrap implements BootstrapMBean
 		final String[] ret = new String[size];
 		return env.toArray(ret);
 	}
+
+	public static Map<String, String> parseEnv(String[] env)
+	{
+		Map<String, String> ret = new HashMap<>();
+		if(env == null) return ret;
+		for(int i=0; i <env.length ; i++)
+		{
+			final int p = env[i] != null ? env[i].indexOf("=") : -1;
+			if(p >-1)
+			{
+				ret.put(env[i].substring(0,p),env[i].substring(p+1));
+			}
+		}
+		return ret;
+	}
+
+
 	private static void usage()
 	{
 		System.err.println("Usage: org.crypthing.things.appservice.Bootstrap [udpAddress] [cfgFileList...], where");
@@ -123,9 +143,18 @@ public final class Bootstrap implements BootstrapMBean
 		}
 		isRunning = false;
 	}
+
 	@Override
 	public int launch(final String cfgFile)
 	{
+		return launch(cfgFile, System.getProperty("user.dir"), null);
+	}
+	
+	@Override
+	public int launch(String cfgFile, String home, String[] env)
+	{
+		Map<String,String> _env = Bootstrap.parseEnv(env);
+		String _home = home != null ?  home  : System.getProperty("user.dir");
 		int ret;
 		try
 		{
@@ -135,20 +164,32 @@ public final class Bootstrap implements BootstrapMBean
 				final JVMConfig cfg = getJVMConfig(config, getSchema());
 				final List<String> cmds = getCommands(cfg, cfgFile);
 				final ProcessBuilder builder = new ProcessBuilder(cmds);
+
+				builder.environment().putAll(_env);
 				builder.environment().putAll(System.getenv());
+				for(String key : _env.keySet())
+				{
+					if(key.startsWith(OVERRIDE))
+					{
+						builder.environment().put(key.substring(OVERRIDE.length()), _env.get(key));
+					}
+				}
+
 				final StringBuilder sb = new StringBuilder();
 				for(String c : cmds)
 				{
 					sb.append(c).append(' ');
 				}
-				System.out.println("CMD to execute: [" + sb.toString() + "]");
+				System.out.println("CMD to execute: [" + sb.toString() + "] at " + _home);
 
 				if (cfg.getRedirectTo() != null)
 				{
 					builder.redirectErrorStream(true);
 					builder.redirectOutput(Redirect.appendTo(new File(cfg.getRedirectTo())));
+				} else {
+					builder.inheritIO();
 				}
-				builder.start();
+				builder.directory(new File(_home)).start();
 				ret = 0;
 				System.out.println(cfgFile + " configuration launched!");
 				evt.fire(new LifecycleEvent(LifecycleEventType.work, new EncodableString(cfgFile + " configuration launched!")));
@@ -202,4 +243,5 @@ public final class Bootstrap implements BootstrapMBean
 			cmd.add((new StringBuilder(256)).append("-D").append(key).append("=").append(source.getProperty(key)).toString());
 		}
 	}
+
 }

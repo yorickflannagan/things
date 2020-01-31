@@ -28,7 +28,7 @@ public class ConfigProperties extends Properties
 			while (it.hasNext()) add(it.next());
 		}
 	}
-	public void add(final Property prop) { setProperty(prop.getName(), prop.getValue());}
+	public void add(final Property prop) { if(prop != null && prop.getName() !=null && prop.getValue() != null) setProperty(prop.getName(), prop.getValue());}
 	@Override
 	public String toString()
 	{

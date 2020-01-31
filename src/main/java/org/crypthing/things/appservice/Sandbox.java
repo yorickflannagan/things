@@ -26,7 +26,7 @@ public abstract class Sandbox extends Thread implements ShutdownEventDispatcher,
 	private long iSuccess, iFailure;
 	private Properties props;
 
-	final void startup
+	public final void startup
 	(
 		final WorkerConfig config,
 		final LifecycleEventDispatcher lcDispatcher,
@@ -90,8 +90,8 @@ public abstract class Sandbox extends Thread implements ShutdownEventDispatcher,
 
 	protected void success() { iSuccess++; }
 	protected void failure() { iFailure++; }
-	long getSuccess() { return iSuccess; }
-	long getFailure() { return iFailure; }
+	public long getSuccess() { return iSuccess; }
+	public long getFailure() { return iFailure; }
 	
 	public void startup(final Properties props) throws ConfigException {}
 	public void release() {}
