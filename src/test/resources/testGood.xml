@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE  config>
+<config>
+	<jvm>
+		<minMemory>256</minMemory>
+		<maxMemory>512</maxMemory>
+		<name>TestGood</name>
+		<heartbeat>1000</heartbeat>
+        <jmx host="10.216.80.110" port="5055" />
+		<classpath>
+		    <path>test.jar</path>
+		</classpath>
+		<properties></properties>
+	</jvm>
+	<jndi implementation="org.crypthing.things.appservice.ServicesFactory" />
+	<worker implementation="org.crypthing.things.appservice.GoodGuy">
+		<threads>1</threads>
+		<restartable>true</restartable>
+		<sleep>3000</sleep>
+	</worker>
+
+	<sandbox/>
+
+	<snmp>
+		<property name="org.crypthing.things.SNMPTrap" value="org.crypthing.things.snmp" />
+		<property name="org.crypthing.things.batch.udpAddress" value="10.116.88.214/8163" />
+		<property name="org.crypthing.things.batch.rootOID" value="0.1.4320" />
+	</snmp>
+
+	<datasources/>
+
+</config>

@@ -206,13 +206,29 @@ implements	RunnerMBean,
 	@Override
 	public void shutdown()
 	{
-		
+		shutdown(null);
+	}
+
+	private String _key = 
+			System.getenv(Bootstrap.PARENT_JMX_HOST)!= null && System.getenv(Bootstrap.PARENT_JMX_PORT)!= null 
+			? 
+				System.getenv(Bootstrap.PARENT_JMX_HOST) + System.getenv(Bootstrap.PARENT_JMX_PORT) 
+			:
+			 null; 
+	@Override
+	public void shutdown(String key)
+	{
+		if(_key != null && !_key.equals(key))
+		{
+			throw new RuntimeException("Instances started by an agent must be stopped through the same agent.");
+		}
 		ready = false;
 		lcDispatcher.fire(new LifecycleEvent(LifecycleEventType.stop, new EncodableString("Runner shutdown signal received")));
 		final Iterator<InterruptEventListener> it = interruptListeners.iterator();
 		while (it.hasNext()) it.next().shutdown();
 		hasShutdown = true;
 	}
+	
 	@Override
 	public long getSuccessCount()
 	{

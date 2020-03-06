@@ -63,7 +63,7 @@ public final class Launch
 	}
 	private static void launch(final String host, final String port, final String arg, final String home)  throws IOException, JMException
 	{
-		System.out.print("Launching service " + arg + " through host " + host + " and port " + port + " with home " + home);
+		System.out.print("Launching service " + arg + " through host " + host + " and port " + port + " with home " + home + " - ");
 		final JMXConnector jmxc = JMXConnectorFactory.connect(new JMXServiceURL("service:jmx:rmi:///jndi/rmi://" + host + ":" + port + "/jmxrmi"));
 		try
 		{
@@ -71,9 +71,10 @@ public final class Launch
 			final Iterator<ObjectName> it = mbean.queryNames(new ObjectName(Bootstrap.MBEAN_PATTERN + "*"), null).iterator(); 
 			while (it.hasNext())
 			{
-				int ret = (Integer) mbean.invoke(it.next(), "launch", new Object[] { arg, home, Bootstrap.getEnv() }, new String[] { String.class.getName(), String.class.getName(), String[].class.getName() });
-				if (ret == 0) System.out.println("... lauched!");
-				else System.err.println("... failed!");
+				ObjectName mb = it.next();
+				int ret = (Integer) mbean.invoke(mb, "launch", new Object[] { arg, home, Bootstrap.getEnv() }, new String[] { String.class.getName(), String.class.getName(), String[].class.getName() });
+				if (ret == 0) System.out.println("... lauched! with " + mb.getCanonicalName());
+				else System.err.println("... failed! Obname: " + mb.getCanonicalName());
 			}
 		}
 		finally { jmxc.close(); }

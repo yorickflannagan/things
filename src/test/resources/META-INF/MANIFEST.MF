@@ -1,0 +1,13 @@
+Manifest-Version: 1.0
+Implementation-Title: cataloga-arquivos
+Build-Tool: Apache Maven 3.6.0
+Implementation-Version: 1.0.0
+Specification-Title: cataloga-arquivos
+Build-Os: Linux (5.0.0-36-generic; amd64)
+Class-Path: things-2.4.6.jar snmp4j-2.5.6.jar log4j-1.2.14.jar
+Build-Jdk-Spec: 1.8
+Version: 1.0.0 2019-12-13T18:28:27Z
+Created-By: Maven Archiver 3.4.0
+Build-Jdk: 1.8.0_221 (Oracle Corporation)
+Specification-Version: 1.0
+

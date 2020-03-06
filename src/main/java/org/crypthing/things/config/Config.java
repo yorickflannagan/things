@@ -13,6 +13,7 @@ import java.nio.CharBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -50,15 +51,17 @@ public class Config implements Serializable
 	{
 		private final String value;
 		private int offset;
-		ConfigReader(final Reader reader) throws IOException, ConfigException
+		private final Map<String, String> env;
+		ConfigReader(final Reader reader, Map<String, String> env) throws IOException, ConfigException
 		{
 			final CharArrayWriter writer = new CharArrayWriter(16384);
 			final char[] buffer = new char[1024];
 			int read;
 			while ((read = reader.read(buffer)) != -1) writer.write(buffer, 0, read);
 			value = expand(writer.toCharArray(), writer.size());
+			this.env = env;
 		}
-		ConfigReader(final InputStream input) throws IOException, ConfigException { this(new InputStreamReader(input, StandardCharsets.UTF_8)); }
+		ConfigReader(final InputStream input, Map<String, String> env) throws IOException, ConfigException { this(new InputStreamReader(input, StandardCharsets.UTF_8), env); }
 		private String expand(final char[] input, final int len) throws IOException
 		{
 			final CharBuffer wraper = CharBuffer.wrap(input, 0, len);
@@ -81,7 +84,7 @@ public class Config implements Serializable
 			if (buffer[start + 2] == 'E')
 			{
 				key = new String(buffer, start + 6, end - start - 7);
-				value = System.getenv(key);
+				value = env !=null ? env.get(key) : System.getenv(key);
 			}
 			else
 			{
@@ -120,6 +123,7 @@ public class Config implements Serializable
 		try { parse(new FileInputStream(config), new FileInputStream(schema)); }
 		catch (final FileNotFoundException e) { throw new ConfigException(CONFIG_NOT_LOADED, e);}
 	}
+
 	/**
 	 * Creates a new instance based on specified resources: 
 	 * @param config: XML configuration.
@@ -127,7 +131,24 @@ public class Config implements Serializable
 	 * @throws ConfigException if configuration cannot be loaded.
 	 */
 	public Config(final InputStream config, final InputStream schema) throws ConfigException { parse(config, schema); }
+
+	/**
+	 * Creates a new instance based on specified resources: 
+	 * @param config: XML configuration.
+	 * @param schema: XML schema.
+	 * @param env: Target environment, see: System.getEnv()
+	 * @throws ConfigException if configuration cannot be loaded.
+	 */
+	public Config(final InputStream config, final InputStream schema, Map<String, String> env) throws ConfigException { parse(config, schema,env); }
+
+
 	protected void parse(final InputStream document, final InputStream schema) throws ConfigException
+	{
+		parse(document, schema, null);
+	}
+
+
+	protected void parse(final InputStream document, final InputStream schema, Map<String, String> env) throws ConfigException
 	{
 		try
 		{
@@ -142,7 +163,7 @@ public class Config implements Serializable
 				@Override public void error(final SAXParseException exception) throws SAXException { throw new SAXException(exception); }
 				@Override public void fatalError(final SAXParseException exception) throws SAXException { throw new SAXException(exception); }
 			});
-			doc = builder.parse(new InputSource(new ConfigReader(document)));
+			doc = builder.parse(new InputSource(new ConfigReader(document, env)));
 			xFactory = XPathFactory.newInstance();
 		}
 		catch (final Throwable e) { throw new ConfigException(CONFIG_NOT_LOADED, e); }
