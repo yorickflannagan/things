@@ -39,7 +39,6 @@ implements	RunnerMBean,
 	private static Runner instance; 
 	public static final String MBEAN_PATTERN = "org.crypthing.things.appservice:type=Runner,name=";
 	private static final Logger log = Logger.getLogger(Runner.class.getName());
-	private static ObjectName mbName;
 
 	private final ReentrantLock lock = new ReentrantLock();
 	private final RunnerConfig config;
@@ -319,7 +318,7 @@ implements	RunnerMBean,
 			ManagementFactory.getPlatformMBeanServer().registerMBean
 			(
 				instance,
-				mbName = new ObjectName
+				new ObjectName
 				(
 					(new StringBuilder(256))
 					.append(MBEAN_PATTERN)

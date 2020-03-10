@@ -16,7 +16,6 @@ import org.crypthing.things.config.ConfigException;
 
 public final class Status
 {
-	private static String DETAILS = "--details";
 	public static void main(String[] args)
 	{
 		if (args.length < 1) usage();

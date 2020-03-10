@@ -10,6 +10,9 @@ import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
 
+import org.crypthing.things.appservice.JMXConnection.ConnectionHolder;
+import org.crypthing.things.appservice.diagnostic.Network;
+
 public final class Launch
 {
 	public static void main(String[] args)
@@ -64,7 +67,13 @@ public final class Launch
 	private static void launch(final String host, final String port, final String arg, final String home)  throws IOException, JMException
 	{
 		System.out.print("Launching service " + arg + " through host " + host + " and port " + port + " with home " + home + " - ");
-		final JMXConnector jmxc = JMXConnectorFactory.connect(new JMXServiceURL("service:jmx:rmi:///jndi/rmi://" + host + ":" + port + "/jmxrmi"));
+		ConnectionHolder holder = JMXConnection.getConnection(host, port);
+		if(holder.ret !=0)
+		{
+			System.out.println(Network.getMessage(holder.ret, host, port));
+			return;
+		}
+		final JMXConnector jmxc = holder.connection;
 		try
 		{
 			final MBeanServerConnection mbean = jmxc.getMBeanServerConnection();
@@ -74,9 +83,9 @@ public final class Launch
 				ObjectName mb = it.next();
 				int ret = (Integer) mbean.invoke(mb, "launch", new Object[] { arg, home, Bootstrap.getEnv() }, new String[] { String.class.getName(), String.class.getName(), String[].class.getName() });
 				if (ret == 0) System.out.println("... lauched! with " + mb.getCanonicalName());
-				else System.err.println("... failed! Obname: " + mb.getCanonicalName());
+				else System.err.println("... failed! Ret:"+ ret + ". Obname: " + mb.getCanonicalName());
 			}
 		}
-		finally { jmxc.close(); }
+		finally { try{ jmxc.close();} catch(Exception e) {} }
 	}
 }

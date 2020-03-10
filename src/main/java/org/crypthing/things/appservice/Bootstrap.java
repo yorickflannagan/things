@@ -20,11 +20,11 @@ import java.util.concurrent.TimeUnit;
 import javax.management.ObjectName;
 import javax.management.MBeanServerConnection;
 import javax.management.remote.JMXConnector;
-import javax.management.remote.JMXConnectorFactory;
-import javax.management.remote.JMXServiceURL;
 
+import org.crypthing.things.appservice.JMXConnection.ConnectionHolder;
 import org.crypthing.things.appservice.config.JMXConfig;
 import org.crypthing.things.appservice.config.JVMConfig;
+import org.crypthing.things.appservice.diagnostic.Network;
 import org.crypthing.things.config.Config;
 import org.crypthing.things.config.ConfigException;
 import org.crypthing.things.snmp.EncodableString;
@@ -96,6 +96,7 @@ public final class Bootstrap implements BootstrapMBean
 		ManagementFactory.getPlatformMBeanServer().registerMBean(instance,
 				mbName = new ObjectName((new StringBuilder(256)).append(MBEAN_PATTERN)
 						.append(ManagementFactory.getRuntimeMXBean().getName()).toString()));
+		System.out.println("Agent Mbean registered [" + mbName + "]");
 		for (int i = 1; i < args.length; i++)
 			instance.launch(args[i]);
 		instance.run();
@@ -195,8 +196,9 @@ public final class Bootstrap implements BootstrapMBean
 		evt.fire(new LifecycleEvent(LifecycleEventType.start, new EncodableString("Bootstrap has begun")));
 		while (isRunning)
 		{
+			i=0;
 			try { 
-				while(i<100)
+				while(i++<100 && isRunning)
 				{
 					LaunchSpec ls = launchspec.pollFirst();
 					if(ls !=null)
@@ -218,6 +220,7 @@ public final class Bootstrap implements BootstrapMBean
 			}
 			catch (InterruptedException e) { e.printStackTrace(); }
 		}
+		System.out.println("Exiting now.");
 		evt.fire(new LifecycleEvent(LifecycleEventType.stop, new EncodableString("Bootstrap has endend")));
 	}
 
@@ -225,28 +228,32 @@ public final class Bootstrap implements BootstrapMBean
 	public void shutdown()
 	{
 
+		boolean waiting = false;
 		for (Entry<String, Process> entry : processes.entrySet())
 		{
+			waiting = true;
 			if (entry.getValue().isAlive())
 			{
-				stop(entry.getKey());
+				stop(entry.getKey(), TIMEOUT * 2);
 			}
 		}
 
-		try
+		if(waiting)
 		{
-			Thread.sleep(TIMEOUT);
-		}
-		catch (Exception e)
-		{
-		}
-		;
-
-		for (Entry<String, Process> entry : processes.entrySet())
-		{
-			if (entry.getValue().isAlive())
+			try
 			{
-				forceStop(entry.getKey(), TIMEOUT * 2);
+				Thread.sleep(TIMEOUT);
+			}
+			catch (Exception e)
+			{
+			};
+	
+			for (Entry<String, Process> entry : processes.entrySet())
+			{
+				if (entry.getValue().isAlive())
+				{
+					forceStop(entry.getKey(), TIMEOUT * 2);
+				}
 			}
 		}
 
@@ -403,18 +410,9 @@ public final class Bootstrap implements BootstrapMBean
 		}
 	}
 
-	public static final int NO_CONFIG_FOUND = -1;
-	public static final int COULD_NOT_STOP = -2;
-	public static final int NO_PROCESS_FOUND = -3;
-	public static final int EXCEPTION_WHILE_STOP = -4;
-	public static final int ALREADY_STOPPED = -5;
-	public static final int EXCEPTION_WHILE_FORCE_STOP = -6;
-	public static final int EXCEPTION_ON_LAUNCH = -7;
-	public static final int STOP_OK = 0;
-	public static final int STOP_FORCED = 1;
 
 	@Override
-	public int stop(String name)
+	public int stop(String name, int timeout)
 	{
 		Process p = processes.get(name);
 		if(p == null ) return NO_PROCESS_FOUND;
@@ -426,21 +424,32 @@ public final class Bootstrap implements BootstrapMBean
 		if(cfg !=null)
 		{
 			host = cfg.getJmx().getHost();
-			port = cfg.getJmx().getPort();		
+			port = cfg.getJmx().getPort();
 		}
 		else return NO_CONFIG_FOUND;
 		try{
-			final JMXConnector jmxc = JMXConnectorFactory.connect(new JMXServiceURL("service:jmx:rmi:///jndi/rmi://" + host + ":" + port + "/jmxrmi"));
+			ConnectionHolder holder = JMXConnection.getConnection(host, port);
+			if(holder.ret !=0)
+			{
+				System.out.println(Network.getMessage(holder.ret, host, port));
+				return EXCEPTION_WHILE_STOP;
+			}
+			final JMXConnector jmxc = holder.connection;
 			try
 			{
 				final MBeanServerConnection mbean = jmxc.getMBeanServerConnection();
 				final Iterator<ObjectName> it = mbean.queryNames(new ObjectName(Runner.MBEAN_PATTERN + "*"), null).iterator(); 
 				while (it.hasNext()) mbean.invoke(it.next(), "shutdown", new Object[] { jmxkey }, new String[] {  String.class.getName() });
+				if(!p.waitFor(timeout, TimeUnit.SECONDS))
+				{
+					return STOP_TIMEOUT;
+				}
 			}
-			finally { jmxc.close(); }
+			finally { try{ jmxc.close();} catch(Exception e) {} }
 		}
 		catch(Exception e)
 		{
+			e.printStackTrace();
 			return EXCEPTION_WHILE_STOP;
 		}
 
@@ -452,9 +461,9 @@ public final class Bootstrap implements BootstrapMBean
 	{
 		Process p = processes.get(name);
 		if(!p.isAlive()) return STOP_OK;
-		int ret = stop(name);
+		int ret = stop(name, timeout);
 		int count = timeout;
-		if(ret!=STOP_OK && ret!=EXCEPTION_WHILE_STOP) return ret;
+		if(ret!=STOP_OK && ret!=EXCEPTION_WHILE_STOP && ret!=STOP_TIMEOUT) return ret;
 
 		while(count -- > 0 && ret!=EXCEPTION_WHILE_STOP)
 		{
@@ -497,6 +506,7 @@ public final class Bootstrap implements BootstrapMBean
 				list.add(entry.getKey());
 			}
 		}
+		
 		return list.toArray(new String[list.size()]);
 	}
 
