@@ -5,19 +5,20 @@ public interface BootstrapMBean
     
     //transform in a enum? Probably not. JMX won't like.
     
-	int NO_CONFIG_FOUND = -1;
-	int COULD_NOT_STOP = -2;
-	int NO_PROCESS_FOUND = -3;
-	int EXCEPTION_WHILE_STOP = -4;
-	int ALREADY_STOPPED = -5;
-	int EXCEPTION_WHILE_FORCE_STOP = -6;
-    int EXCEPTION_ON_LAUNCH = -7;
-    int STOP_TIMEOUT = -8;
-	int STOP_OK = 0;
-	int STOP_FORCED = 1;
+	int NO_CONFIG_FOUND = 1;
+	int COULD_NOT_STOP = 2;
+	int NO_PROCESS_FOUND = 3;
+	int EXCEPTION_WHILE_STOP = 4;
+	int ALREADY_STOPPED = 5;
+	int EXCEPTION_WHILE_FORCE_STOP = 6;
+    int EXCEPTION_ON_LAUNCH = 7;
+    int STOP_TIMEOUT = 8;
+    int SERVER_ALREADY_STARTED = 9;
 
-    int ALIVE = 1;
-    int DEAD = 0;
+	int OK = 0;
+    
+    int ALIVE = 0;
+    int DEAD = 1;
     int UNKNOW = -1; 
 
     void shutdown();

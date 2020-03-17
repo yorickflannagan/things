@@ -7,8 +7,6 @@ import javax.management.JMException;
 import javax.management.MBeanServerConnection;
 import javax.management.ObjectName;
 import javax.management.remote.JMXConnector;
-import javax.management.remote.JMXConnectorFactory;
-import javax.management.remote.JMXServiceURL;
 
 import org.crypthing.things.appservice.JMXConnection.ConnectionHolder;
 import org.crypthing.things.appservice.diagnostic.Network;
@@ -42,7 +40,7 @@ public final class Launch
 						cfgFile = args[i++];
 					}
 					else cfgFile = cmd;
-					if (host != null && port != null && cfgFile != null && home != null ) launch(host, port, cfgFile, home);
+					if (host != null && port != null && cfgFile != null && home != null ) System.exit(launch(host, port, cfgFile, home));
 				}
 			}
 		catch (final Throwable e)
@@ -54,6 +52,7 @@ public final class Launch
 			usage();
 		}
 
+
 	}
 	private static void usage()
 	{
@@ -64,14 +63,14 @@ public final class Launch
 		System.err.println("\tBoth options should be specified in that order");
 		System.exit(1);
 	}
-	private static void launch(final String host, final String port, final String arg, final String home)  throws IOException, JMException
+	private static int launch(final String host, final String port, final String arg, final String home)  throws IOException, JMException
 	{
-		System.out.print("Launching service " + arg + " through host " + host + " and port " + port + " with home " + home + " - ");
+		System.out.println("Launching service " + arg + " through host " + host + " and port " + port + " with home " + home + ".");
 		ConnectionHolder holder = JMXConnection.getConnection(host, port);
 		if(holder.ret !=0)
 		{
 			System.out.println(Network.getMessage(holder.ret, host, port));
-			return;
+			return holder.ret;
 		}
 		final JMXConnector jmxc = holder.connection;
 		try
@@ -83,9 +82,14 @@ public final class Launch
 				ObjectName mb = it.next();
 				int ret = (Integer) mbean.invoke(mb, "launch", new Object[] { arg, home, Bootstrap.getEnv() }, new String[] { String.class.getName(), String.class.getName(), String[].class.getName() });
 				if (ret == 0) System.out.println("... lauched! with " + mb.getCanonicalName());
-				else System.err.println("... failed! Ret:"+ ret + ". Obname: " + mb.getCanonicalName());
+				else 
+				{
+					System.err.println("... failed! Ret:["+ ret + "]. Obname: " + mb.getCanonicalName());
+					return ret;
+				}
 			}
 		}
 		finally { try{ jmxc.close();} catch(Exception e) {} }
+		return 0;
 	}
 }

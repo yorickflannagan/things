@@ -78,7 +78,6 @@ public final class Bootstrap implements BootstrapMBean
 	public static final String MBEAN_PATTERN = "org.crypthing.things.appservice:type=Agent,name=";
 	private static final String CONFIG_SCHEMA_PATH = "/org/crypthing/things/appservice/config.xsd";
 	private static final String OVERRIDE = "things.override.";
-	private static final int SERVER_ALREADY_STARTED = 666;
 	private static ObjectName mbName;
 	private static final Map<String, Process> processes = new HashMap<>();
 	private static final Map<String, JVMConfig> configs = new HashMap<>();
@@ -198,7 +197,7 @@ public final class Bootstrap implements BootstrapMBean
 		{
 			i=0;
 			try { 
-				while(i++<100 && isRunning)
+				while(i++<50 && isRunning)
 				{
 					LaunchSpec ls = launchspec.pollFirst();
 					if(ls !=null)
@@ -214,7 +213,7 @@ public final class Bootstrap implements BootstrapMBean
 							ls.notifyAll();
 						}
 					}
-					Thread.sleep(100);
+					Thread.sleep(200);
 				}
 				evt.fire(heart); 
 			}
@@ -453,22 +452,21 @@ public final class Bootstrap implements BootstrapMBean
 			return EXCEPTION_WHILE_STOP;
 		}
 
-		return STOP_OK;
+		return OK;
 	}
 
 	@Override
 	public int forceStop(String name, int timeout)
 	{
-		Process p = processes.get(name);
-		if(!p.isAlive()) return STOP_OK;
 		int ret = stop(name, timeout);
 		int count = timeout;
-		if(ret!=STOP_OK && ret!=EXCEPTION_WHILE_STOP && ret!=STOP_TIMEOUT) return ret;
+		if(ret!=OK && ret!=EXCEPTION_WHILE_STOP && ret!=STOP_TIMEOUT) return ret;
 
+		Process p = processes.get(name);
 		while(count -- > 0 && ret!=EXCEPTION_WHILE_STOP)
 		{
 			try {Thread.sleep(1000); } catch(Exception e){};
-			if(!p.isAlive()) return STOP_OK;
+			if(!p.isAlive()) return OK;
 		}
 
 		if(p.isAlive())
@@ -476,7 +474,7 @@ public final class Bootstrap implements BootstrapMBean
 			try { 
 				if(p.destroyForcibly().waitFor(timeout, TimeUnit.SECONDS))
 				{
-					return STOP_FORCED;
+					return OK;
 				}
 			} 
 			catch(Exception e) { return EXCEPTION_WHILE_FORCE_STOP; };

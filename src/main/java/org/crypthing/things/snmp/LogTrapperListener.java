@@ -4,6 +4,8 @@ import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.crypthing.things.snmp.LifecycleEvent.LifecycleEventType;
+
 
 public class LogTrapperListener implements LifecycleEventListener, ProcessingEventListener
 {
@@ -35,7 +37,11 @@ public class LogTrapperListener implements LifecycleEventListener, ProcessingEve
 		String msg;
 		if (encode != null && encode.getEncoding() == Encodable.Type.STRING) msg = (String) encode.encode();
 		else msg = "";
-		logger.info(msg);
+		if (e.getType().equals(LifecycleEventType.heart)) {
+			logger.fine(msg);
+		} else{
+			logger.info(msg);
+		}
 		if (trapper != null) trapper.notify(e);
 	}
 	@Override public void info(final ProcessingEvent e) { dispatch(e, Level.INFO); }

@@ -10,13 +10,13 @@ import java.net.UnknownHostException;
  */
 public class Network
 {
-    private static int i = 0;
+    //TODO: unificar os codigos de erro 4 bits mais significativos cliente/ 4 bits menos significativos servidor. ou algo do tipo.
 
-    public static final int OK = 0;
-    public static final int UNKNOW_HOST = -1;
-    public static final int CONNECTION_REFUSED = -2;
-    public static final int OTHER = -3;
-    public static final int INVALID_PORT = -4;
+    public static final int OK =                 0;
+    public static final int UNKNOW_HOST =        1 << 4;
+    public static final int CONNECTION_REFUSED = 2 << 4;
+    public static final int OTHER =              3 << 4;
+    public static final int INVALID_PORT =       4 << 4;
 
 
     public static int verifyConnection(String host, String port)

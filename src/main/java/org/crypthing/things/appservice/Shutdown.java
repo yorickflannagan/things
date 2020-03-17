@@ -2,16 +2,12 @@ package org.crypthing.things.appservice;
 
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Set;
 
 import javax.management.JMException;
 import javax.management.MBeanServerConnection;
 import javax.management.ObjectName;
 import javax.management.remote.JMXConnector;
-import javax.management.remote.JMXConnectorFactory;
-import javax.management.remote.JMXServiceURL;
 
 import org.crypthing.things.appservice.JMXConnection.ConnectionHolder;
 import org.crypthing.things.appservice.config.JVMConfig;
@@ -166,7 +162,7 @@ public final class Shutdown
 		{
 			switch (ret)
 			{
-				case BootstrapMBean.STOP_OK:
+				case BootstrapMBean.OK:
 					System.out.println("Done.");
 					break;
 				case BootstrapMBean.ALREADY_STOPPED:
@@ -184,8 +180,11 @@ public final class Shutdown
 				case BootstrapMBean.NO_PROCESS_FOUND:
 					System.out.println("Could not stop process. No process found.");
 					break;
-				case BootstrapMBean.STOP_FORCED:
-					System.out.println("Stop was forced.");
+				// case BootstrapMBean.STOP_FORCED:
+				// 	System.out.println("Stop was forced.");
+				// 	break;
+				case BootstrapMBean.STOP_TIMEOUT:
+					System.out.println("Stop timed out. Wait a little and list instances that are alive or kill it with --force_stop_by_agent.");
 					break;
 				default:
 					System.out.println("Something happened, I don't know why and I don't know how:" + ret);
