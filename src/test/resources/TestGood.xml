@@ -5,7 +5,7 @@
 		<minMemory>256</minMemory>
 		<maxMemory>512</maxMemory>
 		<name>TestGood</name>
-		<heartbeat>1000</heartbeat>
+		<heartbeat>2000</heartbeat>
         <jmx host="10.216.80.110" port="5055" />
 		<classpath>
 		    <path>test.jar</path>
@@ -27,6 +27,5 @@
 		<property name="org.crypthing.things.batch.rootOID" value="0.1.4320" />
 	</snmp>
 
-	<datasources/>
 
 </config>

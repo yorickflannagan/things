@@ -6,7 +6,7 @@
 		<maxMemory>512</maxMemory>
 		<name>TestTalky</name>
 		<heartbeat>1000</heartbeat>
-        <jmx host="10.216.80.110" port="5057" />
+        <jmx host="10.216.80.110" port="5056" />
 		<classpath>
 		    <path>test.jar</path>
 		</classpath>
@@ -27,6 +27,5 @@
 		<property name="org.crypthing.things.batch.rootOID" value="0.1.4320" />
 	</snmp>
 
-	<datasources/>
 
 </config>

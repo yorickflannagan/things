@@ -4,16 +4,16 @@
 	<jvm>
 		<minMemory>256</minMemory>
 		<maxMemory>512</maxMemory>
-		<name>TestEvil</name>
-		<heartbeat>1000</heartbeat>
-        <jmx host="10.216.80.110" port="5057" />
+		<name>TestGood</name>
+		<heartbeat>2000</heartbeat>
+        <jmx host="10.216.80.110" port="5055" />
 		<classpath>
 		    <path>test.jar</path>
 		</classpath>
 		<properties></properties>
 	</jvm>
 	<jndi implementation="org.crypthing.things.appservice.ServicesFactory" />
-	<worker implementation="org.crypthing.things.appservice.EvilGuy">
+	<worker implementation="org.crypthing.things.appservice.Sleepy">
 		<threads>1</threads>
 		<restartable>true</restartable>
 		<sleep>3000</sleep>
