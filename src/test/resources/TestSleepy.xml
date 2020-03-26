@@ -4,7 +4,7 @@
 	<jvm>
 		<minMemory>256</minMemory>
 		<maxMemory>512</maxMemory>
-		<name>TestGood</name>
+		<name>TestSleepy</name>
 		<heartbeat>2000</heartbeat>
         <jmx host="10.216.80.110" port="5055" />
 		<classpath>

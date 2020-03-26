@@ -98,6 +98,7 @@ public final class Shutdown
 			e.printStackTrace();
 			System.err.println("\n-------------------------------\n\n");
 			usage();
+			System.exit(-1);
 		}
 	}
 
@@ -122,7 +123,7 @@ public final class Shutdown
 		if(holder.ret !=0)
 		{
 			System.out.println(Network.getMessage(holder.ret, host, port));
-			return;
+			System.exit(holder.ret);
 		}
 		final JMXConnector jmxc = holder.connection;
 		boolean done = false;

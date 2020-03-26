@@ -96,6 +96,7 @@ implements	RunnerMBean,
 			lcDispatcher.fire(new LifecycleEvent(LifecycleEventType.start, new EncodableString("Runner initialization succeeded.")));
 			ready = true;
 			Thread t = new Thread(new Heart());
+			t.setDaemon(true);
 			t.start();
 			
 			int goal = config.getWorker().getGoal();
@@ -107,7 +108,7 @@ implements	RunnerMBean,
 				int adjustDelay = config.getWorker().getGoalMeasure();
 				ThreadAdvisor ted = new ThreadAdvisor(goal, ramp); 
 				try{Thread.sleep(adjustDelay);}catch(InterruptedException e){}
-				while(ready)
+				while(workers.size() >0)
 				{
 					sucessCurrent = getSuccessCount();
 					int go = ted.whichWay(workers.size(), sucessCurrent - sucessLast);
