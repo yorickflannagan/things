@@ -215,6 +215,17 @@ implements	RunnerMBean,
 				System.getenv(Bootstrap.PARENT_JMX_HOST) + System.getenv(Bootstrap.PARENT_JMX_PORT) 
 			:
 			 null; 
+
+
+	private void _shutdown()
+	{
+		ready = false;
+		lcDispatcher.fire(new LifecycleEvent(LifecycleEventType.stop, new EncodableString("Runner shutdown signal received")));
+		final Iterator<InterruptEventListener> it = interruptListeners.iterator();
+		while (it.hasNext()) it.next().shutdown();
+		hasShutdown = true;
+	}
+
 	@Override
 	public void shutdown(String key)
 	{
@@ -222,11 +233,7 @@ implements	RunnerMBean,
 		{
 			throw new RuntimeException("Instances started by an agent must be stopped through the same agent.");
 		}
-		ready = false;
-		lcDispatcher.fire(new LifecycleEvent(LifecycleEventType.stop, new EncodableString("Runner shutdown signal received")));
-		final Iterator<InterruptEventListener> it = interruptListeners.iterator();
-		while (it.hasNext()) it.next().shutdown();
-		hasShutdown = true;
+		_shutdown();
 	}
 	
 	@Override
@@ -286,7 +293,7 @@ implements	RunnerMBean,
 	public void abort(final Sandbox worker)
 	{
 		releaseResources(worker);
-		shutdown();
+		_shutdown();
 	}
 	@Override public int getWorkerCount() { return workers.size(); }
 

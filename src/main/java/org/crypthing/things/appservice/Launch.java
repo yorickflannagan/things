@@ -50,6 +50,7 @@ public final class Launch
 			e.printStackTrace();
 			System.err.println("\n-------------------------------\n\n");
 			usage();
+			System.exit(-1);
 		}
 
 
