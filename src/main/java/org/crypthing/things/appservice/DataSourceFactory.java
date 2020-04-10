@@ -55,7 +55,7 @@ public class DataSourceFactory extends Reference implements DataSource, Resource
 			conn.close();
 			conn.forceClose();
 		}
-		catch (final Throwable e) { throw new ConfigException("Could not load JDBC driver", e); }
+		catch (final Throwable e) { throw new ConfigException("Could not load JDBC driver for " + this.config.getName(), e); }
 		subscriber.addReleaseResourceListener(this);
 	}
 	@Override

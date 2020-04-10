@@ -35,7 +35,7 @@ implements	RunnerMBean,
 		ReleaseResourceEventDispatcher,
 		InterruptEventDispatcher
 {
-	private class ShutdownHook implements Runnable { @Override public void run() { if (!hasShutdown) shutdown(); } }
+	private class ShutdownHook implements Runnable { @Override public void run() { if (!hasShutdown) _shutdown(); } }
 	private static Runner instance; 
 	public static final String MBEAN_PATTERN = "org.crypthing.things.appservice:type=Runner,name=";
 	private static final Logger log = Logger.getLogger(Runner.class.getName());

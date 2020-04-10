@@ -78,6 +78,7 @@ public final class Bootstrap implements BootstrapMBean
 	public static final String MBEAN_PATTERN = "org.crypthing.things.appservice:type=Agent,name=";
 	private static final String CONFIG_SCHEMA_PATH = "/org/crypthing/things/appservice/config.xsd";
 	private static final String OVERRIDE = "things.override.";
+	private static final String SCHEMA_LOCATION = "things.schema";
 	private static ObjectName mbName;
 	private static final Map<String, Process> processes = new HashMap<>();
 	private static final Map<String, JVMConfig> configs = new HashMap<>();
@@ -103,7 +104,19 @@ public final class Bootstrap implements BootstrapMBean
 
 	public static InputStream getSchema() throws ConfigException
 	{
-		return Bootstrap.class.getClass().getResourceAsStream(CONFIG_SCHEMA_PATH);
+		String loc = System.getProperty(SCHEMA_LOCATION); 
+		if(loc==null)
+		{
+			return Bootstrap.class.getClass().getResourceAsStream(CONFIG_SCHEMA_PATH);
+		}
+		else{
+			try {
+				return new FileInputStream(loc);
+			} catch (Exception e) {
+				System.err.println("Could no load schema from:[" + loc + "] - will try locally.");
+				return Bootstrap.class.getClass().getResourceAsStream(CONFIG_SCHEMA_PATH);
+			}
+		}
 	}
 
 	public static JVMConfig getJVMConfig(final InputStream cfgFile, final InputStream cfgSchema) throws ConfigException

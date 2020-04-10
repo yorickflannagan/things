@@ -46,6 +46,8 @@ public class Config implements Serializable
 	private static final long serialVersionUID = -326226312678955321L;
 	private static final String ENV_NOT_FOUND = "Environment variable not found: ";
 	private static final String INVALID_ARG = "Arguments must not be null and must have valid values";
+	private static final String INVALID_ARG_CFG = "Config must not be null and must have valid value";
+	private static final String INVALID_ARG_SCH = "Schema must not be null and must have valid value";
 	private static final String CONFIG_NOT_LOADED = "Could not load configuration file";
 	private class ConfigReader extends Reader
 	{
@@ -152,7 +154,8 @@ public class Config implements Serializable
 	{
 		try
 		{
-			if (document == null || schema == null) throw new NullPointerException(INVALID_ARG);
+			if (schema == null) throw new NullPointerException(INVALID_ARG_SCH);
+			if (document == null) throw new NullPointerException(INVALID_ARG_CFG);
 			final SchemaFactory fac = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
 			final DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 			dbf.setSchema(fac.newSchema(new StreamSource(schema)));
