@@ -11,8 +11,10 @@ import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
 
+import org.crypthing.things.appservice.JMXConnection.ConnectionHolder;
 import org.crypthing.things.appservice.config.JVMConfig;
 import org.crypthing.things.appservice.db.Cursor;
+import org.crypthing.things.appservice.diagnostic.Network;
 import org.crypthing.things.config.ConfigException;
 
 public class CursorInfo {
@@ -52,47 +54,55 @@ public class CursorInfo {
 	}
 	private static void viewStatus(final String host, final String port, String name, final int count, final long interval)  throws IOException, JMException, InterruptedException
 	{
-		final String service = host + ":" + port;
-		final JMXConnector jmxc = JMXConnectorFactory.connect(new JMXServiceURL("service:jmx:rmi:///jndi/rmi://" + service + "/jmxrmi"));
-		try
+		ConnectionHolder ch = JMXConnection.getConnection(host, port);
+		final JMXConnector jmxc = ch.ret == 0 ? ch.connection : null;
+		if(jmxc != null)
 		{
-			final MBeanServerConnection mbean = jmxc.getMBeanServerConnection();
-			final Iterator<ObjectName> it = mbean.queryNames(new ObjectName(Cursor.MBEAN_PATTERN + name), null).iterator();
-			final ObjectName obName = it.hasNext() ? it.next() : null;
-			if (obName == null)
+			try
 			{
-				System.err.println("Given URL has no Cursor " + Cursor.MBEAN_PATTERN + name + " or it was not started yet");
-				System.exit(1);
+				final MBeanServerConnection mbean = jmxc.getMBeanServerConnection();
+				final Iterator<ObjectName> it = mbean.queryNames(new ObjectName(Cursor.MBEAN_PATTERN + name), null).iterator();
+				final ObjectName obName = it.hasNext() ? it.next() : null;
+				if (obName == null)
+				{
+					System.err.println("Given URL has no Cursor " + Cursor.MBEAN_PATTERN + name + " or it was not started yet");
+					System.exit(1);
+				}
+				int i = 0;
+				System.out.println("Cursor "+ name + " from [" + host + ":" +  port + "]");
+				String sql = getValue(mbean, obName, "SQLStatement");
+				System.out.print("SQL:\t[");
+				System.out.println(sql);
+				StringBuilder builder = new StringBuilder(128);
+				do
+				{
+					Thread.sleep(interval);
+					builder.setLength(0);
+									
+					long remainder = getValue(mbean, obName, "Remainder");
+					long stock = getValue(mbean, obName, "Stock");
+					long lastRecord = getValue(mbean, obName, "LastRecord");
+					
+					builder.append("***********************************************\n");
+					builder.append("Registros em memória    :\t");
+					builder.append(stock).append("\n");
+					builder.append("Registros a Processar   :\t");
+					builder.append(remainder).append("\n");
+					builder.append("Último Indice Processado:\t");
+					builder.append(lastRecord).append("\n");
+					
+					System.out.println(builder.toString());
+				}
+				while (++i < count);
+				System.out.println("***********************************************");
 			}
-			int i = 0;
-			System.out.println("Cursor "+ name + " from " + service);
-			String sql = getValue(mbean, obName, "SQLStatement");
-			System.out.print("SQL:\t[");
-			System.out.println(sql);
-			StringBuilder builder = new StringBuilder(128);
-			do
-			{
-				Thread.sleep(interval);
-				builder.setLength(0);
-								
-				long remainder = getValue(mbean, obName, "Remainder");
-				long stock = getValue(mbean, obName, "Stock");
-				long lastRecord = getValue(mbean, obName, "LastRecord");
-				
-				builder.append("***********************************************\n");
-				builder.append("Registros em memória    :\t");
-				builder.append(stock).append("\n");
-				builder.append("Registros a Processar   :\t");
-				builder.append(remainder).append("\n");
-				builder.append("Último Indice Processado:\t");
-				builder.append(lastRecord).append("\n");
-				
-				System.out.println(builder.toString());
-			}
-			while (++i < count);
-			System.out.println("***********************************************");
+			finally { jmxc.close(); }
 		}
-		finally { jmxc.close(); }
+		else
+		{
+			System.out.println(Network.getMessage(ch.ret, host, port));
+		}
+
 	}
 	
 	@SuppressWarnings("unchecked")

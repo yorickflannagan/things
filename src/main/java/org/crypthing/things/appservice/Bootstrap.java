@@ -78,6 +78,7 @@ public final class Bootstrap implements BootstrapMBean
 	public static final String MBEAN_PATTERN = "org.crypthing.things.appservice:type=Agent,name=";
 	private static final String CONFIG_SCHEMA_PATH = "/org/crypthing/things/appservice/config.xsd";
 	private static final String OVERRIDE = "things.override.";
+	private static final String OVERRIDE_ENV = "override";
 	private static final String SCHEMA_LOCATION = "things.schema";
 	private static ObjectName mbName;
 	private static final Map<String, Process> processes = new HashMap<>();
@@ -119,6 +120,10 @@ public final class Bootstrap implements BootstrapMBean
 		}
 	}
 
+	public static JVMConfig getJVMConfig(final String cfgFile) throws ConfigException, IOException
+	{
+		return getJVMConfig(new FileInputStream(cfgFile), Bootstrap.getSchema());
+	}
 	public static JVMConfig getJVMConfig(final InputStream cfgFile, final InputStream cfgSchema) throws ConfigException
 	{
 		return getJVMConfig(cfgFile, cfgSchema, System.getenv());
@@ -127,7 +132,7 @@ public final class Bootstrap implements BootstrapMBean
 	public static JVMConfig getJVMConfig(final InputStream cfgFile, final InputStream cfgSchema,
 			Map<String, String> env) throws ConfigException
 	{
-		final Config config = new Config(cfgFile, cfgSchema);
+		final Config config = new Config(cfgFile, cfgSchema, env);
 		return new JVMConfig(config, config.getNodeValue("/config/jvm"));
 	}
 
@@ -167,6 +172,7 @@ public final class Bootstrap implements BootstrapMBean
 		System.err.println("\tcfgFileList...: an optional list of configuration files to launch");
 		System.err.println("\tRequired system properties:");
 		System.err.println("\tjava.rmi.server.hostname: JMX host");
+		System.err.println("\tcom.sun.management.jmxremote.host: JMX host - Same as java.rmi.server.hostname");
 		System.err.println("\tcom.sun.management.jmxremote.port: JMX port");
 		System.exit(1);
 	}
@@ -316,8 +322,20 @@ public final class Bootstrap implements BootstrapMBean
 	{
 		Map<String,String> _env = Bootstrap.parseEnv(env);
 		Map<String,String> __env = new HashMap<>();
-		__env.putAll(_env);
-		__env.putAll(System.getenv());
+
+		String inherit = (String)_env.get("package org.crypthing.things.appservice.env");
+		if(OVERRIDE_ENV.equals(inherit))
+		{
+			__env.putAll(System.getenv());
+			__env.putAll(_env);
+		}
+		else
+		{
+			__env.putAll(_env);
+			__env.putAll(System.getenv());
+		}
+		
+
 		__env.put(PARENT_JMX_HOST, System.getProperty("java.rmi.server.hostname"));
 		__env.put(PARENT_JMX_PORT, System.getProperty("com.sun.management.jmxremote.port"));
 

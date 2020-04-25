@@ -11,8 +11,10 @@ import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
 
+import org.crypthing.things.appservice.JMXConnection.ConnectionHolder;
 import org.crypthing.things.appservice.config.JVMConfig;
 import org.crypthing.things.appservice.db.Cursor;
+import org.crypthing.things.appservice.diagnostic.Network;
 import org.crypthing.things.config.ConfigException;
 
 public class CursorReset {
@@ -45,14 +47,24 @@ public class CursorReset {
 	}
 	private static void reset(final String host, final String port, String name) throws IOException, JMException
 	{
-		final JMXConnector jmxc = JMXConnectorFactory.connect(new JMXServiceURL("service:jmx:rmi:///jndi/rmi://" + host + ":" + port + "/jmxrmi"));
-		try
+
+		ConnectionHolder ch = JMXConnection.getConnection(host, port);
+		final JMXConnector jmxc = ch.ret == 0 ? ch.connection : null;
+		if(jmxc != null)
 		{
-			final MBeanServerConnection mbean = jmxc.getMBeanServerConnection();
-			final Iterator<ObjectName> it = mbean.queryNames(new ObjectName(Cursor.MBEAN_PATTERN + name), null).iterator(); 
-			while (it.hasNext()) mbean.invoke(it.next(), "reset", new Object[] {}, new String[] {});
+			try
+			{
+				final MBeanServerConnection mbean = jmxc.getMBeanServerConnection();
+				final Iterator<ObjectName> it = mbean.queryNames(new ObjectName(Cursor.MBEAN_PATTERN + name), null).iterator(); 
+				while (it.hasNext()) mbean.invoke(it.next(), "reset", new Object[] {}, new String[] {});
+			}
+			finally { jmxc.close(); }
 		}
-		finally { jmxc.close(); }
+		else
+		{
+			System.out.println(Network.getMessage(ch.ret, host, port));
+		}
+
 	}
 
 }

@@ -60,8 +60,8 @@ public class Config implements Serializable
 			final char[] buffer = new char[1024];
 			int read;
 			while ((read = reader.read(buffer)) != -1) writer.write(buffer, 0, read);
-			value = expand(writer.toCharArray(), writer.size());
 			this.env = env;
+			value = expand(writer.toCharArray(), writer.size());
 		}
 		ConfigReader(final InputStream input, Map<String, String> env) throws IOException, ConfigException { this(new InputStreamReader(input, StandardCharsets.UTF_8), env); }
 		private String expand(final char[] input, final int len) throws IOException

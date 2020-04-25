@@ -1,6 +1,5 @@
 package org.crypthing.things.appservice;
 
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Iterator;
 
@@ -8,10 +7,10 @@ import javax.management.JMException;
 import javax.management.MBeanServerConnection;
 import javax.management.ObjectName;
 import javax.management.remote.JMXConnector;
-import javax.management.remote.JMXConnectorFactory;
-import javax.management.remote.JMXServiceURL;
 
+import org.crypthing.things.appservice.JMXConnection.ConnectionHolder;
 import org.crypthing.things.appservice.config.JVMConfig;
+import org.crypthing.things.appservice.diagnostic.Network;
 import org.crypthing.things.config.ConfigException;
 
 public final class Status
@@ -21,7 +20,7 @@ public final class Status
 		if (args.length < 1) usage();
 		try
 		{
-			final JVMConfig cfg = Bootstrap.getJVMConfig(new FileInputStream(args[0]), Bootstrap.getSchema());
+			final JVMConfig cfg = Bootstrap.getJVMConfig(args[0]);
 			if (cfg.getJmx() == null) throw new ConfigException("Configuration must have a JMX entry");
 
 			viewStatus
@@ -50,43 +49,50 @@ public final class Status
 	}
 	private static void viewStatus(final String host, final String port, final int count, final long interval)  throws IOException, JMException, InterruptedException
 	{
-		final String service = host + ":" + port;
-		final JMXConnector jmxc = JMXConnectorFactory.connect(new JMXServiceURL("service:jmx:rmi:///jndi/rmi://" + service + "/jmxrmi"));
-		try
+		ConnectionHolder ch = JMXConnection.getConnection(host, port);
+		final JMXConnector jmxc = ch.ret == 0 ? ch.connection : null;
+		if(jmxc != null)
 		{
-			final MBeanServerConnection mbean = jmxc.getMBeanServerConnection();
-			final Iterator<ObjectName> it = mbean.queryNames(new ObjectName(Runner.MBEAN_PATTERN + "*"), null).iterator();
-			final ObjectName obName = it.hasNext() ? it.next() : null;
-			if (obName == null)
+			try
 			{
-				System.err.println("Given URL has no Runner " + Runner.MBEAN_PATTERN + " or it was not started yet");
-				System.exit(1);
+				final MBeanServerConnection mbean = jmxc.getMBeanServerConnection();
+				final Iterator<ObjectName> it = mbean.queryNames(new ObjectName(Runner.MBEAN_PATTERN + "*"), null).iterator();
+				final ObjectName obName = it.hasNext() ? it.next() : null;
+				if (obName == null)
+				{
+					System.err.println("Given URL has no Runner " + Runner.MBEAN_PATTERN + " or it was not started yet");
+					System.exit(1);
+				}
+	
+				long lastMeasure = getValue(mbean, obName, "SuccessCount");
+				long lastStamp = System.currentTimeMillis();
+				int i = 0;
+				System.out.println("Listening to [" + host + ":" +  port + "]");
+				System.out.println("Success\tError\tThroughput\tWorkers");
+				do
+				{
+					Thread.sleep(interval);
+					long currentMeasure = getValue(mbean, obName, "SuccessCount");
+					long currentStamp = System.currentTimeMillis();
+					StringBuilder builder = new StringBuilder(128);
+					builder.append(currentMeasure).append("\t");
+					builder.append(getValue(mbean, obName, "ErrorCount").toString()).append("\t");
+					long hit = (currentStamp - lastStamp) / 1000;
+					if (hit > 0) builder.append((currentMeasure - lastMeasure) / hit).append("/s");
+					else builder.append("?");
+					builder.append("\t\t").append(getValue(mbean, obName, "WorkerCount").toString()).append("\t");
+					lastMeasure = currentMeasure;
+					lastStamp = currentStamp;
+					System.out.println(builder.toString());
+				}
+				while (++i < count);
 			}
-
-			long lastMeasure = getValue(mbean, obName, "SuccessCount");
-			long lastStamp = System.currentTimeMillis();
-			int i = 0;
-			System.out.println("Listening to service " + service);
-			System.out.println("Success\tError\tThroughput\tWorkers");
-			do
-			{
-				Thread.sleep(interval);
-				long currentMeasure = getValue(mbean, obName, "SuccessCount");
-				long currentStamp = System.currentTimeMillis();
-				StringBuilder builder = new StringBuilder(128);
-				builder.append(currentMeasure).append("\t");
-				builder.append(getValue(mbean, obName, "ErrorCount").toString()).append("\t");
-				long hit = (currentStamp - lastStamp) / 1000;
-				if (hit > 0) builder.append((currentMeasure - lastMeasure) / hit).append("/s");
-				else builder.append("?");
-				builder.append("\t\t").append(getValue(mbean, obName, "WorkerCount").toString()).append("\t");
-				lastMeasure = currentMeasure;
-				lastStamp = currentStamp;
-				System.out.println(builder.toString());
-			}
-			while (++i < count);
+			finally { jmxc.close(); }
 		}
-		finally { jmxc.close(); }
+		else
+		{
+			System.out.println(Network.getMessage(ch.ret, host, port));
+		}
 	}
 	
 	@SuppressWarnings("unchecked")
