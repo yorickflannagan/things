@@ -85,6 +85,7 @@ public final class Bootstrap implements BootstrapMBean
 	private static final Map<String, JVMConfig> configs = new HashMap<>();
 	private static final String jmxkey = System.getProperty("java.rmi.server.hostname")
 			+ System.getProperty("com.sun.management.jmxremote.port");
+	private static final Object ENV_OVERRIDE_KEY = "org_crypthing_things_appservice_env";
 
 	public static void main(String[] args) throws Exception
 	{
@@ -323,7 +324,7 @@ public final class Bootstrap implements BootstrapMBean
 		Map<String,String> _env = Bootstrap.parseEnv(env);
 		Map<String,String> __env = new HashMap<>();
 
-		String inherit = (String)_env.get("package org.crypthing.things.appservice.env");
+		String inherit = (String)_env.get(ENV_OVERRIDE_KEY);
 		if(OVERRIDE_ENV.equals(inherit))
 		{
 			__env.putAll(System.getenv());

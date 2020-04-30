@@ -27,7 +27,7 @@ import org.crypthing.things.snmp.ProcessingEvent;
 import org.crypthing.things.snmp.ProcessingEvent.ProcessingEventType;
 import org.crypthing.things.snmp.ProcessingEventListener;
 
-
+@SuppressWarnings("all") // CursorMBean 
 public class Cursor implements CursorMBean, CursorData, InterruptEventListener {
 	
 	private static final Object[] EMPTY = new Object[0];
