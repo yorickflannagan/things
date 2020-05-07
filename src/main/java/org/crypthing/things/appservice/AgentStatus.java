@@ -34,7 +34,7 @@ public final class AgentStatus
 			if(holder.ret !=0)
 			{
 				System.out.println(Network.getMessage(holder.ret, host, port));
-				return;
+				System.exit(holder.ret);
 			}
 			final JMXConnector jmxc = holder.connection;
 			try
@@ -57,13 +57,14 @@ public final class AgentStatus
 			System.err.println("-------------------------------\n");
 			e.printStackTrace();
 			System.err.println("\n-------------------------------\n\n");
+			System.exit(-2);
 		}
 	}
 	private static void usage()
 	{
 		System.err.println("Usage: AgentStatus --agent <server> <port>:");
 		System.err.println("\t--agent  asks for a list of running instances.");
-		System.exit(1);
+		System.exit(-1);
 	}
 	
 }

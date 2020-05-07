@@ -1,5 +1,7 @@
 package org.crypthing.things.appservice;
 
+import org.crypthing.things.config.ConfigException;
+
 public interface BootstrapMBean
 {
     
@@ -24,6 +26,7 @@ public interface BootstrapMBean
     void shutdown();
     int launch(String config);
     int launch(String config, String home, String[] env);
+    String getLaunch(String config, String[] env)  throws ConfigException;
     int stop(String name, int timeout);
     int forceStop(String name, int timeout);
     int isAlive(String name);

@@ -2,6 +2,7 @@ package org.crypthing.things.appservice;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.ProcessBuilder.Redirect;
@@ -319,7 +320,7 @@ public final class Bootstrap implements BootstrapMBean
 		return ls.ret; 
 	}
 
-	private int _launch(String cfgFile, String home, String[] env)
+	private Map<String,String> prepareEnv(String[] env)
 	{
 		Map<String,String> _env = Bootstrap.parseEnv(env);
 		Map<String,String> __env = new HashMap<>();
@@ -348,7 +349,35 @@ public final class Bootstrap implements BootstrapMBean
 				__env.put(key.substring(OVERRIDE.length()), _env.get(key));
 			}
 		}
+		return  __env;
+	}
 
+	public String getLaunch(String cfgFile, String[] env)  throws ConfigException
+	{
+		Map<String,String> __env = prepareEnv(env);
+		FileInputStream config;
+		try
+		{
+			config = new FileInputStream(cfgFile);
+			final JVMConfig cfg = getJVMConfig(config, getSchema(), __env);
+			final List<String> cmds = getCommands(cfg, cfgFile);
+			final StringBuilder sb = new StringBuilder();
+			for(String c : cmds)
+			{
+				sb.append(c).append(' ');
+			}
+			return  sb.toString();
+		}
+		catch (FileNotFoundException e)
+		{
+			throw new ConfigException("Config não encontrado: [" +  cfgFile + "]", e);
+		}
+	}
+
+
+	private int _launch(String cfgFile, String home, String[] env)
+	{
+		Map<String,String> __env = prepareEnv(env);
 		String _home = home != null ?  home  : System.getProperty("user.dir");
 		int ret;
 		try
