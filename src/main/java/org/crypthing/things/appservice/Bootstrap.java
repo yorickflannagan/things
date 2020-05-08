@@ -19,6 +19,7 @@ import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.TimeUnit;
 
 import javax.management.ObjectName;
+import javax.management.ReflectionException;
 import javax.management.MBeanServerConnection;
 import javax.management.remote.JMXConnector;
 
@@ -499,7 +500,20 @@ public final class Bootstrap implements BootstrapMBean
 			{
 				final MBeanServerConnection mbean = jmxc.getMBeanServerConnection();
 				final Iterator<ObjectName> it = mbean.queryNames(new ObjectName(Runner.MBEAN_PATTERN + "*"), null).iterator(); 
-				while (it.hasNext()) mbean.invoke(it.next(), "shutdown", new Object[] { jmxkey }, new String[] {  String.class.getName() });
+				ObjectName o;
+				while (it.hasNext()) 
+				{
+					o =  it.next();
+					try
+					{
+						mbean.invoke(o, "shutdown", new Object[] { jmxkey }, new String[] {  String.class.getName() });
+					}
+					catch (ReflectionException e) {
+						//TODO: old versions doesnt have  an string as parameter.
+						System.err.println("You can't teach an old dog new tricks, but you can throw them a bone.");
+						mbean.invoke(o, "shutdown", new Object[] { }, new String[] { });
+					}
+				}
 				if(!p.waitFor(timeout, TimeUnit.SECONDS))
 				{
 					return STOP_TIMEOUT;
