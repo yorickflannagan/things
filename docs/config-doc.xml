@@ -19,6 +19,7 @@
 			<property name="com.sun.management.jmxremote.ssl" value="false" />
 			<property name="com.sun.management.jmxremote.authenticate" value="false" />
 		-->
+		<heartbeat>1</heartbeat>			<!-- Intervalo em milissegundos entre dois sinais de heartbeat -->
 		<jmx host="[IP/hostname]" port="8000" />
 
 		<!--
@@ -88,7 +89,6 @@
 		<threads>1</threads>				<!-- Quantidade de threads de trabalho -->
 		<restartable>false</restartable>	<!-- true se a aplicação deve rodar como um daemon -->
 		<sleep>1</sleep>					<!-- Tempo em milissegundos de aguardo entre duas execuções de cada thread -->
-		<heartbeat>1</heartbeat>			<!-- Intervalo em milissegundos entre dois sinais de heartbeat -->
 	</worker>
 
 	<!--

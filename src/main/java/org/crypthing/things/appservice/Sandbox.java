@@ -19,7 +19,6 @@ public abstract class Sandbox extends Thread implements ShutdownEventDispatcher,
 	private boolean running = true;
 	private long sleeptime;
 	private boolean isRestartable = false;
-	private long heartbeat;
 	private ShutdownEventListener shutdownListner;
 	private LifecycleEventDispatcher lcDispatcher;
 	private ProcessingEventDispatcher pDispatcher;
@@ -36,7 +35,6 @@ public abstract class Sandbox extends Thread implements ShutdownEventDispatcher,
 	{
 		sleeptime = config.getSleep();
 		isRestartable = config.isRestartable();
-		heartbeat = config.getHeartbeat();
 		this.lcDispatcher = lcDispatcher;
 		this.pDispatcher = pDispatcher;
 		props = sbProps;
@@ -52,7 +50,6 @@ public abstract class Sandbox extends Thread implements ShutdownEventDispatcher,
 		try
 		{
 			startup(props);
-			long lastSignal = System.currentTimeMillis();
 			boolean onceMore = true;
 			do
 			{
@@ -61,11 +58,6 @@ public abstract class Sandbox extends Thread implements ShutdownEventDispatcher,
 				{
 					pDispatcher.fire(new ProcessingEvent(ProcessingEventType.warning, "Unhandled IO or SQLException", e));
 					if (!isRestartable) throw e;
-				}
-				if (heartbeat > 0 && System.currentTimeMillis() - lastSignal > heartbeat)
-				{
-					lcDispatcher.fire(new LifecycleEvent(LifecycleEventType.work, new EncodableString("Sandbox thread " + getId() + "is alive and running")));
-					lastSignal = System.currentTimeMillis();
 				}
 				if (running && onceMore && sleeptime > 0) try { Thread.sleep(sleeptime);} catch(InterruptedException e) {}
 			}

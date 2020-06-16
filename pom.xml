@@ -9,6 +9,22 @@
         <name>Yakoana Services</name>
     </organization>
     <url>http://www.yakoana.com.br</url>
+
+	<developers>
+		<developer>
+			<name>Diego von Sohsten</name>
+			<email>diego.sohsten@gmail.com</email>
+			<organization>Yakoana</organization>
+			<organizationUrl>http://www.yakoana.com.br</organizationUrl>
+		</developer>
+		<developer>
+			<name>Marco Gutierrez</name>
+			<email>yorick.flannagan@gmail.com</email>
+			<organization>Yakoana</organization>
+			<organizationUrl>http://www.yakoana.com.br</organizationUrl>
+		</developer>
+	</developers>
+
     <scm>
         <connection>scm:git:https://bitbucket.org/yakoana/things.git</connection>
         <tag>HEAD</tag>

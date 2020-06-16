@@ -12,7 +12,6 @@ public final class WorkerConfig
 	private final int threads;
 	private final boolean restartable;
 	private final long sleep;
-	private final long heartbeat;
 	private final int goal;
 	private final int ramp;
 	private final int goalMeasure;
@@ -24,7 +23,6 @@ public final class WorkerConfig
 		threads = xml.getValue("./threads", root, intConv);
 		restartable = Boolean.parseBoolean(xml.getValue("./restartable", root));
 		sleep = xml.getValue("./sleep", root, longConv);
-		heartbeat = xml.getValue("./heartbeat", root, longConv);
 		goal = xml.getValue("./goal", root, intConv);
 		ramp = xml.getValue("./ramp", root, new ConvertToInt(10));
 		goalMeasure = xml.getValue("./goalMeasure", root, new ConvertToInt(1000));
@@ -33,7 +31,6 @@ public final class WorkerConfig
 	public int getThreads() { return threads; }
 	public boolean isRestartable() { return restartable; }
 	public long getSleep() { return sleep; }
-	public long getHeartbeat() { return heartbeat; }
 	@Override
 	public String toString()
 	{
@@ -42,7 +39,6 @@ public final class WorkerConfig
 		return builder.append(", threads=").append(threads)
 			.append(", restartable=").append(restartable)
 			.append(", sleep=").append(sleep)
-			.append(", heartbeat=").append(heartbeat)
 			.toString();
 	}
 	public int getGoal() { return goal; }

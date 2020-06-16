@@ -4,46 +4,47 @@
 	<xs:element name="config">
 	<xs:complexType>
 	<xs:sequence>
-		<xs:element ref="jvm" />
-		<xs:element ref="jndi" />
-		<xs:element ref="worker" />
-		<xs:element ref="sandbox" minOccurs="0" />
-		<xs:element ref="snmp" minOccurs="0" />
-		<xs:element ref="datasources" minOccurs="0" />
-		<xs:element ref="cursors" minOccurs="0" />
-		<xs:element ref="mqxconnectors" minOccurs="0" />
+		<xs:element ref="jvm" />					<!-- Child process JVM configuration -->
+		<xs:element ref="jndi" />					<!-- Java Naming and Directory Interface registration -->
+		<xs:element ref="worker" />					<!-- Worker thread configuration -->
+		<xs:element ref="sandbox" minOccurs="0" />		<!-- Worker thread implementation parameters -->
+		<xs:element ref="snmp" minOccurs="0" />			<!-- Simple Network Management Protocol implementation -->
+		<xs:element ref="datasources" minOccurs="0" />		<!-- JDBC datasources -->
+		<xs:element ref="cursors" minOccurs="0" />		<!-- Database worker producer -->
+		<xs:element ref="mqxconnectors" minOccurs="0" />	<!-- Messaging server client connector -->
 	</xs:sequence>
 	</xs:complexType>
 	</xs:element>
 
+	<!-- Child process JVM configuration -->
 	<xs:element name="jvm">
 	<xs:complexType>
 	<xs:sequence>
-		<xs:element name="redirectTo" type="xs:string" minOccurs="0"/>
-		<xs:element name="minMemory" type="positive" minOccurs="0" />
-		<xs:element name="maxMemory" type="positive" minOccurs="0" />
-		<xs:element name="vmflags" type="nonempty" minOccurs="0" />
-		<xs:element name="name" type="nonempty" minOccurs="0" />
-		<xs:element name="heartbeat" type="xs:int" minOccurs="0" />
-		<xs:element name="jmx">
+		<xs:element name="redirectTo" type="xs:string" minOccurs="0"/>	<!-- Redirects child process output to specified file -->
+		<xs:element name="minMemory" type="positive" minOccurs="0" />	<!-- JVM -Xms parameter value -->
+		<xs:element name="maxMemory" type="positive" minOccurs="0" />	<!-- JVM -Xmx parameter value -->
+		<xs:element name="vmflags" type="nonempty" minOccurs="0" />		<!-- Aditional JVM parameters (-server -Xbatch is already defined) -->
+		<xs:element name="name" type="nonempty" minOccurs="0" />		<!-- Process arbitrary name (thing.server.name property value) -->
+		<xs:element name="heartbeat" type="xs:int" minOccurs="0" />		<!-- Heartbeat interval (sanity trap) -->
+		<xs:element name="jmx">								<!-- Remote conection definitions -->
 		<xs:complexType>
 		<xs:sequence>
 			<xs:element name="property" type="property" minOccurs="0" maxOccurs="unbounded" />
 		</xs:sequence>
-		<xs:attribute name="host" type="xs:string" use="required" />
-		<xs:attribute name="port" type="portType" use="required" />
+		<xs:attribute name="host" type="xs:string" use="required" />	<!-- Host name for JMX connections -->
+		<xs:attribute name="port" type="portType" use="required" />		<!-- Port for JMX connections -->
 		</xs:complexType>
 		</xs:element>
-		<xs:element name="classpath">
+		<xs:element name="classpath">							<!-- java.class.path values -->
 		<xs:complexType>
 		<xs:sequence>
 			<xs:element name="path" type="nonempty" minOccurs="1" maxOccurs="unbounded" />
 		</xs:sequence>
 		</xs:complexType>
 		</xs:element>
-		<xs:element name="properties" minOccurs="0">
-		<xs:complexType>
-		<xs:sequence>
+		<xs:element name="properties" minOccurs="0">				<!-- Aditional definitions. Default values: -->
+		<xs:complexType>									<!-- -Dcom.sun.management.jmxremote.ssl=false and -->
+		<xs:sequence>									<!-- -Dcom.sun.management.jmxremote.authenticate=false -->
 			<xs:element name="property" type="property" minOccurs="0" maxOccurs="unbounded" />
 		</xs:sequence>
 		</xs:complexType>
@@ -52,20 +53,21 @@
 	</xs:complexType>
 	</xs:element>
 
+	<!-- Java Naming and Directory Interface registration -->
 	<xs:element name="jndi">
 	<xs:complexType>
 		<xs:sequence>
-			<xs:element name="environment" minOccurs="0" maxOccurs="1">
+			<xs:element name="environment" minOccurs="0" maxOccurs="1">	<!-- General environment definition -->
 			<xs:complexType>
 			<xs:sequence>
 				<xs:element name="property" type="property" minOccurs="1" maxOccurs="unbounded" />
 			</xs:sequence>
 			</xs:complexType>
 			</xs:element>
-			<xs:element name="object" minOccurs="0" maxOccurs="unbounded">
+			<xs:element name="object" minOccurs="0" maxOccurs="unbounded">	<!-- JNDI entry -->
 			<xs:complexType>
 			<xs:sequence>
-				<xs:element name="environment" minOccurs="0" maxOccurs="1">
+				<xs:element name="environment" minOccurs="0" maxOccurs="1">	<!-- Entry values -->
 				<xs:complexType>
 				<xs:sequence>
 					<xs:element name="property" type="property" minOccurs="1" maxOccurs="unbounded" />
@@ -73,30 +75,32 @@
 				</xs:complexType>
 				</xs:element>
 			</xs:sequence>
-			<xs:attribute name="name" type="xs:string" use="required" />
-			<xs:attribute name="factory" type="xs:string" use="required" />
+			<xs:attribute name="name" type="xs:string" use="required" />	<!-- Entry name -->
+			<xs:attribute name="factory" type="xs:string" use="required" />	<!-- Entry implementation -->
 			</xs:complexType>
 			</xs:element>
 		</xs:sequence>
-		<xs:attribute name="implementation" type="xs:string" use="required" />
+		<xs:attribute name="implementation" type="xs:string" use="required" />	<!-- JNDI implementation -->
+														<!-- Default implementation: org.crypthing.things.jndi.InitialContextFactory -->
 	</xs:complexType>
 	</xs:element>
 
+	<!-- Worker thread configuration -->
 	<xs:element name="worker">
 	<xs:complexType>
 	<xs:sequence>
-		<xs:element name="threads" type="positive" />
-		<xs:element name="restartable" type="xs:boolean" />
-		<xs:element name="sleep" type="xs:int" minOccurs="0" />
-		<xs:element name="heartbeat" type="xs:int" minOccurs="0" />
-		<xs:element name="goal" type="xs:int" minOccurs="0" />
-		<xs:element name="ramp" type="xs:int" minOccurs="0" />
-		<xs:element name="goalMeasure" type="xs:int" minOccurs="0" />
+		<xs:element name="threads" type="positive" />				<!-- Initial amount of threads -->
+		<xs:element name="restartable" type="xs:boolean" />			<!-- Restartable worker indicator -->
+		<xs:element name="sleep" type="xs:int" minOccurs="0" />		<!-- Sleep time, if restartable -->
+		<xs:element name="goal" type="xs:int" minOccurs="0" />		<!-- Ideal work target -->
+		<xs:element name="ramp" type="xs:int" minOccurs="0" />		<!-- Goal soften ratio -->
+		<xs:element name="goalMeasure" type="xs:int" minOccurs="0" />	<!-- How to measure a goal achievement-->
 	</xs:sequence>
-	<xs:attribute name="implementation" type="xs:string" use="required" />
+	<xs:attribute name="implementation" type="xs:string" use="required" />	<!-- Worker thread implementation of Sandbox -->
 	</xs:complexType>
 	</xs:element>
 
+	<!-- Worker thread implementation parameters -->
 	<xs:element name="sandbox">
 	<xs:complexType>
 	<xs:sequence>
@@ -104,65 +108,73 @@
 	</xs:sequence>
 	</xs:complexType>
 	</xs:element>
-	
+
+	<!-- Simple Network Management Protocol -->
 	<xs:element name="snmp">
 	<xs:complexType>
 	<xs:sequence>
+		<!-- If available, the following properties must be supplied -->
+		<!-- org.crypthing.things.SNMPTrap: SNMP implementation (default: org.crypthing.things.snmp.SNMPBridge -->
+		<!-- org.crypthing.things.batch.udpAddress: target address (IP/port) -->
+		<!-- org.crypthing.things.batch.rootOID: trap root object identifier -->
 		<xs:element name="property" type="property" minOccurs="0" maxOccurs="unbounded" />
 	</xs:sequence>
 	</xs:complexType>
 	</xs:element>
-	
+
+	<!-- JDBC datasources -->
 	<xs:element name="datasources">
 	<xs:complexType>
 	<xs:sequence>
-		<xs:element name="jdbc" minOccurs="1" maxOccurs="unbounded">
+		<xs:element name="jdbc" minOccurs="1" maxOccurs="unbounded">			<!-- JDBC definition -->
 		<xs:complexType>
 			<xs:sequence>
 				<xs:element name="property" type="property" minOccurs="0" maxOccurs="unbounded" />
 			</xs:sequence>
-			<xs:attribute name="name" type="xs:string" use="required" />
-			<xs:attribute name="driver" type="xs:string" use="required" />
-			<xs:attribute name="url" type="xs:string" use="required" />
-			<xs:attribute name="validationQuery" type="xs:string" use="optional" />
+			<xs:attribute name="name" type="xs:string" use="required" />		<!-- Lookup name -->
+			<xs:attribute name="driver" type="xs:string" use="required" />		<!-- JDBC driver -->
+			<xs:attribute name="url" type="xs:string" use="required" />			<!-- Conection string -->
+			<xs:attribute name="validationQuery" type="xs:string" use="optional" />	<!-- Sanity check query -->
 		</xs:complexType>
 		</xs:element>
 	</xs:sequence>
 	</xs:complexType>
 	</xs:element>
-	
+
+	<!-- Database worker producer -->
 	<xs:element name="cursors">
 	<xs:complexType>
 	<xs:sequence>
 		<xs:element name="cursor" minOccurs="1" maxOccurs="unbounded">
 		<xs:complexType>
 			<xs:sequence>
-				<xs:element name="name" type="xs:string" />
-				<xs:element name="datasource" type="xs:string" />
-				<xs:element name="implementation" type="xs:string" />
-				<xs:element name="sleepBeetwenRun" type="xs:int" />
-				<xs:element name="maxMemoryRecords" type="xs:int" />
+				<xs:element name="name" type="xs:string" />		<!-- JMX lookup name -->
+				<xs:element name="datasource" type="xs:string" />	<!-- Cursor datasource lookup JNDI name -->
+				<xs:element name="implementation" type="xs:string" />	<!-- Database reader implementation -->
+				<xs:element name="sleepBeetwenRun" type="xs:int" />	<!-- Sleep time between cursor fill -->
+				<xs:element name="maxMemoryRecords" type="xs:int" />	<!-- Maximum amount of records to fill cursor -->
 			</xs:sequence>
 		</xs:complexType>
 		</xs:element>
 	</xs:sequence>
 	</xs:complexType>
 	</xs:element>
-	
+
+	<!-- Messaging server client connector -->
 	<xs:element name="mqxconnectors">
 	<xs:complexType>
 	<xs:sequence>
 		<xs:element name="mqxconnector" minOccurs="1" maxOccurs="unbounded">
 		<xs:complexType>
 			<xs:sequence>
-				<xs:element name="context">
+				<xs:element name="context">		<!-- Server conection configuration -->
 				<xs:complexType>
 				<xs:sequence>
 					<xs:element name="property" type="property" minOccurs="0" maxOccurs="unbounded" />
 				</xs:sequence>
 				</xs:complexType>
 				</xs:element>
-					<xs:element name="queues">
+					<xs:element name="queues">	<!-- Queues to connect -->
 					<xs:complexType>
 					<xs:sequence>
 						<xs:element name="queue" minOccurs="1" maxOccurs="unbounded">
@@ -177,8 +189,8 @@
 					</xs:complexType>
 					</xs:element>
 			</xs:sequence>
-			<xs:attribute name="name" type="xs:string" use="required" />
-			<xs:attribute name="driver" type="xs:string" use="required" />
+			<xs:attribute name="name" type="xs:string" use="required" />	<!-- Conector JNDI name -->
+			<xs:attribute name="driver" type="xs:string" use="required" />	<!-- Conector implementation -->
 		</xs:complexType>
 		</xs:element>
 	</xs:sequence>
