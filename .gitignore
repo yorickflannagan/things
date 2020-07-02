@@ -4,3 +4,4 @@ java-bin
 *.jar
 target
 tmp
+.vscode
