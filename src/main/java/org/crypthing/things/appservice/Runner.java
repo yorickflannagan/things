@@ -57,6 +57,7 @@ implements	RunnerMBean,
 	private final long heartbeat;
 	private final String jmxaddr;
 	private final String jmxport; 
+	private final SNMPBridge bridge;
 
 	public Runner(final RunnerConfig cfg) throws ConfigException
 	{
@@ -68,7 +69,6 @@ implements	RunnerMBean,
 		heartbeat = config.getJVM().getHeartbeat();
 		lcDispatcher = new LifecycleEventDispatcher();
 		pDispatcher = new ProcessingEventDispatcher();
-		SNMPBridge bridge = null;
 		try
 		{
 			bridge = SNMPBridge.newInstance
@@ -77,13 +77,11 @@ implements	RunnerMBean,
 				config.getSnmp().getProperty("org.crypthing.things.batch.udpAddress"),
 				config.getSnmp().getProperty("org.crypthing.things.batch.rootOID")
 			);
+			final LogTrapperListener traps = new LogTrapperListener(log, bridge); 
+			lcDispatcher.addListener(traps);
+			pDispatcher.addListener(traps);
 		}
-		catch (final Exception swallowed) { bridge = null; }
-		final LogTrapperListener traps;
-		try { traps = new LogTrapperListener(log, bridge); }
 		catch (final Throwable e) { throw new ConfigException("Invalid SNMP config properties"); }
-		lcDispatcher.addListener(traps);
-		pDispatcher.addListener(traps);
 		resourceListeners = new HashSet<ReleaseResourceListener>();
 		interruptListeners = new HashSet<InterruptEventListener>();
 	}
@@ -310,18 +308,7 @@ implements	RunnerMBean,
 			String jndiImpl;
 			if (jndi == null || (jndiImpl = jndi.getImplementation()) == null) throw new ConfigException("Config entry required: /config/jndi/implementation");
 			if (jndi.size() > 0) System.getProperties().putAll(jndi);
-			SNMPBridge bridge = null;
-			try
-			{
-				bridge = SNMPBridge.newInstance
-				(
-					cfg.getSnmp().getProperty("org.crypthing.things.SNMPTrap"),
-					cfg.getSnmp().getProperty("org.crypthing.things.batch.udpAddress"),
-					cfg.getSnmp().getProperty("org.crypthing.things.batch.rootOID")
-				);
-			}
-			catch (final Exception swallowed) { bridge = null; }
-			((BindServices) Class.forName(jndiImpl).newInstance()).bind(cfg, instance, new LogTrapperListener(log, bridge));
+			((BindServices) Class.forName(jndiImpl).newInstance()).bind(cfg, instance, new LogTrapperListener(log, instance.bridge));
 			Runtime.getRuntime().addShutdownHook(new Thread(instance.new ShutdownHook()));
 			ManagementFactory.getPlatformMBeanServer().registerMBean
 			(

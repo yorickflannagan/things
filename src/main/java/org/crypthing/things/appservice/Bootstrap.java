@@ -449,6 +449,7 @@ public final class Bootstrap implements BootstrapMBean
 
 		final JMXConfig jmx = config.getJmx();
 		ret.add((new StringBuilder(256)).append("-Djava.rmi.server.hostname=").append(jmx.getHost()).toString());
+		ret.add((new StringBuilder(256)).append("-Dcom.sun.management.jmxremote.host=").append(jmx.getHost()).toString());
 		ret.add((new StringBuilder(256)).append("-Dcom.sun.management.jmxremote.port=").append(jmx.getPort()).toString());
 		if(config.getName() != null) ret.add((new StringBuilder(256)).append("-Dthing.server.name=").append(config.getName()).toString());
 		if (jmx.getProperty("com.sun.management.jmxremote.ssl") == null) ret.add("-Dcom.sun.management.jmxremote.ssl=false");
