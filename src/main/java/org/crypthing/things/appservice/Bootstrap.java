@@ -88,6 +88,7 @@ public final class Bootstrap implements BootstrapMBean
 	private static final String jmxkey = System.getProperty("java.rmi.server.hostname")
 			+ System.getProperty("com.sun.management.jmxremote.port");
 	private static final Object ENV_OVERRIDE_KEY = "org_crypthing_things_appservice_env";
+	private static final boolean dumpEnv = Boolean.getBoolean("org.crypthing.things.dumpEnvironment");
 
 	public static void main(String[] args) throws Exception
 	{
@@ -379,6 +380,14 @@ public final class Bootstrap implements BootstrapMBean
 	private int _launch(String cfgFile, String home, String[] env)
 	{
 		Map<String,String> __env = prepareEnv(env);
+		if(dumpEnv)
+		{
+			System.out.println("Environment that will be passed for " + cfgFile);
+			for(Entry<String, String> pair : __env.entrySet())
+			{
+				System.out.println(pair.getKey() + "=" + pair.getValue());
+			}
+		}
 		String _home = home != null ?  home  : System.getProperty("user.dir");
 		int ret;
 		try
