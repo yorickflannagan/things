@@ -2,7 +2,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.crypthing</groupId>
     <artifactId>things</artifactId>
-    <version>2.5.8</version>
+    <version>2.5.9</version>
     <name>Things</name>
     <description>The Crypthing Initiative</description>
     <organization>
