@@ -1,12 +1,8 @@
 package org.crypthing.things.config;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
@@ -15,10 +11,6 @@ import javax.xml.xpath.XPathFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-import org.xml.sax.ErrorHandler;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
-import org.xml.sax.SAXParseException;
 
 public class XMLHelper {
 
@@ -27,30 +19,6 @@ public class XMLHelper {
 
 	protected Document doc;
 	protected XPathFactory xFactory = XPathFactory.newInstance();
-
-    final DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-    final DocumentBuilder builder;
-
-
-    XMLHelper() 
-    {
-        try {
-            builder = dbf.newDocumentBuilder();
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to create Document Builder.", e);
-        }
-    }
-
-    public void  parse(byte[] data) throws SAXException, IOException
-    {
-        builder.setErrorHandler(new ErrorHandler()
-        {
-            @Override public void warning(final SAXParseException exception) throws SAXException {}
-            @Override public void error(final SAXParseException exception) throws SAXException { throw new SAXException(exception); }
-            @Override public void fatalError(final SAXParseException exception) throws SAXException { throw new SAXException(exception); }
-        });
-        doc = builder.parse(new InputSource(new ByteArrayInputStream(data)));
-    }
 
 
 	/**
@@ -160,5 +128,15 @@ public class XMLHelper {
 	 * @param conv: result conversion utility. convert() method argument must be of type org.w3c.dom.Node
 	 * @return a (possibly empty) collection or null if path is an invalid XPath expression.
 	 */
-	public <T> Collection<T> getValueCollection(final String path, final Converter<T> conv) { return getObjectValue(path, doc, conv); }    
+	public <T> Collection<T> getValueCollection(final String path, final Converter<T> conv) { return getObjectValue(path, doc, conv); }
+
+	public Document getDoc()
+	{
+		return doc;
+	}
+
+	public void setDoc(Document doc)
+	{
+		this.doc = doc;
+	}
 }
