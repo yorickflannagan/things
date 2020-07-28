@@ -1,6 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
 
+	<!--
+		Supported features:
+		External entity replacement (see https://www.w3.org/TR/REC-xml/#sec-external-ent)
+			<!DOCTYPE config [
+				<!ENTITY SNMP-CONF SYSTEM "system path to snmp.conf" >
+			]>
+		Environment and system properties replacement:
+			<!DOCTYPE config [
+				<!ENTITY SNMP-CONF SYSTEM "${ENV.CONFIG_LOCATION}/snmp.conf" >
+				<!ENTITY MQ-CONF   SYSTEM "${PROP.CONFIG_LOCATION}/mqseries.conf" >
+			]>
+	-->
 	<xs:element name="config">
 	<xs:complexType>
 	<xs:sequence>

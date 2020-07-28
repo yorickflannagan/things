@@ -1,6 +1,0 @@
-<context>
-	<property name="br.gov.caixa.mqx.address" value="10.216.80.110(1414)" />
-	<property name="br.gov.caixa.mqx.channel" value="RJNT011B.TO.RJD1" />
-	<property name="br.gov.caixa.mqx.manager" value="RJD1" />
-</context>
-
