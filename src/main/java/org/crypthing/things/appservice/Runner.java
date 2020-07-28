@@ -106,7 +106,7 @@ implements	RunnerMBean,
 				int adjustDelay = config.getWorker().getGoalMeasure();
 				ThreadAdvisor ted = new ThreadAdvisor(goal, ramp); 
 				try{Thread.sleep(adjustDelay);}catch(InterruptedException e){}
-				while(!hasShutdown)
+				while(!hasShutdown && workers.size() > 0)
 				{
 					sucessCurrent = getSuccessCount();
 					int go = ted.whichWay(workers.size(), sucessCurrent - sucessLast);
