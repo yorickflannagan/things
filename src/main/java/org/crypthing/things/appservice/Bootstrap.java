@@ -34,6 +34,7 @@ import org.crypthing.things.snmp.LifecycleEvent;
 import org.crypthing.things.snmp.LifecycleEventDispatcher;
 import org.crypthing.things.snmp.LifecycleEventListener;
 import org.crypthing.things.snmp.SNMPBridge;
+import org.crypthing.things.snmp.SignalBean;
 import org.crypthing.things.snmp.LifecycleEvent.LifecycleEventType;
 
 public final class Bootstrap implements BootstrapMBean
@@ -243,7 +244,7 @@ public final class Bootstrap implements BootstrapMBean
 			catch (InterruptedException e) { e.printStackTrace(); }
 		}
 		System.out.println("Exiting now.");
-		evt.fire(new LifecycleEvent(LifecycleEventType.stop, new EncodableString("Bootstrap has endend")));
+		evt.fire(new LifecycleEvent(LifecycleEventType.stop, (new SignalBean(Bootstrap.class.getName(), "Bootstrap has ended")).encode()));
 	}
 
 	@Override

@@ -13,6 +13,7 @@ import org.crypthing.things.snmp.LifecycleEventDispatcher;
 import org.crypthing.things.snmp.ProcessingEvent;
 import org.crypthing.things.snmp.ProcessingEvent.ProcessingEventType;
 import org.crypthing.things.snmp.ProcessingEventDispatcher;
+import org.crypthing.things.snmp.SignalBean;
 
 public abstract class Sandbox extends Thread implements ShutdownEventDispatcher, InterruptEventListener
 {
@@ -72,7 +73,7 @@ public abstract class Sandbox extends Thread implements ShutdownEventDispatcher,
 			iFailure++;
 			shutdownListner.abort(this);
 		}
-		lcDispatcher.fire(new LifecycleEvent(LifecycleEventType.stop, new EncodableString("Sandbox thread " + getId() + "has ended")));
+		lcDispatcher.fire(new LifecycleEvent(LifecycleEventType.stop, (new SignalBean(Sandbox.class.getName(), "Sandbox thread " + getId() + "has ended")).encode()));
 		interrupt();
 	}
 

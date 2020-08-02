@@ -27,6 +27,7 @@ import org.crypthing.things.snmp.ProcessingEvent;
 import org.crypthing.things.snmp.ProcessingEvent.ProcessingEventType;
 import org.crypthing.things.snmp.ProcessingEventDispatcher;
 import org.crypthing.things.snmp.SNMPBridge;
+import org.crypthing.things.snmp.SignalBean;
 
 
 public class Runner
@@ -117,8 +118,8 @@ implements	RunnerMBean,
 						else { removeWorker(); }
 					}
 					try{Thread.sleep(adjustDelay);}catch(InterruptedException e){}
-				} 
-				lcDispatcher.fire(new LifecycleEvent(LifecycleEventType.stop, new EncodableString("Runner ending.")));
+				}
+				lcDispatcher.fire(new LifecycleEvent(LifecycleEventType.stop, (new SignalBean(Runner.class.getName(), "Runner ending activity")).encode()));
 			}
 		}
 		catch (final Throwable e)
@@ -218,7 +219,8 @@ implements	RunnerMBean,
 	private void _shutdown()
 	{
 		ready = false;
-		lcDispatcher.fire(new LifecycleEvent(LifecycleEventType.stop, new EncodableString("Runner shutdown signal received")));
+		
+		lcDispatcher.fire(new LifecycleEvent(LifecycleEventType.stop, (new SignalBean(Runner.class.getName(), "Runner received a shutdown signal")).encode()));
 		final Iterator<InterruptEventListener> it = interruptListeners.iterator();
 		while (it.hasNext()) it.next().shutdown();
 		hasShutdown = true;
