@@ -7,6 +7,7 @@ import java.util.Properties;
 import org.crypthing.things.config.ConfigException;
 import org.crypthing.things.appservice.config.WorkerConfig;
 import org.crypthing.things.snmp.EncodableString;
+import org.crypthing.things.snmp.ErrorBean;
 import org.crypthing.things.snmp.LifecycleEvent;
 import org.crypthing.things.snmp.LifecycleEvent.LifecycleEventType;
 import org.crypthing.things.snmp.LifecycleEventDispatcher;
@@ -57,7 +58,8 @@ public abstract class Sandbox extends Thread implements ShutdownEventDispatcher,
 				try { onceMore = execute(); }
 				catch (final IOException | SQLException e)
 				{
-					pDispatcher.fire(new ProcessingEvent(ProcessingEventType.warning, "Unhandled IO or SQLException", e));
+					
+					pDispatcher.fire(new ProcessingEvent(ProcessingEventType.warning, (new ErrorBean(Sandbox.class.getName(), "Unhandled IO or SQLException", e)).encode()));
 					if (!isRestartable) throw e;
 				}
 				if (running && onceMore && sleeptime > 0) try { Thread.sleep(sleeptime);} catch(InterruptedException e) {}
@@ -69,7 +71,7 @@ public abstract class Sandbox extends Thread implements ShutdownEventDispatcher,
 		}
 		catch (final Throwable e)
 		{
-			pDispatcher.fire(new ProcessingEvent(ProcessingEventType.error, "Unhandled exception received", e));
+			pDispatcher.fire(new ProcessingEvent(ProcessingEventType.error, (new ErrorBean(Sandbox.class.getName(), "Unhandled exception received", e)).encode()));
 			iFailure++;
 			shutdownListner.abort(this);
 		}

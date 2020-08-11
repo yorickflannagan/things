@@ -23,6 +23,8 @@ import org.crypthing.things.appservice.InterruptEventListener;
 import org.crypthing.things.appservice.Runner;
 import org.crypthing.things.config.ConfigException;
 import org.crypthing.things.appservice.config.CursorConfig;
+import org.crypthing.things.snmp.EncodableString;
+import org.crypthing.things.snmp.ErrorBean;
 import org.crypthing.things.snmp.ProcessingEvent;
 import org.crypthing.things.snmp.ProcessingEvent.ProcessingEventType;
 import org.crypthing.things.snmp.ProcessingEventListener;
@@ -81,26 +83,31 @@ public class Cursor implements CursorMBean, CursorData, InterruptEventListener {
 				)
 			);
 		}
-		catch(NamingException e)
+		catch(final NamingException e)
 		{
-			trap.error(new ProcessingEvent(ProcessingEventType.error, "Could not initialize Cursor. Datasource not Found", e));			
+			trap.error(new ProcessingEvent(ProcessingEventType.error, (new ErrorBean(Cursor.class.getName(), "Could not initialize Cursor. Datasource not Found", e)).encode()));			
 			throw new ConfigException("Could not initialize Cursor. Datasource not Found", e);
-		} catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
-			trap.error(new ProcessingEvent(ProcessingEventType.error, "Could not initialize Cursor. Problem with CursorReader class.", e));			
+		}
+		catch (final InstantiationException | IllegalAccessException | ClassNotFoundException e)
+		{
+			trap.error(new ProcessingEvent(ProcessingEventType.error, (new ErrorBean(Cursor.class.getName(), "Could not initialize Cursor. Problem with CursorReader class.", e)).encode()));			
 			throw new ConfigException("Could not initialize Cursor. Problem with CursorReader class.", e);
-		} catch (SQLException e) {
-			trap.error(new ProcessingEvent(ProcessingEventType.error, "Could not initialize Cursor. Problems fetching data.", e));			
+		}
+		catch (final SQLException e)
+		{
+			trap.error(new ProcessingEvent(ProcessingEventType.error, (new ErrorBean(Cursor.class.getName(), "Could not initialize Cursor. Problems fetching data.", e)).encode()));
 			throw new ConfigException("Could not initialize Cursor. Problems fetching data.", e);
-		} catch (InstanceAlreadyExistsException
-				| MBeanRegistrationException | NotCompliantMBeanException
-				| MalformedObjectNameException e) {
+		}
+		catch (final InstanceAlreadyExistsException | MBeanRegistrationException | NotCompliantMBeanException | MalformedObjectNameException e)
+		{
+			trap.error(new ProcessingEvent(ProcessingEventType.error, (new ErrorBean(Cursor.class.getName(), "Could not initialize Cursor. Problems registering MBean.", e)).encode()));
 			throw new ConfigException("Could not initialize Cursor. Problems registering MBean.", e);
 		}
 		
 		minion = new SQLMinion();
 		minion.start();
 		Runner.getInstance().addInterruptEventListener(this);
-		trap.info(new ProcessingEvent(ProcessingEventType.info, "Cursor "+ config.getName()  + " initialized."));
+		trap.info(new ProcessingEvent(ProcessingEventType.info, new EncodableString("Cursor "+ config.getName()  + " initialized.")));
 	}
 	
 	public Object next()
@@ -233,9 +240,9 @@ public class Cursor implements CursorMBean, CursorData, InterruptEventListener {
 					while(!(hasShutdown) && stock < config.getMaxMemoryRecords() && getData() > 0);
 					if(!(hasShutdown)) Thread.sleep(config.getSleepBeetwenRun());
 				}
-				catch(Throwable t)	
+				catch(final Throwable t)	
 				{
-					trap.error(new ProcessingEvent(ProcessingEventType.error, "Problems fetching data.", t));			
+					trap.error(new ProcessingEvent(ProcessingEventType.error, (new ErrorBean(Cursor.class.getName(), "Problems fetching data.", t)).encode()));			
 				}
 			}
 			

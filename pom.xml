@@ -5,7 +5,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.crypthing</groupId>
 	<artifactId>things</artifactId>
-	<version>2.6.0</version>
+	<version>2.5.10</version>
 	<name>Things</name>
 	<description>Implements a real time application service infrastructure</description>
 	<inceptionYear>2016</inceptionYear>

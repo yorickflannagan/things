@@ -30,6 +30,7 @@ import javax.sql.DataSource;
 
 import org.crypthing.things.config.ConfigException;
 import org.crypthing.things.appservice.config.JDBCConfig;
+import org.crypthing.things.snmp.ErrorBean;
 import org.crypthing.things.snmp.ProcessingEvent;
 import org.crypthing.things.snmp.ProcessingEventListener;
 import org.crypthing.things.snmp.ProcessingEvent.ProcessingEventType;
@@ -65,7 +66,7 @@ public class DataSourceFactory extends Reference implements DataSource, Resource
 		if (conn != null)
 		{
 			try { conn.forceClose(); }
-			catch (SQLException e) { trap.error(new ProcessingEvent(ProcessingEventType.error, "Could not close JDBC connection", e)); }
+			catch (final SQLException e) { trap.error(new ProcessingEvent(ProcessingEventType.error, (new ErrorBean(DataSourceFactory.class.getName(), "Could not close JDBC connection", e)).encode())); }
 			instances.remove(resource);
 		}
 	}

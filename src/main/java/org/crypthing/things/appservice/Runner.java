@@ -19,6 +19,7 @@ import org.crypthing.things.appservice.config.RunnerConfig;
 import org.crypthing.things.config.Config;
 import org.crypthing.things.config.ConfigException;
 import org.crypthing.things.snmp.EncodableString;
+import org.crypthing.things.snmp.ErrorBean;
 import org.crypthing.things.snmp.LifecycleEvent;
 import org.crypthing.things.snmp.LifecycleEvent.LifecycleEventType;
 import org.crypthing.things.snmp.LifecycleEventDispatcher;
@@ -124,7 +125,7 @@ implements	RunnerMBean,
 		}
 		catch (final Throwable e)
 		{
-			pDispatcher.fire(new ProcessingEvent(ProcessingEventType.error, "Could not launch new worker", e));
+			pDispatcher.fire(new ProcessingEvent(ProcessingEventType.error, (new ErrorBean(Runner.class.getName(), "Could not launch new worker", e)).encode()));
 			shutdown();
 		}
 	}

@@ -48,9 +48,9 @@ public final class Bootstrap implements BootstrapMBean
 	{
 		private final SNMPBridge trapper;
 
-		public Trapper(final String udpAddress) throws IOException
+		public Trapper(final String udpAddress, final String oidRoot) throws IOException
 		{
-			trapper = new SNMPBridge(udpAddress, "0.1.4320");
+			trapper = new SNMPBridge(udpAddress, oidRoot);
 		}
 
 		@Override
@@ -93,18 +93,28 @@ public final class Bootstrap implements BootstrapMBean
 
 	public static void main(String[] args) throws Exception
 	{
-		if (args.length < 1 || System.getProperty("java.rmi.server.hostname") == null
-				|| System.getProperty("com.sun.management.jmxremote.port") == null)
-			usage();
+		if
+		(
+			args.length < 2 ||
+			System.getProperty("java.rmi.server.hostname") == null ||
+			System.getProperty("com.sun.management.jmxremote.port") == null
+		)	usage();
 		final LifecycleEventDispatcher dispatcher = new LifecycleEventDispatcher();
-		dispatcher.addListener(new Trapper(args[0]));
+		dispatcher.addListener(new Trapper(args[0], args[1]));
 		final Bootstrap instance = new Bootstrap(dispatcher);
-		ManagementFactory.getPlatformMBeanServer().registerMBean(instance,
-				mbName = new ObjectName((new StringBuilder(256)).append(MBEAN_PATTERN)
-						.append(ManagementFactory.getRuntimeMXBean().getName()).toString()));
+		ManagementFactory.getPlatformMBeanServer().registerMBean
+		(
+			instance,
+			mbName = new ObjectName
+			(
+				(new StringBuilder(256))
+					.append(MBEAN_PATTERN)
+					.append(ManagementFactory.getRuntimeMXBean().getName())
+					.toString()
+			)
+		);
 		System.out.println("Agent Mbean registered [" + mbName + "]");
-		for (int i = 1; i < args.length; i++)
-			instance.launch(args[i]);
+		for (int i = 2; i < args.length; i++) instance.launch(args[i]);
 		instance.run();
 	}
 
@@ -172,9 +182,9 @@ public final class Bootstrap implements BootstrapMBean
 
 	private static void usage()
 	{
-		System.err.println("Usage: org.crypthing.things.appservice.Bootstrap [udpAddress] [cfgFileList...], where");
+		System.err.println("Usage: org.crypthing.things.appservice.Bootstrap [udpAddress] [oidRoot], where");
 		System.err.println("\tudpAddress: IP/port for SNMP traps");
-		System.err.println("\tcfgFileList...: an optional list of configuration files to launch");
+		System.err.println("\toidRoot: root OID for SNMP traps");
 		System.err.println("\tRequired system properties:");
 		System.err.println("\tjava.rmi.server.hostname: JMX host");
 		System.err.println("\tcom.sun.management.jmxremote.host: JMX host - Same as java.rmi.server.hostname");

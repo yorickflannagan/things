@@ -20,13 +20,7 @@ import java.io.StringWriter;
  *             "who": "org.crypthing.Concept"
  *         }
  *     ],
- *     "required": [
- *         "stacktrace",
- *         "errorMessage",
- *         "cause",
- *         "message",
- *         "who"
- *     ],
+ *     "required": [ ],
  *     "properties": {
  *         "who": {
  *             "$id": "#/properties/who",
@@ -78,14 +72,18 @@ public class ErrorBean extends SignalBean
 	private String stacktrace;
 	private String errorMessage;
 	public ErrorBean() { super(); cause = ""; stacktrace = ""; errorMessage = ""; }
+	public ErrorBean(final String who, final String message) { this(who, message, null); }
 	public ErrorBean(final String who, final String message, final Throwable e)
 	{
 		super(who, message);
-		cause = e.getClass().getName();
-		errorMessage = e.getMessage();
-		final StringWriter writer = new StringWriter(1024);
-		e.printStackTrace(new PrintWriter(writer));
-		stacktrace = writer.toString();
+		if (e != null)
+		{
+			cause = e.getClass().getName();
+			errorMessage = e.getMessage();
+			final StringWriter writer = new StringWriter(1024);
+			e.printStackTrace(new PrintWriter(writer));
+			stacktrace = writer.toString();
+		}
 	}
 	public String getStacktrace() { return stacktrace; }
 	public void setStacktrace(final String stacktrace) { this.stacktrace = stacktrace; }

@@ -16,7 +16,7 @@ package org.crypthing.things.snmp;
  *             "message": "Structured signal message example"
  *         }
  *     ],
- *     "required": [ "who", "message" ],
+ *     "required": [],
  *     "properties": {
  *         "who": {
  *             "$id": "#/properties/who",
