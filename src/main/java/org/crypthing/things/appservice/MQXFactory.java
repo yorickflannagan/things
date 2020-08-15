@@ -11,6 +11,7 @@ import javax.naming.StringRefAddr;
 import org.crypthing.things.config.ConfigException;
 import org.crypthing.things.appservice.config.ConnectorConfig;
 import org.crypthing.things.appservice.config.QueueConfig;
+import org.crypthing.things.snmp.ErrorBean;
 import org.crypthing.things.snmp.ProcessingEvent;
 import org.crypthing.things.snmp.ProcessingEventListener;
 import org.crypthing.things.snmp.ProcessingEvent.ProcessingEventType;
@@ -64,7 +65,7 @@ public class MQXFactory extends Reference implements ResourceProvider, ReleaseRe
 		if (mq != null)
 		{
 			try { mq.forceClose(); }
-			catch (final Throwable e) { trap.error(new ProcessingEvent(ProcessingEventType.error, "Could not close MQX connection", e)); }
+			catch (final Throwable e) { trap.error(new ProcessingEvent(ProcessingEventType.error, (new ErrorBean(MQXFactory.class.getName(), "Could not close MQX connection", e)).encode())); }
 			instances.remove(resource);
 		}
 	}

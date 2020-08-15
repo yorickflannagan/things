@@ -5,6 +5,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.crypthing.things.snmp.LifecycleEvent.LifecycleEventType;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 
 public class LogTrapperListener implements LifecycleEventListener, ProcessingEventListener
@@ -25,9 +27,13 @@ public class LogTrapperListener implements LifecycleEventListener, ProcessingEve
 		String msg;
 		if (encode != null && encode.getEncoding() == Encodable.Type.STRING) msg = (String) encode.encode();
 		else msg = "";
-		final Throwable ex = e.getThroable();
-		if (ex != null) msg = "Message ID: " + UUID.randomUUID().toString() + " [ " + ex.getClass().getName() + " ] - " + msg;
-		logger.log(level, msg, ex);
+		try
+		{
+			final JSONObject json = new JSONObject(msg);
+			msg = "Message ID: " + UUID.randomUUID().toString() + " [ " + json.getString("who") + " ] - " + msg;
+		}
+		catch (final JSONException err) {}
+		logger.log(level, msg);
 		if (trapper != null) trapper.notify(e);
 	}
 	private void dispatch(final LifecycleEvent e)
@@ -37,11 +43,8 @@ public class LogTrapperListener implements LifecycleEventListener, ProcessingEve
 		String msg;
 		if (encode != null && encode.getEncoding() == Encodable.Type.STRING) msg = (String) encode.encode();
 		else msg = "";
-		if (e.getType().equals(LifecycleEventType.heart)) {
-			logger.fine(msg);
-		} else{
-			logger.info(msg);
-		}
+		if (e.getType().equals(LifecycleEventType.heart)) logger.fine(msg);
+		else logger.info(msg);
 		if (trapper != null) trapper.notify(e);
 	}
 	@Override public void info(final ProcessingEvent e) { dispatch(e, Level.INFO); }

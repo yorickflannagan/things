@@ -19,6 +19,7 @@ import org.crypthing.things.appservice.config.RunnerConfig;
 import org.crypthing.things.config.Config;
 import org.crypthing.things.config.ConfigException;
 import org.crypthing.things.snmp.EncodableString;
+import org.crypthing.things.snmp.ErrorBean;
 import org.crypthing.things.snmp.LifecycleEvent;
 import org.crypthing.things.snmp.LifecycleEvent.LifecycleEventType;
 import org.crypthing.things.snmp.LifecycleEventDispatcher;
@@ -27,6 +28,7 @@ import org.crypthing.things.snmp.ProcessingEvent;
 import org.crypthing.things.snmp.ProcessingEvent.ProcessingEventType;
 import org.crypthing.things.snmp.ProcessingEventDispatcher;
 import org.crypthing.things.snmp.SNMPBridge;
+import org.crypthing.things.snmp.SignalBean;
 
 
 public class Runner
@@ -106,7 +108,7 @@ implements	RunnerMBean,
 				int adjustDelay = config.getWorker().getGoalMeasure();
 				ThreadAdvisor ted = new ThreadAdvisor(goal, ramp); 
 				try{Thread.sleep(adjustDelay);}catch(InterruptedException e){}
-				while(!hasShutdown)
+				while(!hasShutdown && workers.size() > 0)
 				{
 					sucessCurrent = getSuccessCount();
 					int go = ted.whichWay(workers.size(), sucessCurrent - sucessLast);
@@ -117,13 +119,13 @@ implements	RunnerMBean,
 						else { removeWorker(); }
 					}
 					try{Thread.sleep(adjustDelay);}catch(InterruptedException e){}
-				} 
-				lcDispatcher.fire(new LifecycleEvent(LifecycleEventType.stop, new EncodableString("Runner ending.")));
+				}
+				lcDispatcher.fire(new LifecycleEvent(LifecycleEventType.stop, (new SignalBean(Runner.class.getName(), "Runner ending activity")).encode()));
 			}
 		}
 		catch (final Throwable e)
 		{
-			pDispatcher.fire(new ProcessingEvent(ProcessingEventType.error, "Could not launch new worker", e));
+			pDispatcher.fire(new ProcessingEvent(ProcessingEventType.error, (new ErrorBean(Runner.class.getName(), "Could not launch new worker", e)).encode()));
 			shutdown();
 		}
 	}
@@ -218,7 +220,8 @@ implements	RunnerMBean,
 	private void _shutdown()
 	{
 		ready = false;
-		lcDispatcher.fire(new LifecycleEvent(LifecycleEventType.stop, new EncodableString("Runner shutdown signal received")));
+		
+		lcDispatcher.fire(new LifecycleEvent(LifecycleEventType.stop, (new SignalBean(Runner.class.getName(), "Runner received a shutdown signal")).encode()));
 		final Iterator<InterruptEventListener> it = interruptListeners.iterator();
 		while (it.hasNext()) it.next().shutdown();
 		hasShutdown = true;

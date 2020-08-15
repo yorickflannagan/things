@@ -1,7 +1,0 @@
-#!/bin/bash
-#
-# Script de finalização das aplicações batch geridas pelo pacote Things.
-# Os argumentos esperados são os arquivos configuração referentes às aplicações a serem finalizadas
-source $(dirname $0)/environment
-java -cp "$JAVA_CLASS_PATH" org.crypthing.things.appservice.Shutdown $*
-

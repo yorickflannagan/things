@@ -9,6 +9,8 @@ import java.util.logging.Logger;
 
 import org.crypthing.things.snmp.LifecycleEvent.LifecycleEventType;
 import org.crypthing.things.snmp.ProcessingEvent.ProcessingEventType;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 public class Monitor extends TicketClerk implements LifecycleEventListener, ProcessingEventListener
 {
@@ -55,7 +57,7 @@ public class Monitor extends TicketClerk implements LifecycleEventListener, Proc
 			final SNMPBridge trap = new SNMPBridge(udpAddress, oidRoot);
 			trap.notify(new GatheredBillingEvent(tickets));
 		}
-		catch (final IOException e) { error(new ProcessingEvent(ProcessingEventType.error, SNMP_ERROR, e)); }
+		catch (final IOException e) { error(new ProcessingEvent(ProcessingEventType.error, (new ErrorBean(Monitor.class.getName(), SNMP_ERROR, e)).encode())); }
 		stop(MON_END);
 	}
 	private void dispatch(final ProcessingEvent e, final Level level)
@@ -65,9 +67,13 @@ public class Monitor extends TicketClerk implements LifecycleEventListener, Proc
 		String msg;
 		if (encode != null && encode.getEncoding() == Encodable.Type.STRING) msg = (String) encode.encode();
 		else msg = "";
-		final Throwable ex = e.getThroable();
-		if (ex != null) msg = "Message ID: " + UUID.randomUUID().toString() + " [ " + ex.getClass().getName() + " ] - " + msg;
-		logger.log(level, msg, ex);
+		try
+		{
+			final JSONObject json = new JSONObject(msg);
+			msg = "Message ID: " + UUID.randomUUID().toString() + " [ " + json.getString("who") + " ] - " + msg;
+		}
+		catch (final JSONException err) {}
+		logger.log(level, msg);
 		try
 		{
 			final SNMPBridge trap = new SNMPBridge(udpAddress, oidRoot);
