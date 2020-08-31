@@ -2,9 +2,24 @@ package org.crypthing.things.snmp;
 
 public class ProcessingEvent extends Event
 {
+
+	private static String me = ProcessingEvent.class.getName();
+	private static String kaller()
+	{
+		StackTraceElement[] stElements = Thread.currentThread().getStackTrace();
+		for (int i=1; i<stElements.length; i++) {
+			StackTraceElement ste = stElements[i];
+			if (!ste.getClassName().equals(me) && ste.getClassName().indexOf("java.lang.Thread")!=0) {
+					return ste.getClassName();
+			}
+		}
+		return null;		
+	}
 	public enum ProcessingEventType { info, warning, error }
 	private final ProcessingEventType type;
-	public ProcessingEvent(final ProcessingEventType type) { this(type, null); }
+	public ProcessingEvent(final ProcessingEventType type) { this(type, (Encodable)null); }
+	public ProcessingEvent(final ProcessingEventType type, final String data) { this(type, new EncodableString(data)); }
+	public ProcessingEvent(final ProcessingEventType type, final String message, final Exception e) { this(type, new ErrorBean(kaller(), message, e).encode()); }
 	public ProcessingEvent(final ProcessingEventType type, final Encodable data)
 	{
 		this.type = type;
