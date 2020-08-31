@@ -605,4 +605,24 @@ public final class Bootstrap implements BootstrapMBean
 	}
 
 
+	public int exitCode(String name)
+	{
+		Process p = processes.get(name);
+		if(p == null ) return NO_PROCESS_FOUND;
+		if(!p.isAlive()) return SERVER_ALIVE;
+		return p.exitValue();
+	}
+
+	public int waitFor(String name, long timeout)
+	{
+		Process p = processes.get(name);
+		if(p == null ) return NO_PROCESS_FOUND;
+		if(!p.isAlive()) return 0;
+		try { p.waitFor(timeout, TimeUnit.SECONDS); }
+		catch (InterruptedException e) { return EXCEPTION_ON_WAIT; }
+		return 0;
+	}
+
+
+
 }

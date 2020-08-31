@@ -16,6 +16,8 @@ public interface BootstrapMBean
     int EXCEPTION_ON_LAUNCH = 7;
     int STOP_TIMEOUT = 8;
     int SERVER_ALREADY_STARTED = 9;
+    int SERVER_ALIVE=10;
+    int EXCEPTION_ON_WAIT=11;
 
 	int OK = 0;
     
@@ -31,5 +33,7 @@ public interface BootstrapMBean
     int forceStop(String name, int timeout);
     int isAlive(String name);
     String[] list();
+    int exitCode(String name);
+    int waitFor(String name, long timeout);
 
 }
