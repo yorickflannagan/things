@@ -307,12 +307,6 @@ implements	RunnerMBean,
 			final RunnerConfig cfg = getConfig(new FileInputStream(args[0]), Bootstrap.getSchema());
 			instance = new Runner(cfg);
 			instance.configfile = args[0];
-			final JNDIConfig jndi = cfg.getJndi();
-			String jndiImpl;
-			if (jndi == null || (jndiImpl = jndi.getImplementation()) == null) throw new ConfigException("Config entry required: /config/jndi/implementation");
-			if (jndi.size() > 0) System.getProperties().putAll(jndi);
-			((BindServices) Class.forName(jndiImpl).newInstance()).bind(cfg, instance, new LogTrapperListener(log, instance.bridge));
-			Runtime.getRuntime().addShutdownHook(new Thread(instance.new ShutdownHook()));
 			ManagementFactory.getPlatformMBeanServer().registerMBean
 			(
 				instance,
@@ -324,6 +318,12 @@ implements	RunnerMBean,
 					.toString()
 				)
 			);
+			final JNDIConfig jndi = cfg.getJndi();
+			String jndiImpl;
+			if (jndi == null || (jndiImpl = jndi.getImplementation()) == null) throw new ConfigException("Config entry required: /config/jndi/implementation");
+			if (jndi.size() > 0) System.getProperties().putAll(jndi);
+			((BindServices) Class.forName(jndiImpl).newInstance()).bind(cfg, instance, new LogTrapperListener(log, instance.bridge));
+			Runtime.getRuntime().addShutdownHook(new Thread(instance.new ShutdownHook()));
 			System.out.println(instance.configfile + " has been launched!");
 			instance.start();
 		}
