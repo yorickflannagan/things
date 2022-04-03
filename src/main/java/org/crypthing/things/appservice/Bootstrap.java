@@ -120,19 +120,22 @@ public final class Bootstrap implements BootstrapMBean
 
 	public static InputStream getSchema() throws ConfigException
 	{
-		String loc = System.getProperty(SCHEMA_LOCATION); 
-		if(loc==null)
+		InputStream ret = null;
+		try
 		{
-			return Bootstrap.class.getClass().getResourceAsStream(CONFIG_SCHEMA_PATH);
+			final String loc = System.getProperty(SCHEMA_LOCATION); 
+			if (loc != null) ret = new FileInputStream(loc);
+			if (ret == null) throw new RuntimeException("Could no load schema from:[" + loc + "] - will try locally.");
 		}
-		else{
-			try {
-				return new FileInputStream(loc);
-			} catch (Exception e) {
-				System.err.println("Could no load schema from:[" + loc + "] - will try locally.");
-				return Bootstrap.class.getClass().getResourceAsStream(CONFIG_SCHEMA_PATH);
-			}
+		catch (final Exception e)
+		{
+			System.err.print(e.getMessage());
+			System.err.println(" Will try again...");
+			ret = Bootstrap.class.getClassLoader().getResourceAsStream(CONFIG_SCHEMA_PATH);
+			if (ret == null) ret = Bootstrap.class.getResourceAsStream(CONFIG_SCHEMA_PATH);
+			if (ret == null) throw new ConfigException("Things appservice schema not loaded");
 		}
+		return ret;
 	}
 
 	public static JVMConfig getJVMConfig(final String cfgFile) throws ConfigException, IOException

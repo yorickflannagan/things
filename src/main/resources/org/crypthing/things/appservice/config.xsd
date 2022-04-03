@@ -16,13 +16,13 @@
 	<xs:element name="config">
 	<xs:complexType>
 	<xs:sequence>
-		<xs:element ref="jvm" />					<!-- Child process JVM configuration -->
-		<xs:element ref="jndi" />					<!-- Java Naming and Directory Interface registration -->
-		<xs:element ref="worker" />					<!-- Worker thread configuration -->
-		<xs:element ref="sandbox" minOccurs="0" />		<!-- Worker thread implementation parameters -->
-		<xs:element ref="snmp" minOccurs="0" />			<!-- Simple Network Management Protocol implementation -->
+		<xs:element ref="jvm" minOccurs="0" />				<!-- Child process JVM configuration -->
+		<xs:element ref="jndi" minOccurs="0" />				<!-- Java Naming and Directory Interface registration -->
+		<xs:element ref="worker" minOccurs="0" />			<!-- Worker thread configuration -->
+		<xs:element ref="sandbox" minOccurs="0" />			<!-- Worker thread implementation parameters -->
+		<xs:element ref="snmp" minOccurs="0" />				<!-- Simple Network Management Protocol implementation -->
 		<xs:element ref="datasources" minOccurs="0" />		<!-- JDBC datasources -->
-		<xs:element ref="cursors" minOccurs="0" />		<!-- Database worker producer -->
+		<xs:element ref="cursors" minOccurs="0" />			<!-- Database worker producer -->
 		<xs:element ref="mqxconnectors" minOccurs="0" />	<!-- Messaging server client connector -->
 	</xs:sequence>
 	</xs:complexType>
